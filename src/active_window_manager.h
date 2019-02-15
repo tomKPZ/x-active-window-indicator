@@ -1,5 +1,5 @@
 // rofi-workspace: An X11 workspace plugin for rofi
-// Copyright (C) 2018 <tomKPZ@gmail.com>
+// Copyright (C) 2019 <tomKPZ@gmail.com>
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
