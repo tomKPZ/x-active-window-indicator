@@ -83,9 +83,10 @@ std::optional<std::vector<xcb_atom_t>> GetAtomArray(xcb_connection_t* connection
   auto size = xcb_get_property_value_length(reply);
   assert(size % sizeof(xcb_atom_t) == 0);
   for (decltype(size) i = 0; i < size/sizeof(xcb_atom_t); i++) {
-    std::cout << "1: " << value[i] << std::endl;
+    std::cout << value[i] << std::endl;
     ret.value().emplace_back(value[i]);
   }
+  std::cout << "done" << std::endl;
   return ret;
 }
 
@@ -123,8 +124,9 @@ ActiveWindowManager::ActiveWindowManager() {
   net_supported_ = GetAtom(connection_, "_NET_SUPPORTED");
   net_active_window_ = GetAtom(connection_, "_NET_ACTIVE_WINDOW");
 
-  for (xcb_atom_t atom : GetAtomArray(connection_, root_window_, net_supported_).value())
-    std::cout << "2: " << atom << std::endl;
+  auto atoms = GetAtomArray(connection_, root_window_, net_supported_);
+  for (xcb_atom_t atom : atoms.value())
+    std::cout << atom << std::endl;
 
   auto window = GetWindow(connection_, root_window_, net_active_window_);
   // std::cout << window.value_or(0) << std::endl;
