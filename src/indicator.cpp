@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-#include "workspace_manager.h"
+#include "active_window_manager.h"
 
 int main (int argc, char *argv[]) {
   WorkspaceManager workspace_manager;
