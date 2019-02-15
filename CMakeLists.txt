@@ -12,8 +12,6 @@ target_link_libraries(x-active-window-indicator ${XCB_LIBRARIES})
 target_include_directories(x-active-window-indicator PUBLIC ${XCB_INCLUDE_DIRS})
 target_compile_options(x-active-window-indicator PUBLIC ${XCB_CFLAGS_OTHER})
 
-target_link_libraries(x-active-window-indicator "-lc++")
-target_compile_options(x-active-window-indicator PUBLIC -stdlib=libc++)
-SET (CMAKE_CXX_COMPILER "clang++")
-
-add_compile_options("-g3" "-O0")
+# target_link_libraries(x-active-window-indicator "-lc++")
+# target_compile_options(x-active-window-indicator PUBLIC -stdlib=libc++)
+# SET (CMAKE_CXX_COMPILER "clang++")
