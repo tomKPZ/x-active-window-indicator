@@ -16,35 +16,23 @@
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 #include <cstdint>
-#include <optional>
-#include <string>
-#include <vector>
 
 typedef struct xcb_connection_t xcb_connection_t;
 typedef uint32_t xcb_atom_t;
 typedef uint32_t xcb_window_t;
 
-class WorkspaceManager {
+class ActiveWindowManager {
  public:
-  struct Workspace {
-    bool current = false;
-    std::optional<std::string> name;
-  };
-
-  WorkspaceManager();
-  ~WorkspaceManager();
-
-  std::vector<Workspace> GetWorkspaces();
+  ActiveWindowManager();
+  ~ActiveWindowManager();
 
  private:
-  WorkspaceManager(const WorkspaceManager&) = delete;
-  WorkspaceManager& operator=(const WorkspaceManager&) = delete;
+  ActiveWindowManager(const ActiveWindowManager&) = delete;
+  ActiveWindowManager& operator=(const ActiveWindowManager&) = delete;
 
   xcb_connection_t* connection_;
   xcb_window_t root_window_;
 
-  xcb_atom_t net_current_desktop_;
-  xcb_atom_t net_desktop_names_;
-  xcb_atom_t net_number_of_desktops_;
-  xcb_atom_t utf8_string_;
+  xcb_atom_t net_supported_;
+  xcb_atom_t net_active_window_;
 };

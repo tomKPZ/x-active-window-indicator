@@ -5,8 +5,6 @@
 #include "active_window_manager.h"
 
 int main (int argc, char *argv[]) {
-  WorkspaceManager workspace_manager;
-  for (const auto& workspace : workspace_manager.GetWorkspaces())
-    std::cout << workspace.name.value_or("") << std::endl;
+  ActiveWindowManager active_window_manager;
   return 0;
 }
