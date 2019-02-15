@@ -15,12 +15,17 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include "workspace_manager.h"
+#include "active_window_manager.h"
 
 #include <xcb/xcb.h>
 
+#include <cassert>
 #include <cstring>
+#include <iostream>
 #include <limits>
+#include <optional>
+#include <string>
+#include <vector>
 
 namespace {
 
@@ -59,53 +64,52 @@ xcb_atom_t GetAtom(xcb_connection_t* connection, const std::string& str) {
   return reply ? reply->atom : XCB_ATOM_NONE;
 }
 
-std::optional<uint32_t> GetCardinal(xcb_connection_t* connection,
-                                    xcb_window_t window,
-                                    xcb_atom_t atom) {
+std::optional<std::vector<xcb_atom_t>> GetAtomArray(xcb_connection_t* connection,
+						    xcb_window_t window,
+						    xcb_atom_t atom) {
+  // TODO: these should be one template function.
   auto cookie = xcb_get_property(connection, false, window, atom,
-                                 XCB_ATOM_CARDINAL, 0, sizeof(uint32_t));
-
+                                 XCB_ATOM_ATOM, 0, std::numeric_limits<uint32_t>::max());
   auto reply =
       MakeXcbReply(xcb_get_property_reply(connection, cookie, nullptr));
 
-  if (!reply || reply->format != 8 * sizeof(uint32_t) ||
-      reply->type != XCB_ATOM_CARDINAL || reply->bytes_after > 0 ||
-      xcb_get_property_value_length(reply) != sizeof(uint32_t)) {
-    return std::nullopt;
-  }
-
-  return reinterpret_cast<uint32_t*>(xcb_get_property_value(reply))[0];
-}
-
-std::optional<std::vector<std::string>> GetUtf8Array(
-    xcb_connection_t* connection,
-    xcb_window_t window,
-    xcb_atom_t atom,
-    xcb_atom_t type) {
-  auto cookie = xcb_get_property(connection, false, window, atom, type, 0,
-                                 std::numeric_limits<uint32_t>::max());
-
-  auto reply =
-      MakeXcbReply(xcb_get_property_reply(connection, cookie, nullptr));
-
-  if (!reply || reply->format != 8 || reply->type != type ||
+  if (!reply || reply->format != 8*sizeof(xcb_atom_t) || reply->type != XCB_ATOM_ATOM ||
       reply->bytes_after > 0) {
     return std::nullopt;
   }
 
-  std::optional<std::vector<std::string>> ret{std::in_place};
-  char* value = reinterpret_cast<char*>(xcb_get_property_value(reply));
-  int size = xcb_get_property_value_length(reply);
-  for (int i = 0; i < size;) {
-    ret.value().emplace_back(value + i);
-    i += ret.value().back().length() + 1;
+  std::optional<std::vector<xcb_atom_t>> ret{std::in_place};
+  xcb_atom_t* value = reinterpret_cast<xcb_atom_t*>(xcb_get_property_value(reply));
+  auto size = xcb_get_property_value_length(reply);
+  assert(size % sizeof(xcb_atom_t) == 0);
+  for (decltype(size) i = 0; i < size/sizeof(xcb_atom_t); i++) {
+    std::cout << "1: " << value[i] << std::endl;
+    ret.value().emplace_back(value[i]);
   }
   return ret;
 }
 
+std::optional<xcb_window_t> GetWindow(xcb_connection_t* connection,
+				      xcb_window_t window,
+				      xcb_atom_t atom) {
+  auto cookie = xcb_get_property(connection, false, window, atom,
+                                 XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));
+
+  auto reply =
+      MakeXcbReply(xcb_get_property_reply(connection, cookie, nullptr));
+
+  if (!reply || reply->format != 8 * sizeof(xcb_window_t) ||
+      reply->type != XCB_ATOM_WINDOW || reply->bytes_after > 0 ||
+      xcb_get_property_value_length(reply) != sizeof(xcb_window_t)) {
+    return std::nullopt;
+  }
+
+  return reinterpret_cast<xcb_window_t*>(xcb_get_property_value(reply))[0];
+}
+
 }  // namespace
 
-WorkspaceManager::WorkspaceManager() {
+ActiveWindowManager::ActiveWindowManager() {
   int screen_number;
   connection_ = xcb_connect(nullptr, &screen_number);
   if (xcb_connection_has_error(connection_))
@@ -116,42 +120,16 @@ WorkspaceManager::WorkspaceManager() {
   if (!root_window_)
     return;
 
-  net_current_desktop_ = GetAtom(connection_, "_NET_CURRENT_DESKTOP");
-  net_desktop_names_ = GetAtom(connection_, "_NET_DESKTOP_NAMES");
-  net_number_of_desktops_ = GetAtom(connection_, "_NET_NUMBER_OF_DESKTOPS");
-  utf8_string_ = GetAtom(connection_, "UTF8_STRING");
+  net_supported_ = GetAtom(connection_, "_NET_SUPPORTED");
+  net_active_window_ = GetAtom(connection_, "_NET_ACTIVE_WINDOW");
+
+  for (xcb_atom_t atom : GetAtomArray(connection_, root_window_, net_supported_).value())
+    std::cout << "2: " << atom << std::endl;
+
+  auto window = GetWindow(connection_, root_window_, net_active_window_);
+  // std::cout << window.value_or(0) << std::endl;
 }
 
-WorkspaceManager::~WorkspaceManager() {
+ActiveWindowManager::~ActiveWindowManager() {
   xcb_disconnect(connection_);
-}
-
-std::vector<WorkspaceManager::Workspace> WorkspaceManager::GetWorkspaces() {
-  auto number_of_desktops =
-      GetCardinal(connection_, root_window_, net_number_of_desktops_);
-
-  auto arr =
-      GetUtf8Array(connection_, root_window_, net_desktop_names_, utf8_string_);
-
-  size_t real_number_of_desktops =
-      number_of_desktops ? number_of_desktops.value() : 0;
-  if (arr && arr.value().size() > 0)
-    real_number_of_desktops =
-        std::min(real_number_of_desktops, arr.value().size());
-
-  std::vector<Workspace> ret{real_number_of_desktops};
-  if (arr) {
-    for (size_t i = 0; i < real_number_of_desktops && i < arr.value().size();
-         ++i) {
-      ret[i].name = arr.value()[i];
-    }
-  }
-
-  auto current_desktop =
-      GetCardinal(connection_, root_window_, net_current_desktop_);
-  if (current_desktop && current_desktop.value() < ret.size()) {
-    ret[current_desktop.value()].current = true;
-  }
-
-  return ret;
 }
