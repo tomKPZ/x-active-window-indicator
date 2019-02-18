@@ -19,6 +19,7 @@
 
 #include <xcb/xcb.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <iostream>
@@ -28,6 +29,8 @@
 #include <vector>
 
 namespace {
+
+static constexpr const uint16_t BORDER_WIDTH = 5;
 
 template <typename T>
 class XcbReply {
@@ -82,11 +85,8 @@ std::optional<std::vector<xcb_atom_t>> GetAtomArray(xcb_connection_t* connection
   xcb_atom_t* value = reinterpret_cast<xcb_atom_t*>(xcb_get_property_value(reply));
   auto size = xcb_get_property_value_length(reply);
   assert(size % sizeof(xcb_atom_t) == 0);
-  for (decltype(size) i = 0; i < size/sizeof(xcb_atom_t); i++) {
-    std::cout << value[i] << std::endl;
+  for (decltype(size) i = 0; i < size/sizeof(xcb_atom_t); i++)
     ret.value().emplace_back(value[i]);
-  }
-  std::cout << "done" << std::endl;
   return ret;
 }
 
@@ -121,15 +121,38 @@ ActiveWindowManager::ActiveWindowManager() {
   if (!root_window_)
     return;
 
+  // TODO: use exceptions.
   net_supported_ = GetAtom(connection_, "_NET_SUPPORTED");
+  if (net_supported_ == XCB_ATOM_NONE)
+    return;
   net_active_window_ = GetAtom(connection_, "_NET_ACTIVE_WINDOW");
+  if (net_active_window_ == XCB_ATOM_NONE)
+    return;
 
   auto atoms = GetAtomArray(connection_, root_window_, net_supported_);
-  for (xcb_atom_t atom : atoms.value())
-    std::cout << atom << std::endl;
+  if (!atoms || std::find(atoms.value().begin(), atoms.value().end(), net_active_window_) == atoms.value().end())
+    return;
 
-  auto window = GetWindow(connection_, root_window_, net_active_window_);
-  // std::cout << window.value_or(0) << std::endl;
+  auto window = GetWindow(connection_, root_window_, net_active_window_).value_or(0);
+  auto cookie = xcb_get_geometry(connection_, window);
+  auto reply =
+    MakeXcbReply(xcb_get_geometry_reply(connection_, cookie, nullptr));
+  std::cout << reply->x << " " << reply->y << " " << reply->width << " " << reply->height << std::endl;
+
+  auto cookie2 = xcb_translate_coordinates(connection_, window, root_window_, reply->x, reply->y);
+  auto reply2 = MakeXcbReply(xcb_translate_coordinates_reply(connection_, cookie2, nullptr));
+
+  auto border_window = xcb_generate_id(connection_);
+  uint32_t attributes[] = { 0xff0000, true };
+  xcb_create_window(connection_, XCB_COPY_FROM_PARENT, border_window, root_window_,
+		    reply2->dst_x, reply2->dst_y, reply->width - 2*BORDER_WIDTH, reply->height - 2*BORDER_WIDTH, BORDER_WIDTH,
+		    XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
+		    XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT, attributes);
+  
+  xcb_map_window(connection_, border_window);
+  
+  xcb_flush(connection_);
+  xcb_wait_for_event(connection_);
 }
 
 ActiveWindowManager::~ActiveWindowManager() {
