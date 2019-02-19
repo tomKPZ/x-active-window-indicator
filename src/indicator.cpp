@@ -4,7 +4,7 @@
 
 #include "active_window_manager.h"
 
-int main(int argc, char* argv[]) {
+int main(int, char**) {
   ActiveWindowManager active_window_manager;
   return 0;
 }

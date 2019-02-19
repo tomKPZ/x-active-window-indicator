@@ -36,6 +36,15 @@ namespace {
 
 static constexpr const uint16_t BORDER_WIDTH = 5;
 
+template <typename Dst, typename Src>
+constexpr Dst safe_cast(Src value) {
+  if (value < std::numeric_limits<Dst>::min() ||
+      value > std::numeric_limits<Dst>::max()) {
+    throw "Cast out of range";
+  }
+  return static_cast<Dst>(value);
+}
+
 template <typename T>
 class XcbReply {
  public:
@@ -53,7 +62,8 @@ class XcbRegion {
   XcbRegion(xcb_connection_t* connection,
             const std::vector<xcb_rectangle_t> rects)
       : connection_(connection), id_(xcb_generate_id(connection_)) {
-    xcb_xfixes_create_region(connection_, id_, rects.size(), rects.data());
+    xcb_xfixes_create_region(connection_, id_,
+                             safe_cast<uint32_t>(rects.size()), rects.data());
   }
   ~XcbRegion() { xcb_xfixes_destroy_region(connection_, id_); }
   uint32_t id() const { return id_; }
@@ -63,19 +73,10 @@ class XcbRegion {
   uint32_t id_;
 };
 
-template <typename Dst, typename Src>
-constexpr Dst saturated_cast(Src value) {
-  if (value < std::numeric_limits<Dst>::min())
-    return std::numeric_limits<Dst>::min();
-  if (value > std::numeric_limits<Dst>::max())
-    return std::numeric_limits<Dst>::max();
-  return static_cast<Dst>(value);
-}
-
 template <typename T>
 XcbReply<T> MakeXcbReply(T* t) {
   if (!t)
-    throw "Could not get reply.";
+    throw "Could not get reply";
   return XcbReply(t);
 }
 
@@ -91,7 +92,8 @@ xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {
 }
 
 xcb_atom_t GetAtom(xcb_connection_t* connection, const std::string& str) {
-  return XCB_SYNC(xcb_intern_atom, connection, false, str.length(), str.c_str())
+  return XCB_SYNC(xcb_intern_atom, connection, false,
+                  safe_cast<uint16_t>(str.length()), str.c_str())
       ->atom;
 }
 
@@ -103,17 +105,12 @@ std::vector<xcb_atom_t> GetAtomArray(xcb_connection_t* connection,
 
   if (reply->format != 8 * sizeof(xcb_atom_t) || reply->type != XCB_ATOM_ATOM ||
       reply->bytes_after > 0) {
-    throw "";
+    throw "Bad property reply";
   }
 
-  std::vector<xcb_atom_t> ret;
-  xcb_atom_t* value =
+  const xcb_atom_t* value =
       reinterpret_cast<xcb_atom_t*>(xcb_get_property_value(reply));
-  auto size = xcb_get_property_value_length(reply);
-  assert(size % sizeof(xcb_atom_t) == 0);
-  for (decltype(size) i = 0; i < size / sizeof(xcb_atom_t); i++)
-    ret.emplace_back(value[i]);
-  return ret;
+  return std::vector<xcb_atom_t>(value, value + reply->value_len);
 }
 
 xcb_window_t GetWindow(xcb_connection_t* connection,
@@ -125,7 +122,7 @@ xcb_window_t GetWindow(xcb_connection_t* connection,
   if (reply->format != 8 * sizeof(xcb_window_t) ||
       reply->type != XCB_ATOM_WINDOW || reply->bytes_after > 0 ||
       xcb_get_property_value_length(reply) != sizeof(xcb_window_t)) {
-    throw "";
+    throw "Bad property reply";
   }
 
   return reinterpret_cast<xcb_window_t*>(xcb_get_property_value(reply))[0];
@@ -140,20 +137,18 @@ ActiveWindowManager::ActiveWindowManager() {
     throw "Connection error";
 
   xcb_screen_t* screen = ScreenOfConnection(connection_, screen_number);
-  root_window_ = screen ? screen->root : XCB_WINDOW_NONE;
+  if (!screen)
+    throw "Could not get screen";
+  root_window_ = screen->root;
   if (!root_window_)
-    throw "Couldn't find root window";
+    throw "Could not find root window";
 
   net_supported_ = GetAtom(connection_, "_NET_SUPPORTED");
-  if (net_supported_ == XCB_ATOM_NONE)
-    return;
   net_active_window_ = GetAtom(connection_, "_NET_ACTIVE_WINDOW");
-  if (net_active_window_ == XCB_ATOM_NONE)
-    return;
 
   auto atoms = GetAtomArray(connection_, root_window_, net_supported_);
   if (std::find(atoms.begin(), atoms.end(), net_active_window_) == atoms.end())
-    return;
+    throw "WM does not support active window";
 
   auto window = GetWindow(connection_, root_window_, net_active_window_);
   auto geometry = XCB_SYNC(xcb_get_geometry, connection_, window);
@@ -164,34 +159,33 @@ ActiveWindowManager::ActiveWindowManager() {
 
   auto border_window = xcb_generate_id(connection_);
   uint32_t attributes[] = {0xff0000, true};
-  xcb_create_window(connection_, XCB_COPY_FROM_PARENT, border_window,
-                    root_window_, root_coordinates->dst_x,
-                    root_coordinates->dst_y, geometry->width - 2 * BORDER_WIDTH,
-                    geometry->height - 2 * BORDER_WIDTH, BORDER_WIDTH,
-                    XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
-                    XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT, attributes);
+  xcb_create_window(
+      connection_, XCB_COPY_FROM_PARENT, border_window, root_window_,
+      root_coordinates->dst_x, root_coordinates->dst_y,
+      safe_cast<uint16_t>(geometry->width - 2 * BORDER_WIDTH),
+      safe_cast<uint16_t>(geometry->height - 2 * BORDER_WIDTH), BORDER_WIDTH,
+      XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
+      XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT, attributes);
 
   XCB_SYNC(xcb_xfixes_query_version, connection_, XCB_XFIXES_MAJOR_VERSION,
            XCB_XFIXES_MINOR_VERSION);
 
   const std::vector<xcb_rectangle_t> rects{
       // Top edge.
-      {saturated_cast<int16_t>(geometry->x - BORDER_WIDTH),
-       saturated_cast<int16_t>(geometry->y - BORDER_WIDTH), geometry->width,
+      {safe_cast<int16_t>(geometry->x - BORDER_WIDTH),
+       safe_cast<int16_t>(geometry->y - BORDER_WIDTH), geometry->width,
        BORDER_WIDTH},
       // Bottom edge.
-      {saturated_cast<int16_t>(geometry->x - BORDER_WIDTH),
-       saturated_cast<int16_t>(geometry->y + geometry->height -
-                               2 * BORDER_WIDTH),
+      {safe_cast<int16_t>(geometry->x - BORDER_WIDTH),
+       safe_cast<int16_t>(geometry->y + geometry->height - 2 * BORDER_WIDTH),
        geometry->width, BORDER_WIDTH},
       // Left edge.
-      {saturated_cast<int16_t>(geometry->x - BORDER_WIDTH),
-       saturated_cast<int16_t>(geometry->y - BORDER_WIDTH), BORDER_WIDTH,
+      {safe_cast<int16_t>(geometry->x - BORDER_WIDTH),
+       safe_cast<int16_t>(geometry->y - BORDER_WIDTH), BORDER_WIDTH,
        geometry->height},
       // Right edge.
-      {saturated_cast<int16_t>(geometry->x + geometry->width -
-                               2 * BORDER_WIDTH),
-       saturated_cast<int16_t>(geometry->y - BORDER_WIDTH), BORDER_WIDTH,
+      {safe_cast<int16_t>(geometry->x + geometry->width - 2 * BORDER_WIDTH),
+       safe_cast<int16_t>(geometry->y - BORDER_WIDTH), BORDER_WIDTH,
        geometry->height},
   };
   xcb_xfixes_set_window_shape_region(connection_, border_window,
