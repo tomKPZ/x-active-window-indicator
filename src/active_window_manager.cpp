@@ -29,6 +29,10 @@
 #include <string>
 #include <vector>
 
+#define XCB_SYNC(func, connection, ...) \
+  MakeXcbReply(func##_reply(            \
+      connection, func(connection __VA_OPT__(, ) __VA_ARGS__), nullptr))
+
 namespace {
 
 static constexpr const uint16_t BORDER_WIDTH = 5;
@@ -71,9 +75,8 @@ xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {
 }
 
 xcb_atom_t GetAtom(xcb_connection_t* connection, const std::string& str) {
-  xcb_intern_atom_cookie_t cookie =
-      xcb_intern_atom(connection, false, str.length(), str.c_str());
-  auto reply = MakeXcbReply(xcb_intern_atom_reply(connection, cookie, nullptr));
+  auto reply =
+      XCB_SYNC(xcb_intern_atom, connection, false, str.length(), str.c_str());
   return reply ? reply->atom : XCB_ATOM_NONE;
 }
 
@@ -81,11 +84,8 @@ std::optional<std::vector<xcb_atom_t>> GetAtomArray(
     xcb_connection_t* connection,
     xcb_window_t window,
     xcb_atom_t atom) {
-  // TODO: these should be one template function.
-  auto cookie = xcb_get_property(connection, false, window, atom, XCB_ATOM_ATOM,
-                                 0, std::numeric_limits<uint32_t>::max());
-  auto reply =
-      MakeXcbReply(xcb_get_property_reply(connection, cookie, nullptr));
+  auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
+                        XCB_ATOM_ATOM, 0, std::numeric_limits<uint32_t>::max());
 
   if (!reply || reply->format != 8 * sizeof(xcb_atom_t) ||
       reply->type != XCB_ATOM_ATOM || reply->bytes_after > 0) {
@@ -105,11 +105,8 @@ std::optional<std::vector<xcb_atom_t>> GetAtomArray(
 std::optional<xcb_window_t> GetWindow(xcb_connection_t* connection,
                                       xcb_window_t window,
                                       xcb_atom_t atom) {
-  auto cookie = xcb_get_property(connection, false, window, atom,
-                                 XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));
-
-  auto reply =
-      MakeXcbReply(xcb_get_property_reply(connection, cookie, nullptr));
+  auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
+                        XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));
 
   if (!reply || reply->format != 8 * sizeof(xcb_window_t) ||
       reply->type != XCB_ATOM_WINDOW || reply->bytes_after > 0 ||
@@ -148,14 +145,10 @@ ActiveWindowManager::ActiveWindowManager() {
 
   auto window =
       GetWindow(connection_, root_window_, net_active_window_).value_or(0);
-  auto cookie = xcb_get_geometry(connection_, window);
-  auto reply =
-      MakeXcbReply(xcb_get_geometry_reply(connection_, cookie, nullptr));
+  auto reply = XCB_SYNC(xcb_get_geometry, connection_, window);
 
-  auto cookie2 = xcb_translate_coordinates(connection_, window, root_window_,
-                                           reply->x, reply->y);
-  auto reply2 = MakeXcbReply(
-      xcb_translate_coordinates_reply(connection_, cookie2, nullptr));
+  auto reply2 = XCB_SYNC(xcb_translate_coordinates, connection_, window,
+                         root_window_, reply->x, reply->y);
 
   auto border_window = xcb_generate_id(connection_);
   uint32_t attributes[] = {0xff0000, true};
@@ -166,10 +159,8 @@ ActiveWindowManager::ActiveWindowManager() {
                     XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
                     XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT, attributes);
 
-  auto cookie3 = xcb_xfixes_query_version(connection_, XCB_XFIXES_MAJOR_VERSION,
-                                          XCB_XFIXES_MINOR_VERSION);
-  auto reply3 = MakeXcbReply(
-      xcb_xfixes_query_version_reply(connection_, cookie3, nullptr));
+  auto reply3 = XCB_SYNC(xcb_xfixes_query_version, connection_,
+                         XCB_XFIXES_MAJOR_VERSION, XCB_XFIXES_MINOR_VERSION);
 
   auto region = xcb_generate_id(connection_);
 
