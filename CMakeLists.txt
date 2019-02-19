@@ -1,8 +1,23 @@
+include(CheckCXXCompilerFlag)
+find_package(PkgConfig REQUIRED)
+
 cmake_minimum_required(VERSION 2.6)
 project(XActiveWindowIndicator)
 
-add_compile_options(INTERFACE
-                    -Werror
+function(add_cxx_compiler_flag_if_supported FLAG)
+  # Remove leading - or / from the flag name.
+  string(REGEX
+         REPLACE "^-|/"
+                 ""
+                 name
+                 ${FLAG})
+  check_cxx_compiler_flag(${FLAG} ${name})
+  if(${name})
+    add_compile_options(${FLAG})
+  endif()
+endfunction()
+
+add_compile_options(-Werror
                     -Wall
                     -Wextra # reasonable and standard
                     -Wshadow # warn the user if a variable declaration shadows one from a parent
@@ -17,18 +32,26 @@ add_compile_options(INTERFACE
                     -Wpedantic # warn if non-standard C++ is used
                     -Wconversion # warn on type conversions that may lose data
                     -Wsign-conversion # warn on sign conversions
-                    -Wmisleading-indentation # warn if identation implies blocks where blocks do not
-                                             # exist
-                    -Wduplicated-cond # warn if if / else chain has duplicated conditions
-                    -Wduplicated-branches # warn if if / else branches have duplicated code
-                    -Wlogical-op # warn about logical operations being used where bitwise were
-                                 # probably wanted
                     -Wnull-dereference # warn if a null dereference is detected
-                    -Wuseless-cast # warn if you perform a cast to the same type
                     -Wdouble-promotion # warn if float is implicit promoted to double
                     -Wformat=2 # warn on security issues around functions that format output (ie
                                # printf)
                     )
+
+# Warn if identation implies blocks where blocks do not exist.
+add_cxx_compiler_flag_if_supported(-Wmisleading-indentation)
+
+# Warn if if / else chain has duplicated conditions.
+add_cxx_compiler_flag_if_supported(-Wduplicated-cond)
+
+# Warn about logical operations being used where bitwise were probably wanted.
+add_cxx_compiler_flag_if_supported(-Wlogical-op)
+
+# Warn if you perform a cast to the same type.
+add_cxx_compiler_flag_if_supported(-Wuseless-cast)
+
+# Warn if if / else branches have duplicated code.
+add_cxx_compiler_flag_if_supported(-Wduplicated-branches)
 
 add_executable(x-active-window-indicator
                src/indicator.cpp
@@ -37,7 +60,6 @@ add_executable(x-active-window-indicator
 
 set_target_properties(x-active-window-indicator PROPERTIES CXX_STANDARD 17)
 
-find_package(PkgConfig REQUIRED)
 pkg_check_modules(XCB REQUIRED xcb)
 pkg_check_modules(XCB_XFIXES REQUIRED xcb-xfixes)
 
