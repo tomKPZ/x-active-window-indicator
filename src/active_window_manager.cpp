@@ -25,7 +25,6 @@
 #include <cstring>
 #include <iostream>
 #include <limits>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -80,38 +79,37 @@ xcb_atom_t GetAtom(xcb_connection_t* connection, const std::string& str) {
   return reply ? reply->atom : XCB_ATOM_NONE;
 }
 
-std::optional<std::vector<xcb_atom_t>> GetAtomArray(
-    xcb_connection_t* connection,
-    xcb_window_t window,
-    xcb_atom_t atom) {
+std::vector<xcb_atom_t> GetAtomArray(xcb_connection_t* connection,
+                                     xcb_window_t window,
+                                     xcb_atom_t atom) {
   auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
                         XCB_ATOM_ATOM, 0, std::numeric_limits<uint32_t>::max());
 
   if (!reply || reply->format != 8 * sizeof(xcb_atom_t) ||
       reply->type != XCB_ATOM_ATOM || reply->bytes_after > 0) {
-    return std::nullopt;
+    throw "";
   }
 
-  std::optional<std::vector<xcb_atom_t>> ret{std::in_place};
+  std::vector<xcb_atom_t> ret;
   xcb_atom_t* value =
       reinterpret_cast<xcb_atom_t*>(xcb_get_property_value(reply));
   auto size = xcb_get_property_value_length(reply);
   assert(size % sizeof(xcb_atom_t) == 0);
   for (decltype(size) i = 0; i < size / sizeof(xcb_atom_t); i++)
-    ret.value().emplace_back(value[i]);
+    ret.emplace_back(value[i]);
   return ret;
 }
 
-std::optional<xcb_window_t> GetWindow(xcb_connection_t* connection,
-                                      xcb_window_t window,
-                                      xcb_atom_t atom) {
+xcb_window_t GetWindow(xcb_connection_t* connection,
+                       xcb_window_t window,
+                       xcb_atom_t atom) {
   auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
                         XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));
 
   if (!reply || reply->format != 8 * sizeof(xcb_window_t) ||
       reply->type != XCB_ATOM_WINDOW || reply->bytes_after > 0 ||
       xcb_get_property_value_length(reply) != sizeof(xcb_window_t)) {
-    return std::nullopt;
+    throw "";
   }
 
   return reinterpret_cast<xcb_window_t*>(xcb_get_property_value(reply))[0];
@@ -139,12 +137,10 @@ ActiveWindowManager::ActiveWindowManager() {
     return;
 
   auto atoms = GetAtomArray(connection_, root_window_, net_supported_);
-  if (!atoms || std::find(atoms.value().begin(), atoms.value().end(),
-                          net_active_window_) == atoms.value().end())
+  if (std::find(atoms.begin(), atoms.end(), net_active_window_) == atoms.end())
     return;
 
-  auto window =
-      GetWindow(connection_, root_window_, net_active_window_).value_or(0);
+  auto window = GetWindow(connection_, root_window_, net_active_window_);
   auto reply = XCB_SYNC(xcb_get_geometry, connection_, window);
 
   auto reply2 = XCB_SYNC(xcb_translate_coordinates, connection_, window,
