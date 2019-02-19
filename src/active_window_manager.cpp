@@ -18,6 +18,7 @@
 #include "active_window_manager.h"
 
 #include <xcb/xcb.h>
+#include <xcb/xfixes.h>
 
 #include <algorithm>
 #include <cassert>
@@ -137,7 +138,6 @@ ActiveWindowManager::ActiveWindowManager() {
   auto cookie = xcb_get_geometry(connection_, window);
   auto reply =
     MakeXcbReply(xcb_get_geometry_reply(connection_, cookie, nullptr));
-  std::cout << reply->x << " " << reply->y << " " << reply->width << " " << reply->height << std::endl;
 
   auto cookie2 = xcb_translate_coordinates(connection_, window, root_window_, reply->x, reply->y);
   auto reply2 = MakeXcbReply(xcb_translate_coordinates_reply(connection_, cookie2, nullptr));
@@ -148,11 +148,32 @@ ActiveWindowManager::ActiveWindowManager() {
 		    reply2->dst_x, reply2->dst_y, reply->width - 2*BORDER_WIDTH, reply->height - 2*BORDER_WIDTH, BORDER_WIDTH,
 		    XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
 		    XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT, attributes);
+
+  auto cookie3 = xcb_xfixes_query_version(connection_, 5, 0);
+  auto reply3 = MakeXcbReply(xcb_xfixes_query_version_reply(connection_, cookie3, nullptr));
+
+  auto region = xcb_generate_id(connection_);
+
+  xcb_rectangle_t rects[] = {
+			     // Top edge.
+			     {reply->x - BORDER_WIDTH, reply->y - BORDER_WIDTH, reply->width, BORDER_WIDTH},
+			     // Bottom edge.
+			     {reply->x - BORDER_WIDTH, reply->y + reply->height - 2*BORDER_WIDTH, reply->width, BORDER_WIDTH},
+			     // Left edge.
+			     {reply->x - BORDER_WIDTH, reply->y - BORDER_WIDTH, BORDER_WIDTH, reply->height},
+			     // Right edge.
+			     {reply->x + reply->width - 2*BORDER_WIDTH, reply->y - BORDER_WIDTH, BORDER_WIDTH, reply->height},
+  };
+  xcb_xfixes_create_region(connection_, region, sizeof(rects)/sizeof(rects[0]), rects);
+  xcb_xfixes_set_window_shape_region(connection_, border_window, XCB_SHAPE_SK_INPUT, 0, 0, region);
+  xcb_xfixes_set_window_shape_region(connection_, border_window, XCB_SHAPE_SK_BOUNDING, 0, 0, region);
+  xcb_xfixes_destroy_region(connection_, region);
   
   xcb_map_window(connection_, border_window);
   
   xcb_flush(connection_);
-  xcb_wait_for_event(connection_);
+  while(true)
+    xcb_wait_for_event(connection_);
 }
 
 ActiveWindowManager::~ActiveWindowManager() {
