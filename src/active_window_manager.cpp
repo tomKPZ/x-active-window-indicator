@@ -59,6 +59,8 @@ constexpr Dst saturated_cast(Src value) {
 
 template <typename T>
 XcbReply<T> MakeXcbReply(T* t) {
+  if (!t)
+    throw "Could not get reply.";
   return XcbReply(t);
 }
 
@@ -74,9 +76,8 @@ xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {
 }
 
 xcb_atom_t GetAtom(xcb_connection_t* connection, const std::string& str) {
-  auto reply =
-      XCB_SYNC(xcb_intern_atom, connection, false, str.length(), str.c_str());
-  return reply ? reply->atom : XCB_ATOM_NONE;
+  return XCB_SYNC(xcb_intern_atom, connection, false, str.length(), str.c_str())
+      ->atom;
 }
 
 std::vector<xcb_atom_t> GetAtomArray(xcb_connection_t* connection,
@@ -85,8 +86,8 @@ std::vector<xcb_atom_t> GetAtomArray(xcb_connection_t* connection,
   auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
                         XCB_ATOM_ATOM, 0, std::numeric_limits<uint32_t>::max());
 
-  if (!reply || reply->format != 8 * sizeof(xcb_atom_t) ||
-      reply->type != XCB_ATOM_ATOM || reply->bytes_after > 0) {
+  if (reply->format != 8 * sizeof(xcb_atom_t) || reply->type != XCB_ATOM_ATOM ||
+      reply->bytes_after > 0) {
     throw "";
   }
 
@@ -106,7 +107,7 @@ xcb_window_t GetWindow(xcb_connection_t* connection,
   auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
                         XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));
 
-  if (!reply || reply->format != 8 * sizeof(xcb_window_t) ||
+  if (reply->format != 8 * sizeof(xcb_window_t) ||
       reply->type != XCB_ATOM_WINDOW || reply->bytes_after > 0 ||
       xcb_get_property_value_length(reply) != sizeof(xcb_window_t)) {
     throw "";
@@ -121,14 +122,13 @@ ActiveWindowManager::ActiveWindowManager() {
   int screen_number;
   connection_ = xcb_connect(nullptr, &screen_number);
   if (xcb_connection_has_error(connection_))
-    return;
+    throw "Connection error";
 
   xcb_screen_t* screen = ScreenOfConnection(connection_, screen_number);
   root_window_ = screen ? screen->root : XCB_WINDOW_NONE;
   if (!root_window_)
-    return;
+    throw "Couldn't find root window";
 
-  // TODO: use exceptions.
   net_supported_ = GetAtom(connection_, "_NET_SUPPORTED");
   if (net_supported_ == XCB_ATOM_NONE)
     return;
