@@ -48,6 +48,21 @@ class XcbReply {
   T* t_;
 };
 
+class XcbRegion {
+ public:
+  XcbRegion(xcb_connection_t* connection,
+            const std::vector<xcb_rectangle_t> rects)
+      : connection_(connection), id_(xcb_generate_id(connection_)) {
+    xcb_xfixes_create_region(connection_, id_, rects.size(), rects.data());
+  }
+  ~XcbRegion() { xcb_xfixes_destroy_region(connection_, id_); }
+  uint32_t id() const { return id_; }
+
+ private:
+  xcb_connection_t* connection_;
+  uint32_t id_;
+};
+
 template <typename Dst, typename Src>
 constexpr Dst saturated_cast(Src value) {
   if (value < std::numeric_limits<Dst>::min())
@@ -141,48 +156,47 @@ ActiveWindowManager::ActiveWindowManager() {
     return;
 
   auto window = GetWindow(connection_, root_window_, net_active_window_);
-  auto reply = XCB_SYNC(xcb_get_geometry, connection_, window);
+  auto geometry = XCB_SYNC(xcb_get_geometry, connection_, window);
 
-  auto reply2 = XCB_SYNC(xcb_translate_coordinates, connection_, window,
-                         root_window_, reply->x, reply->y);
+  auto root_coordinates =
+      XCB_SYNC(xcb_translate_coordinates, connection_, window, root_window_,
+               geometry->x, geometry->y);
 
   auto border_window = xcb_generate_id(connection_);
   uint32_t attributes[] = {0xff0000, true};
   xcb_create_window(connection_, XCB_COPY_FROM_PARENT, border_window,
-                    root_window_, reply2->dst_x, reply2->dst_y,
-                    reply->width - 2 * BORDER_WIDTH,
-                    reply->height - 2 * BORDER_WIDTH, BORDER_WIDTH,
+                    root_window_, root_coordinates->dst_x,
+                    root_coordinates->dst_y, geometry->width - 2 * BORDER_WIDTH,
+                    geometry->height - 2 * BORDER_WIDTH, BORDER_WIDTH,
                     XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
                     XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT, attributes);
 
-  auto reply3 = XCB_SYNC(xcb_xfixes_query_version, connection_,
-                         XCB_XFIXES_MAJOR_VERSION, XCB_XFIXES_MINOR_VERSION);
+  XCB_SYNC(xcb_xfixes_query_version, connection_, XCB_XFIXES_MAJOR_VERSION,
+           XCB_XFIXES_MINOR_VERSION);
 
-  auto region = xcb_generate_id(connection_);
-
-  xcb_rectangle_t rects[] = {
+  const std::vector<xcb_rectangle_t> rects{
       // Top edge.
-      {saturated_cast<int16_t>(reply->x - BORDER_WIDTH),
-       saturated_cast<int16_t>(reply->y - BORDER_WIDTH), reply->width,
+      {saturated_cast<int16_t>(geometry->x - BORDER_WIDTH),
+       saturated_cast<int16_t>(geometry->y - BORDER_WIDTH), geometry->width,
        BORDER_WIDTH},
       // Bottom edge.
-      {saturated_cast<int16_t>(reply->x - BORDER_WIDTH),
-       saturated_cast<int16_t>(reply->y + reply->height - 2 * BORDER_WIDTH),
-       reply->width, BORDER_WIDTH},
+      {saturated_cast<int16_t>(geometry->x - BORDER_WIDTH),
+       saturated_cast<int16_t>(geometry->y + geometry->height -
+                               2 * BORDER_WIDTH),
+       geometry->width, BORDER_WIDTH},
       // Left edge.
-      {saturated_cast<int16_t>(reply->x - BORDER_WIDTH),
-       saturated_cast<int16_t>(reply->y - BORDER_WIDTH), BORDER_WIDTH,
-       reply->height},
+      {saturated_cast<int16_t>(geometry->x - BORDER_WIDTH),
+       saturated_cast<int16_t>(geometry->y - BORDER_WIDTH), BORDER_WIDTH,
+       geometry->height},
       // Right edge.
-      {saturated_cast<int16_t>(reply->x + reply->width - 2 * BORDER_WIDTH),
-       saturated_cast<int16_t>(reply->y - BORDER_WIDTH), BORDER_WIDTH,
-       reply->height},
+      {saturated_cast<int16_t>(geometry->x + geometry->width -
+                               2 * BORDER_WIDTH),
+       saturated_cast<int16_t>(geometry->y - BORDER_WIDTH), BORDER_WIDTH,
+       geometry->height},
   };
-  xcb_xfixes_create_region(connection_, region,
-                           sizeof(rects) / sizeof(rects[0]), rects);
   xcb_xfixes_set_window_shape_region(connection_, border_window,
-                                     XCB_SHAPE_SK_BOUNDING, 0, 0, region);
-  xcb_xfixes_destroy_region(connection_, region);
+                                     XCB_SHAPE_SK_BOUNDING, 0, 0,
+                                     XcbRegion(connection_, rects).id());
 
   xcb_map_window(connection_, border_window);
 
