@@ -58,7 +58,7 @@ add_executable(x-active-window-indicator
                src/active_window_manager.h
                src/active_window_manager.cpp)
 
-set_target_properties(x-active-window-indicator PROPERTIES CXX_STANDARD 17)
+set_target_properties(x-active-window-indicator PROPERTIES CXX_STANDARD 20)
 
 pkg_check_modules(XCB REQUIRED xcb)
 pkg_check_modules(XCB_XFIXES REQUIRED xcb-xfixes)
