@@ -45,6 +45,15 @@ class XcbReply {
   T* t_;
 };
 
+template <typename Dst, typename Src>
+constexpr Dst saturated_cast(Src value) {
+  if (value < std::numeric_limits<Dst>::min())
+    return std::numeric_limits<Dst>::min();
+  if (value > std::numeric_limits<Dst>::max())
+    return std::numeric_limits<Dst>::max();
+  return static_cast<Dst>(value);
+}
+
 template <typename T>
 XcbReply<T> MakeXcbReply(T* t) {
   return XcbReply(t);
@@ -68,32 +77,34 @@ xcb_atom_t GetAtom(xcb_connection_t* connection, const std::string& str) {
   return reply ? reply->atom : XCB_ATOM_NONE;
 }
 
-std::optional<std::vector<xcb_atom_t>> GetAtomArray(xcb_connection_t* connection,
-						    xcb_window_t window,
-						    xcb_atom_t atom) {
+std::optional<std::vector<xcb_atom_t>> GetAtomArray(
+    xcb_connection_t* connection,
+    xcb_window_t window,
+    xcb_atom_t atom) {
   // TODO: these should be one template function.
-  auto cookie = xcb_get_property(connection, false, window, atom,
-                                 XCB_ATOM_ATOM, 0, std::numeric_limits<uint32_t>::max());
+  auto cookie = xcb_get_property(connection, false, window, atom, XCB_ATOM_ATOM,
+                                 0, std::numeric_limits<uint32_t>::max());
   auto reply =
       MakeXcbReply(xcb_get_property_reply(connection, cookie, nullptr));
 
-  if (!reply || reply->format != 8*sizeof(xcb_atom_t) || reply->type != XCB_ATOM_ATOM ||
-      reply->bytes_after > 0) {
+  if (!reply || reply->format != 8 * sizeof(xcb_atom_t) ||
+      reply->type != XCB_ATOM_ATOM || reply->bytes_after > 0) {
     return std::nullopt;
   }
 
   std::optional<std::vector<xcb_atom_t>> ret{std::in_place};
-  xcb_atom_t* value = reinterpret_cast<xcb_atom_t*>(xcb_get_property_value(reply));
+  xcb_atom_t* value =
+      reinterpret_cast<xcb_atom_t*>(xcb_get_property_value(reply));
   auto size = xcb_get_property_value_length(reply);
   assert(size % sizeof(xcb_atom_t) == 0);
-  for (decltype(size) i = 0; i < size/sizeof(xcb_atom_t); i++)
+  for (decltype(size) i = 0; i < size / sizeof(xcb_atom_t); i++)
     ret.value().emplace_back(value[i]);
   return ret;
 }
 
 std::optional<xcb_window_t> GetWindow(xcb_connection_t* connection,
-				      xcb_window_t window,
-				      xcb_atom_t atom) {
+                                      xcb_window_t window,
+                                      xcb_atom_t atom) {
   auto cookie = xcb_get_property(connection, false, window, atom,
                                  XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));
 
@@ -131,48 +142,65 @@ ActiveWindowManager::ActiveWindowManager() {
     return;
 
   auto atoms = GetAtomArray(connection_, root_window_, net_supported_);
-  if (!atoms || std::find(atoms.value().begin(), atoms.value().end(), net_active_window_) == atoms.value().end())
+  if (!atoms || std::find(atoms.value().begin(), atoms.value().end(),
+                          net_active_window_) == atoms.value().end())
     return;
 
-  auto window = GetWindow(connection_, root_window_, net_active_window_).value_or(0);
+  auto window =
+      GetWindow(connection_, root_window_, net_active_window_).value_or(0);
   auto cookie = xcb_get_geometry(connection_, window);
   auto reply =
-    MakeXcbReply(xcb_get_geometry_reply(connection_, cookie, nullptr));
+      MakeXcbReply(xcb_get_geometry_reply(connection_, cookie, nullptr));
 
-  auto cookie2 = xcb_translate_coordinates(connection_, window, root_window_, reply->x, reply->y);
-  auto reply2 = MakeXcbReply(xcb_translate_coordinates_reply(connection_, cookie2, nullptr));
+  auto cookie2 = xcb_translate_coordinates(connection_, window, root_window_,
+                                           reply->x, reply->y);
+  auto reply2 = MakeXcbReply(
+      xcb_translate_coordinates_reply(connection_, cookie2, nullptr));
 
   auto border_window = xcb_generate_id(connection_);
-  uint32_t attributes[] = { 0xff0000, true };
-  xcb_create_window(connection_, XCB_COPY_FROM_PARENT, border_window, root_window_,
-		    reply2->dst_x, reply2->dst_y, reply->width - 2*BORDER_WIDTH, reply->height - 2*BORDER_WIDTH, BORDER_WIDTH,
-		    XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
-		    XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT, attributes);
+  uint32_t attributes[] = {0xff0000, true};
+  xcb_create_window(connection_, XCB_COPY_FROM_PARENT, border_window,
+                    root_window_, reply2->dst_x, reply2->dst_y,
+                    reply->width - 2 * BORDER_WIDTH,
+                    reply->height - 2 * BORDER_WIDTH, BORDER_WIDTH,
+                    XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
+                    XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT, attributes);
 
-  auto cookie3 = xcb_xfixes_query_version(connection_, 5, 0);
-  auto reply3 = MakeXcbReply(xcb_xfixes_query_version_reply(connection_, cookie3, nullptr));
+  auto cookie3 = xcb_xfixes_query_version(connection_, XCB_XFIXES_MAJOR_VERSION,
+                                          XCB_XFIXES_MINOR_VERSION);
+  auto reply3 = MakeXcbReply(
+      xcb_xfixes_query_version_reply(connection_, cookie3, nullptr));
 
   auto region = xcb_generate_id(connection_);
 
   xcb_rectangle_t rects[] = {
-			     // Top edge.
-			     {reply->x - BORDER_WIDTH, reply->y - BORDER_WIDTH, reply->width, BORDER_WIDTH},
-			     // Bottom edge.
-			     {reply->x - BORDER_WIDTH, reply->y + reply->height - 2*BORDER_WIDTH, reply->width, BORDER_WIDTH},
-			     // Left edge.
-			     {reply->x - BORDER_WIDTH, reply->y - BORDER_WIDTH, BORDER_WIDTH, reply->height},
-			     // Right edge.
-			     {reply->x + reply->width - 2*BORDER_WIDTH, reply->y - BORDER_WIDTH, BORDER_WIDTH, reply->height},
+      // Top edge.
+      {saturated_cast<int16_t>(reply->x - BORDER_WIDTH),
+       saturated_cast<int16_t>(reply->y - BORDER_WIDTH), reply->width,
+       BORDER_WIDTH},
+      // Bottom edge.
+      {saturated_cast<int16_t>(reply->x - BORDER_WIDTH),
+       saturated_cast<int16_t>(reply->y + reply->height - 2 * BORDER_WIDTH),
+       reply->width, BORDER_WIDTH},
+      // Left edge.
+      {saturated_cast<int16_t>(reply->x - BORDER_WIDTH),
+       saturated_cast<int16_t>(reply->y - BORDER_WIDTH), BORDER_WIDTH,
+       reply->height},
+      // Right edge.
+      {saturated_cast<int16_t>(reply->x + reply->width - 2 * BORDER_WIDTH),
+       saturated_cast<int16_t>(reply->y - BORDER_WIDTH), BORDER_WIDTH,
+       reply->height},
   };
-  xcb_xfixes_create_region(connection_, region, sizeof(rects)/sizeof(rects[0]), rects);
-  xcb_xfixes_set_window_shape_region(connection_, border_window, XCB_SHAPE_SK_INPUT, 0, 0, region);
-  xcb_xfixes_set_window_shape_region(connection_, border_window, XCB_SHAPE_SK_BOUNDING, 0, 0, region);
+  xcb_xfixes_create_region(connection_, region,
+                           sizeof(rects) / sizeof(rects[0]), rects);
+  xcb_xfixes_set_window_shape_region(connection_, border_window,
+                                     XCB_SHAPE_SK_BOUNDING, 0, 0, region);
   xcb_xfixes_destroy_region(connection_, region);
-  
+
   xcb_map_window(connection_, border_window);
-  
+
   xcb_flush(connection_);
-  while(true)
+  while (true)
     xcb_wait_for_event(connection_);
 }
 
