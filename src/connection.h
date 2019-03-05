@@ -25,6 +25,8 @@ class Connection {
   Connection();
   ~Connection();
 
+  uint32_t GenerateId();
+
   xcb_connection_t* connection() { return connection_; }
   xcb_window_t root_window() const { return root_window_; }
   

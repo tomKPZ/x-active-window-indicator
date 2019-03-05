@@ -69,7 +69,7 @@ class XcbRegion {
  public:
   XcbRegion(Connection* connection, const std::vector<xcb_rectangle_t> rects)
       : connection_(connection),
-        id_(xcb_generate_id(connection_->connection())) {
+        id_(connection_->GenerateId())) {
     xcb_xfixes_create_region(connection_->connection(), id_,
                              safe_cast<uint32_t>(rects.size()), rects.data());
   }
@@ -162,7 +162,7 @@ ActiveWindowManager::ActiveWindowManager(Connection* connection)
       XCB_SYNC(xcb_translate_coordinates, connection_->connection(), window,
                connection_->root_window(), geometry->x, geometry->y);
 
-  auto border_window = xcb_generate_id(connection_->connection());
+  auto border_window = connection_->GenerateId();
   uint32_t attributes[] = {0xff0000, true};
   xcb_create_window(connection_->connection(), XCB_COPY_FROM_PARENT,
                     border_window, connection_->root_window(),
