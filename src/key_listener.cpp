@@ -27,15 +27,6 @@
 #include "event.h"
 #include "key_state_observer.h"
 
-namespace {
-
-template <typename T>
-constexpr size_t ArraySize(const T& array) {
-  return sizeof(array) / sizeof(array[0]);
-}
-
-}  // namespace
-
 KeyListener::KeyListener(Connection* connection, KeyStateObserver* observer)
     : connection_(connection), observer_(observer) {
   XCB_SYNC(xcb_input_xi_query_version, connection_->connection(),

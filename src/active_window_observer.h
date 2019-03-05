@@ -19,27 +19,12 @@
 
 #include <cstdint>
 
-#include "util.h"
-
 typedef uint32_t xcb_window_t;
-typedef struct xcb_rectangle_t xcb_rectangle_t;
 
-class Connection;
-
-class BorderWindow {
+class ActiveWindowObserver {
  public:
-  BorderWindow(Connection* connection);
-  ~BorderWindow();
-
-  void SetRect(const xcb_rectangle_t& rect);
-
-  void Show();
-  void Hide();
+  virtual void ActiveWindowChanged(xcb_window_t window) = 0;
   
- private:
-  Connection* connection_;
-
-  xcb_window_t window_;
-
-  DISALLOW_COPY_AND_ASSIGN(BorderWindow);
+ protected:
+  virtual ~ActiveWindowObserver() {};
 };

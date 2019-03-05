@@ -15,7 +15,11 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
+#pragma once
+
 #include <cstdint>
+
+#include "util.h"
 
 typedef struct xcb_connection_t xcb_connection_t;
 typedef uint32_t xcb_atom_t;
@@ -28,11 +32,10 @@ class ActiveWindowTracker {
   ~ActiveWindowTracker();
 
  private:
-  ActiveWindowTracker(const ActiveWindowTracker&) = delete;
-  ActiveWindowTracker& operator=(const ActiveWindowTracker&) = delete;
-
   Connection* connection_;
 
   xcb_atom_t net_supported_;
   xcb_atom_t net_active_window_;
+
+  DISALLOW_COPY_AND_ASSIGN(ActiveWindowTracker);
 };

@@ -15,7 +15,11 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
+#pragma once
+
 #include <vector>
+
+#include "util.h"
 
 class Connection;
 class EventDispatcher;
@@ -30,10 +34,9 @@ class EventLoop {
   void Run();
   
  private:
-  EventLoop(const EventLoop&) = delete;
-  EventLoop& operator=(const EventLoop&) = delete;
-  
   Connection* connection_;
 
   std::vector<EventDispatcher*> dispatchers_;
+
+  DISALLOW_COPY_AND_ASSIGN(EventLoop);
 };
