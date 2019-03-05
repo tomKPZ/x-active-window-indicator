@@ -15,8 +15,12 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include "event_loop.h"
+#include "event.h"
 
-EventLoop::EventLoop(Connection* connection) : connection_(connection) {}
+#include <cstdlib>
 
-EventLoop::~EventLoop() {}
+Event::Event(xcb_generic_event_t* event) : event_(event) {}
+
+Event::~Event() {
+  free(event_);
+}

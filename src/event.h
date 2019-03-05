@@ -15,8 +15,18 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include "event_loop.h"
+// TODO: any way to forward declare xcb_generic_event_t?
+#include <xcb/xcb.h>
 
-EventLoop::EventLoop(Connection* connection) : connection_(connection) {}
+class Event {
+ public:
+  Event(xcb_generic_event_t* event);
+  ~Event();
+  
+  operator bool() const { return event_; }
+  const xcb_generic_event_t* operator->() const { return event_; }
+  const xcb_generic_event_t* event() const { return event_; }
 
-EventLoop::~EventLoop() {}
+ private:
+  xcb_generic_event_t* event_;
+};

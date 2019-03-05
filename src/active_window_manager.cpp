@@ -30,6 +30,7 @@
 #include <vector>
 
 #include "connection.h"
+#include "event.h"
 
 #define XCB_SYNC(func, connection, ...) \
   MakeXcbReply(func##_reply(            \
@@ -68,8 +69,7 @@ class XcbReply {
 class XcbRegion {
  public:
   XcbRegion(Connection* connection, const std::vector<xcb_rectangle_t> rects)
-      : connection_(connection),
-        id_(connection_->GenerateId())) {
+      : connection_(connection), id_(connection_->GenerateId()) {
     xcb_xfixes_create_region(connection_->connection(), id_,
                              safe_cast<uint32_t>(rects.size()), rects.data());
   }
@@ -88,20 +88,8 @@ XcbReply<T> MakeXcbReply(T* t) {
   return XcbReply(t);
 }
 
-class XcbEvent {
- public:
-  XcbEvent(xcb_generic_event_t* event) : event_(event) {}
-  ~XcbEvent() { free(event_); }
-  operator bool() const { return event_; }
-  const xcb_generic_event_t* operator->() const { return event_; }
-  const xcb_generic_event_t* event() const { return event_; }
-
- private:
-  xcb_generic_event_t* event_;
-};
-
-XcbEvent WaitForEvent(Connection* connection) {
-  return XcbEvent(xcb_wait_for_event(connection->connection()));
+Event WaitForEvent(Connection* connection) {
+  return Event(xcb_wait_for_event(connection->connection()));
 }
 
 xcb_atom_t GetAtom(Connection* connection, const std::string& str) {
