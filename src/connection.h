@@ -18,21 +18,17 @@
 #include <cstdint>
 
 typedef struct xcb_connection_t xcb_connection_t;
-typedef uint32_t xcb_atom_t;
 typedef uint32_t xcb_window_t;
-class Connection;
 
-class ActiveWindowManager {
+class Connection {
  public:
-  ActiveWindowManager(Connection* connection);
-  ~ActiveWindowManager();
+  Connection();
+  ~Connection();
 
+  xcb_connection_t* connection() { return connection_; }
+  xcb_window_t root_window() const { return root_window_; }
+  
  private:
-  ActiveWindowManager(const ActiveWindowManager&) = delete;
-  ActiveWindowManager& operator=(const ActiveWindowManager&) = delete;
-
-  Connection* connection_;
-
-  xcb_atom_t net_supported_;
-  xcb_atom_t net_active_window_;
+  xcb_connection_t* connection_;
+  xcb_window_t root_window_;
 };
