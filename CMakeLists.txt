@@ -55,8 +55,8 @@ add_cxx_compiler_flag_if_supported(-Wduplicated-branches)
 
 add_executable(x-active-window-indicator
                src/indicator.cpp
-               src/active_window_manager.h
-               src/active_window_manager.cpp
+               src/active_window_tracker.h
+               src/active_window_tracker.cpp
                src/border_window.h
                src/border_window.cpp
                src/connection.h
