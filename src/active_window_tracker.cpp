@@ -73,7 +73,7 @@ xcb_window_t GetWindow(Connection* connection,
 
 }  // namespace
 
-ActiveWindowManager::ActiveWindowManager(Connection* connection)
+ActiveWindowTracker::ActiveWindowTracker(Connection* connection)
     : connection_(connection) {
   net_supported_ = GetAtom(connection_, "_NET_SUPPORTED");
   net_active_window_ = GetAtom(connection_, "_NET_ACTIVE_WINDOW");
@@ -92,4 +92,4 @@ ActiveWindowManager::ActiveWindowManager(Connection* connection)
                connection_->root_window(), geometry->x, geometry->y);
 }
 
-ActiveWindowManager::~ActiveWindowManager() {}
+ActiveWindowTracker::~ActiveWindowTracker() {}

@@ -22,14 +22,14 @@ typedef uint32_t xcb_atom_t;
 typedef uint32_t xcb_window_t;
 class Connection;
 
-class ActiveWindowManager {
+class ActiveWindowTracker {
  public:
-  ActiveWindowManager(Connection* connection);
-  ~ActiveWindowManager();
+  ActiveWindowTracker(Connection* connection);
+  ~ActiveWindowTracker();
 
  private:
-  ActiveWindowManager(const ActiveWindowManager&) = delete;
-  ActiveWindowManager& operator=(const ActiveWindowManager&) = delete;
+  ActiveWindowTracker(const ActiveWindowTracker&) = delete;
+  ActiveWindowTracker& operator=(const ActiveWindowTracker&) = delete;
 
   Connection* connection_;
 

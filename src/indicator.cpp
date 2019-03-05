@@ -7,6 +7,6 @@
 
 int main(int, char**) {
   Connection connection;
-  ActiveWindowManager active_window_tracker{&connection};
+  ActiveWindowTracker active_window_tracker{&connection};
   return 0;
 }
