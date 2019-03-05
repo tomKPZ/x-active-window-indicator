@@ -24,14 +24,21 @@ class Indicator : public ActiveWindowObserver, KeyStateObserver {
   void ActiveWindowChanged(xcb_window_t window) {
     auto geometry =
         XCB_SYNC(xcb_get_geometry, connection_->connection(), window);
-
     auto root_coordinates =
         XCB_SYNC(xcb_translate_coordinates, connection_->connection(), window,
                  connection_->root_window(), geometry->x, geometry->y);
+    border_window_.SetRect(xcb_rectangle_t{root_coordinates->dst_x,
+                                           root_coordinates->dst_y,
+                                           geometry->width, geometry->height});
   }
 
   // KeyStateObserver:
-  void KeyStateChanged(bool pressed) { (void)pressed; }
+  void KeyStateChanged(bool pressed) {
+    if (pressed)
+      border_window_.Show();
+    else
+      border_window_.Hide();
+  }
 
  private:
   Connection* connection_;
