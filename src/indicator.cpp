@@ -11,13 +11,10 @@
 #include "key_listener.h"
 #include "key_state_observer.h"
 
-class Indicator : public ActiveWindowObserver, KeyStateObserver {
+class Indicator : public ActiveWindowObserver, public KeyStateObserver {
  public:
   Indicator(Connection* connection)
-      : connection_(connection),
-        active_window_tracker_(connection_, this),
-        key_listener_(connection_, this),
-        border_window_(connection_) {}
+      : connection_(connection), border_window_(connection_) {}
   ~Indicator() {}
 
   // ActiveWindowObserver:
@@ -43,14 +40,13 @@ class Indicator : public ActiveWindowObserver, KeyStateObserver {
  private:
   Connection* connection_;
 
-  ActiveWindowTracker active_window_tracker_;
-  KeyListener key_listener_;
-
   BorderWindow border_window_;
 };
 
 int main(int, char**) {
   Connection connection;
   Indicator indicator{&connection};
+  ActiveWindowTracker active_window_tracker_{&connection, &indicator};
+  KeyListener key_listener_{&connection, &indicator};
   return 0;
 }
