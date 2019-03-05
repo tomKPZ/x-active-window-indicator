@@ -31,6 +31,9 @@ class Connection {
   xcb_window_t root_window() const { return root_window_; }
   
  private:
+  Connection(const Connection&) = delete;
+  Connection& operator=(const Connection&) = delete;
+  
   xcb_connection_t* connection_;
   xcb_window_t root_window_;
 };

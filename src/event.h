@@ -28,5 +28,8 @@ class Event {
   const xcb_generic_event_t* event() const { return event_; }
 
  private:
+  Event(const Event&) = delete;
+  Event& operator=(const Event&) = delete;
+  
   xcb_generic_event_t* event_;
 };
