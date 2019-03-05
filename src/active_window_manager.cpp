@@ -19,6 +19,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xfixes.h>
+#include <xcb/xinput.h>
 
 #include <algorithm>
 #include <cassert>
@@ -43,6 +44,11 @@ constexpr Dst safe_cast(Src value) {
     throw "Cast out of range";
   }
   return static_cast<Dst>(value);
+}
+
+template <typename T>
+constexpr size_t ArraySize(const T& array) {
+  return sizeof(array) / sizeof(array[0]);
 }
 
 template <typename T>
@@ -76,8 +82,24 @@ class XcbRegion {
 template <typename T>
 XcbReply<T> MakeXcbReply(T* t) {
   if (!t)
-    throw "Could not get reply";
+    throw "Error getting reply";
   return XcbReply(t);
+}
+
+class XcbEvent {
+ public:
+  XcbEvent(xcb_generic_event_t* event) : event_(event) {}
+  ~XcbEvent() { free(event_); }
+  operator bool() const { return event_; }
+  const xcb_generic_event_t* operator->() const { return event_; }
+  const xcb_generic_event_t* event() const { return event_; }
+
+ private:
+  xcb_generic_event_t* event_;
+};
+
+XcbEvent WaitForEvent(xcb_connection_t* connection) {
+  return XcbEvent(xcb_wait_for_event(connection));
 }
 
 xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {
@@ -170,6 +192,7 @@ ActiveWindowManager::ActiveWindowManager() {
   XCB_SYNC(xcb_xfixes_query_version, connection_, XCB_XFIXES_MAJOR_VERSION,
            XCB_XFIXES_MINOR_VERSION);
 
+  // TODO: Use an outer border instead of an inner border if the window is tiny.
   const std::vector<xcb_rectangle_t> rects{
       // Top edge.
       {safe_cast<int16_t>(geometry->x - BORDER_WIDTH),
@@ -194,9 +217,42 @@ ActiveWindowManager::ActiveWindowManager() {
 
   xcb_map_window(connection_, border_window);
 
+  XCB_SYNC(xcb_input_xi_query_version, connection_, XCB_INPUT_MAJOR_VERSION,
+           XCB_INPUT_MINOR_VERSION);
+  static constexpr const struct {
+    xcb_input_event_mask_t event_mask;
+    xcb_input_xi_event_mask_t xi_event_mask;
+  } masks[] = {{{XCB_INPUT_DEVICE_ALL,
+                 sizeof(xcb_input_xi_event_mask_t) / sizeof(uint32_t)},
+                static_cast<xcb_input_xi_event_mask_t>(
+                    XCB_INPUT_XI_EVENT_MASK_KEY_PRESS |
+                    XCB_INPUT_XI_EVENT_MASK_KEY_RELEASE)}};
+  xcb_input_xi_select_events(connection_, root_window_, ArraySize(masks),
+                             &masks[0].event_mask);
   xcb_flush(connection_);
-  while (true)
-    xcb_wait_for_event(connection_);
+
+  // TODO: verify ->present.
+  auto xcb_input_major_opcode =
+      xcb_get_extension_data(connection_, &xcb_input_id)->major_opcode;
+  while (auto event = WaitForEvent(connection_)) {
+    switch (event->response_type & ~0x80) {
+      case XCB_GE_GENERIC: {
+        const auto* generic_event =
+            reinterpret_cast<const xcb_ge_generic_event_t*>(event.event());
+        if (generic_event->extension == xcb_input_major_opcode) {
+          if (generic_event->event_type == XCB_INPUT_KEY_PRESS) {
+            const auto* key_press_event =
+                reinterpret_cast<const xcb_input_key_press_event_t*>(
+                    generic_event);
+            std::cout << key_press_event->detail << std::endl;
+          }
+        }
+        break;
+      }
+      default:
+        throw "Unhandled event";
+    }
+  }
 }
 
 ActiveWindowManager::~ActiveWindowManager() {
