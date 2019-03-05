@@ -15,39 +15,28 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include "event_dispatcher.h"
-
 #include <cstdint>
-#include <vector>
+
+typedef uint32_t xcb_window_t;
+typedef struct xcb_rectangle_t xcb_rectangle_t;
 
 class Connection;
-class KeyStateObserver;
 
-class KeyListener : public EventDispatcher {
+class BorderWindow {
  public:
-  KeyListener(Connection* connection, KeyStateObserver* observer);
-  ~KeyListener() override;
+  BorderWindow(Connection* connection);
+  ~BorderWindow();
 
-  bool DispatchEvent(const Event& event) override;
+  void SetRect(const xcb_rectangle_t& rect);
 
+  void Show();
+  void Hide();
+  
  private:
-  struct KeyCodeState {
-    KeyCodeState(uint32_t key_code) : code(key_code) {}
-    const uint32_t code;
-
-    // TODO: Any way to get initial key states?
-    bool key_pressed = false;
-  };
-
-  KeyListener(const KeyListener&) = delete;
-  KeyListener& operator=(const KeyListener&) = delete;
-
-  // TODO: Don't hardcode these keycodes.
-  std::vector<KeyCodeState> key_code_states{133, 134};
-
-  bool any_key = false;
+  BorderWindow(const BorderWindow&) = delete;
+  BorderWindow& operator=(const BorderWindow&) = delete;
 
   Connection* connection_;
 
-  KeyStateObserver* observer_;
+  xcb_window_t window_;
 };

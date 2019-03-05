@@ -16,9 +16,33 @@
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 #include <cstdint>
+#include <cstdlib>
+
+#define XCB_SYNC(func, connection, ...) \
+  MakeXcbReply(func##_reply(            \
+      connection, func(connection __VA_OPT__(, ) __VA_ARGS__), nullptr))
 
 typedef struct xcb_connection_t xcb_connection_t;
 typedef uint32_t xcb_window_t;
+
+template <typename T>
+class XcbReply {
+ public:
+  XcbReply(T* t) : t_(t) {}
+  ~XcbReply() { free(t_); }
+  operator const T*() const { return t_; }
+  const T* operator->() const { return t_; }
+
+ private:
+  T* t_;
+};
+
+template <typename T>
+XcbReply<T> MakeXcbReply(T* t) {
+  if (!t)
+    throw "Error getting reply";
+  return XcbReply(t);
+}
 
 class Connection {
  public:

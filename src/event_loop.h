@@ -15,16 +15,25 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
+#include <vector>
+
 class Connection;
+class EventDispatcher;
 
 class EventLoop {
  public:
   EventLoop(Connection* connection_);
   ~EventLoop();
+
+  void RegisterDispatcher(EventDispatcher* dispatcher);
+
+  void Run();
   
  private:
   EventLoop(const EventLoop&) = delete;
   EventLoop& operator=(const EventLoop&) = delete;
   
   Connection* connection_;
+
+  std::vector<EventDispatcher*> dispatchers_;
 };
