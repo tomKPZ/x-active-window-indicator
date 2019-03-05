@@ -19,7 +19,7 @@ class Connection;
 
 class EventLoop {
  public:
-  EventLoop();
+  EventLoop(Connection* connection_);
   ~EventLoop();
   
  private:

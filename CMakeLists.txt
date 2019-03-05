@@ -59,6 +59,8 @@ add_executable(x-active-window-indicator
                src/active_window_manager.cpp
                src/connection.h
                src/connection.cpp
+	       src/event.h
+	       src/event.cpp
                src/event_loop.h
                src/event_loop.cpp)
 
