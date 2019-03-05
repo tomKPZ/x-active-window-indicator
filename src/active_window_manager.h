@@ -20,18 +20,18 @@
 typedef struct xcb_connection_t xcb_connection_t;
 typedef uint32_t xcb_atom_t;
 typedef uint32_t xcb_window_t;
+class Connection;
 
 class ActiveWindowManager {
  public:
-  ActiveWindowManager();
+  ActiveWindowManager(Connection* connection);
   ~ActiveWindowManager();
 
  private:
   ActiveWindowManager(const ActiveWindowManager&) = delete;
   ActiveWindowManager& operator=(const ActiveWindowManager&) = delete;
 
-  xcb_connection_t* connection_;
-  xcb_window_t root_window_;
+  Connection* connection_;
 
   xcb_atom_t net_supported_;
   xcb_atom_t net_active_window_;

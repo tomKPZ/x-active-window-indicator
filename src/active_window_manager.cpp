@@ -29,6 +29,8 @@
 #include <string>
 #include <vector>
 
+#include "connection.h"
+
 #define XCB_SYNC(func, connection, ...) \
   MakeXcbReply(func##_reply(            \
       connection, func(connection __VA_OPT__(, ) __VA_ARGS__), nullptr))
@@ -65,17 +67,17 @@ class XcbReply {
 
 class XcbRegion {
  public:
-  XcbRegion(xcb_connection_t* connection,
-            const std::vector<xcb_rectangle_t> rects)
-      : connection_(connection), id_(xcb_generate_id(connection_)) {
-    xcb_xfixes_create_region(connection_, id_,
+  XcbRegion(Connection* connection, const std::vector<xcb_rectangle_t> rects)
+      : connection_(connection),
+        id_(xcb_generate_id(connection_->connection())) {
+    xcb_xfixes_create_region(connection_->connection(), id_,
                              safe_cast<uint32_t>(rects.size()), rects.data());
   }
-  ~XcbRegion() { xcb_xfixes_destroy_region(connection_, id_); }
+  ~XcbRegion() { xcb_xfixes_destroy_region(connection_->connection(), id_); }
   uint32_t id() const { return id_; }
 
  private:
-  xcb_connection_t* connection_;
+  Connection* connection_;
   uint32_t id_;
 };
 
@@ -98,32 +100,22 @@ class XcbEvent {
   xcb_generic_event_t* event_;
 };
 
-XcbEvent WaitForEvent(xcb_connection_t* connection) {
-  return XcbEvent(xcb_wait_for_event(connection));
+XcbEvent WaitForEvent(Connection* connection) {
+  return XcbEvent(xcb_wait_for_event(connection->connection()));
 }
 
-xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {
-  xcb_screen_iterator_t iter;
-
-  iter = xcb_setup_roots_iterator(xcb_get_setup(c));
-  for (; iter.rem; --screen, xcb_screen_next(&iter))
-    if (screen == 0)
-      return iter.data;
-
-  return nullptr;
-}
-
-xcb_atom_t GetAtom(xcb_connection_t* connection, const std::string& str) {
-  return XCB_SYNC(xcb_intern_atom, connection, false,
+xcb_atom_t GetAtom(Connection* connection, const std::string& str) {
+  return XCB_SYNC(xcb_intern_atom, connection->connection(), false,
                   safe_cast<uint16_t>(str.length()), str.c_str())
       ->atom;
 }
 
-std::vector<xcb_atom_t> GetAtomArray(xcb_connection_t* connection,
+std::vector<xcb_atom_t> GetAtomArray(Connection* connection,
                                      xcb_window_t window,
                                      xcb_atom_t atom) {
-  auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
-                        XCB_ATOM_ATOM, 0, std::numeric_limits<uint32_t>::max());
+  auto reply =
+      XCB_SYNC(xcb_get_property, connection->connection(), false, window, atom,
+               XCB_ATOM_ATOM, 0, std::numeric_limits<uint32_t>::max());
 
   if (reply->format != 8 * sizeof(xcb_atom_t) || reply->type != XCB_ATOM_ATOM ||
       reply->bytes_after > 0) {
@@ -135,11 +127,11 @@ std::vector<xcb_atom_t> GetAtomArray(xcb_connection_t* connection,
   return std::vector<xcb_atom_t>(value, value + reply->value_len);
 }
 
-xcb_window_t GetWindow(xcb_connection_t* connection,
+xcb_window_t GetWindow(Connection* connection,
                        xcb_window_t window,
                        xcb_atom_t atom) {
-  auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
-                        XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));
+  auto reply = XCB_SYNC(xcb_get_property, connection->connection(), false,
+                        window, atom, XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));
 
   if (reply->format != 8 * sizeof(xcb_window_t) ||
       reply->type != XCB_ATOM_WINDOW || reply->bytes_after > 0 ||
@@ -152,45 +144,37 @@ xcb_window_t GetWindow(xcb_connection_t* connection,
 
 }  // namespace
 
-ActiveWindowManager::ActiveWindowManager() {
-  int screen_number;
-  connection_ = xcb_connect(nullptr, &screen_number);
-  if (xcb_connection_has_error(connection_))
-    throw "Connection error";
-
-  xcb_screen_t* screen = ScreenOfConnection(connection_, screen_number);
-  if (!screen)
-    throw "Could not get screen";
-  root_window_ = screen->root;
-  if (!root_window_)
-    throw "Could not find root window";
-
+ActiveWindowManager::ActiveWindowManager(Connection* connection)
+    : connection_(connection) {
   net_supported_ = GetAtom(connection_, "_NET_SUPPORTED");
   net_active_window_ = GetAtom(connection_, "_NET_ACTIVE_WINDOW");
 
-  auto atoms = GetAtomArray(connection_, root_window_, net_supported_);
+  auto atoms =
+      GetAtomArray(connection_, connection_->root_window(), net_supported_);
   if (std::find(atoms.begin(), atoms.end(), net_active_window_) == atoms.end())
     throw "WM does not support active window";
 
-  auto window = GetWindow(connection_, root_window_, net_active_window_);
-  auto geometry = XCB_SYNC(xcb_get_geometry, connection_, window);
+  auto window =
+      GetWindow(connection_, connection_->root_window(), net_active_window_);
+  auto geometry = XCB_SYNC(xcb_get_geometry, connection_->connection(), window);
 
   auto root_coordinates =
-      XCB_SYNC(xcb_translate_coordinates, connection_, window, root_window_,
-               geometry->x, geometry->y);
+      XCB_SYNC(xcb_translate_coordinates, connection_->connection(), window,
+               connection_->root_window(), geometry->x, geometry->y);
 
-  auto border_window = xcb_generate_id(connection_);
+  auto border_window = xcb_generate_id(connection_->connection());
   uint32_t attributes[] = {0xff0000, true};
-  xcb_create_window(
-      connection_, XCB_COPY_FROM_PARENT, border_window, root_window_,
-      root_coordinates->dst_x, root_coordinates->dst_y,
-      safe_cast<uint16_t>(geometry->width - 2 * BORDER_WIDTH),
-      safe_cast<uint16_t>(geometry->height - 2 * BORDER_WIDTH), BORDER_WIDTH,
-      XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
-      XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT, attributes);
+  xcb_create_window(connection_->connection(), XCB_COPY_FROM_PARENT,
+                    border_window, connection_->root_window(),
+                    root_coordinates->dst_x, root_coordinates->dst_y,
+                    safe_cast<uint16_t>(geometry->width - 2 * BORDER_WIDTH),
+                    safe_cast<uint16_t>(geometry->height - 2 * BORDER_WIDTH),
+                    BORDER_WIDTH, XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                    XCB_COPY_FROM_PARENT,
+                    XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT, attributes);
 
-  XCB_SYNC(xcb_xfixes_query_version, connection_, XCB_XFIXES_MAJOR_VERSION,
-           XCB_XFIXES_MINOR_VERSION);
+  XCB_SYNC(xcb_xfixes_query_version, connection_->connection(),
+           XCB_XFIXES_MAJOR_VERSION, XCB_XFIXES_MINOR_VERSION);
 
   // TODO: Use an outer border instead of an inner border if the window is tiny.
   const std::vector<xcb_rectangle_t> rects{
@@ -211,12 +195,12 @@ ActiveWindowManager::ActiveWindowManager() {
        safe_cast<int16_t>(geometry->y - BORDER_WIDTH), BORDER_WIDTH,
        geometry->height},
   };
-  xcb_xfixes_set_window_shape_region(connection_, border_window,
+  xcb_xfixes_set_window_shape_region(connection_->connection(), border_window,
                                      XCB_SHAPE_SK_BOUNDING, 0, 0,
                                      XcbRegion(connection_, rects).id());
 
-  XCB_SYNC(xcb_input_xi_query_version, connection_, XCB_INPUT_MAJOR_VERSION,
-           XCB_INPUT_MINOR_VERSION);
+  XCB_SYNC(xcb_input_xi_query_version, connection_->connection(),
+           XCB_INPUT_MAJOR_VERSION, XCB_INPUT_MINOR_VERSION);
   static constexpr const struct {
     xcb_input_event_mask_t event_mask;
     xcb_input_xi_event_mask_t xi_event_mask;
@@ -225,9 +209,10 @@ ActiveWindowManager::ActiveWindowManager() {
                 static_cast<xcb_input_xi_event_mask_t>(
                     XCB_INPUT_XI_EVENT_MASK_KEY_PRESS |
                     XCB_INPUT_XI_EVENT_MASK_KEY_RELEASE)}};
-  xcb_input_xi_select_events(connection_, root_window_, ArraySize(masks),
+  xcb_input_xi_select_events(connection_->connection(),
+                             connection_->root_window(), ArraySize(masks),
                              &masks[0].event_mask);
-  xcb_flush(connection_);
+  xcb_flush(connection_->connection());
 
   struct KeyCodeState {
     KeyCodeState(uint32_t key_code) : code(key_code) {}
@@ -244,7 +229,8 @@ ActiveWindowManager::ActiveWindowManager() {
 
   // TODO: verify ->present.
   auto xcb_input_major_opcode =
-      xcb_get_extension_data(connection_, &xcb_input_id)->major_opcode;
+      xcb_get_extension_data(connection_->connection(), &xcb_input_id)
+          ->major_opcode;
   while (auto event = WaitForEvent(connection_)) {
     switch (event->response_type & ~0x80) {
       case XCB_GE_GENERIC: {
@@ -283,22 +269,17 @@ ActiveWindowManager::ActiveWindowManager() {
                           return key_code_state.key_pressed;
                         });
         any_key = new_any_key;
-	if (any_key) {
-	  std::cout << "mapping" << std::endl;
-	  xcb_map_window(connection_, border_window);
-	} else {
-	  std::cout << "unmapping" << std::endl;
-	  xcb_unmap_window(connection_, border_window);
-	}
+        if (any_key)
+          xcb_map_window(connection_->connection(), border_window);
+        else
+          xcb_unmap_window(connection_->connection(), border_window);
         break;
       }
       default:
         throw "Unhandled event";
     }
-    xcb_flush(connection_);
+    xcb_flush(connection_->connection());
   }
 }
 
-ActiveWindowManager::~ActiveWindowManager() {
-  xcb_disconnect(connection_);
-}
+ActiveWindowManager::~ActiveWindowManager() {}
