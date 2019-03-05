@@ -57,6 +57,8 @@ add_executable(x-active-window-indicator
                src/indicator.cpp
                src/active_window_manager.h
                src/active_window_manager.cpp
+               src/border_window.h
+               src/border_window.cpp
                src/connection.h
                src/connection.cpp
                src/event.h
@@ -65,7 +67,9 @@ add_executable(x-active-window-indicator
                src/event_loop.h
                src/event_loop.cpp
                src/key_listener.h
-               src/key_listener.cpp)
+               src/key_listener.cpp
+               src/key_state_observer.h
+               src/util.h)
 
 set_target_properties(x-active-window-indicator PROPERTIES CXX_STANDARD 20)
 

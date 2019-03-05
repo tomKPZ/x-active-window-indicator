@@ -17,14 +17,37 @@
 
 #include "event_dispatcher.h"
 
+#include <cstdint>
+#include <vector>
+
+class Connection;
+class KeyStateObserver;
+
 class KeyListener : public EventDispatcher {
  public:
-  KeyListener();
-  ~KeyListener();
+  KeyListener(Connection* connection, KeyStateObserver* observer);
+  ~KeyListener() override;
 
   bool DispatchEvent(const Event& event) override;
 
- protected:
+ private:
+  struct KeyCodeState {
+    KeyCodeState(uint32_t key_code) : code(key_code) {}
+    const uint32_t code;
+
+    // TODO: Any way to get initial key states?
+    bool key_pressed = false;
+  };
+
   KeyListener(const KeyListener&) = delete;
   KeyListener& operator=(const KeyListener&) = delete;
+
+  // TODO: Don't hardcode these keycodes.
+  std::vector<KeyCodeState> key_code_states{133, 134};
+
+  bool any_key = false;
+
+  Connection* connection_;
+
+  KeyStateObserver* observer_;
 };

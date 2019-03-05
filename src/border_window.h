@@ -1,0 +1,42 @@
+// x-active-window-indicator: An X11 utility that signals the active window
+// Copyright (C) 2019 <tomKPZ@gmail.com>
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+#include <cstdint>
+
+typedef uint32_t xcb_window_t;
+typedef struct xcb_rectangle_t xcb_rectangle_t;
+
+class Connection;
+
+class BorderWindow {
+ public:
+  BorderWindow(Connection* connection);
+  ~BorderWindow();
+
+  void SetRect(const xcb_rectangle_t& rect);
+
+  void Show();
+  void Hide();
+  
+ private:
+  BorderWindow(const BorderWindow&) = delete;
+  BorderWindow& operator=(const BorderWindow&) = delete;
+
+  Connection* connection_;
+
+  xcb_window_t window_;
+};

@@ -17,6 +17,33 @@
 
 #include "event_loop.h"
 
+#include "connection.h"
+#include "event.h"
+#include "event_dispatcher.h"
+
+namespace {
+
+Event WaitForEvent(Connection* connection) {
+  return Event(xcb_wait_for_event(connection->connection()));
+}
+
+}  // namespace
+
 EventLoop::EventLoop(Connection* connection) : connection_(connection) {}
 
 EventLoop::~EventLoop() {}
+
+void EventLoop::RegisterDispatcher(EventDispatcher* dispatcher) {
+  dispatchers_.push_back(dispatcher);
+}
+
+void EventLoop::Run() {
+  xcb_flush(connection_->connection());
+  while (auto event = WaitForEvent(connection_)) {
+    for (EventDispatcher* dispatcher : dispatchers_) {
+      if (dispatcher->DispatchEvent(event))
+        break;
+    }
+    xcb_flush(connection_->connection());
+  }
+}
