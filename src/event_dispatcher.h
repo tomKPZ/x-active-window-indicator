@@ -15,25 +15,13 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include <cstdint>
+class Event;
 
-typedef struct xcb_connection_t xcb_connection_t;
-typedef uint32_t xcb_window_t;
-
-class Connection {
+class EventDispatcher {
  public:
-  Connection();
-  ~Connection();
-
-  uint32_t GenerateId();
-
-  xcb_connection_t* connection() { return connection_; }
-  xcb_window_t root_window() const { return root_window_; }
+  // Returns true iff the event was handled.
+  virtual bool DispatchEvent(const Event& event) = 0;
   
- private:
-  Connection(const Connection&) = delete;
-  Connection& operator=(const Connection&) = delete;
-  
-  xcb_connection_t* connection_;
-  xcb_window_t root_window_;
+ protected:
+  virtual ~EventDispatcher() {};
 };

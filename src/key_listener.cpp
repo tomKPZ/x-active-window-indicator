@@ -15,25 +15,12 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include <cstdint>
+#include "key_listener.h"
 
-typedef struct xcb_connection_t xcb_connection_t;
-typedef uint32_t xcb_window_t;
+KeyListener::KeyListener() {}
 
-class Connection {
- public:
-  Connection();
-  ~Connection();
+KeyListener::~KeyListener() {}
 
-  uint32_t GenerateId();
-
-  xcb_connection_t* connection() { return connection_; }
-  xcb_window_t root_window() const { return root_window_; }
-  
- private:
-  Connection(const Connection&) = delete;
-  Connection& operator=(const Connection&) = delete;
-  
-  xcb_connection_t* connection_;
-  xcb_window_t root_window_;
-};
+bool KeyListener::DispatchEvent(const Event&) {
+  return false;
+}
