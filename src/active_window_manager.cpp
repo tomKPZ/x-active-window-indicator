@@ -215,8 +215,6 @@ ActiveWindowManager::ActiveWindowManager() {
                                      XCB_SHAPE_SK_BOUNDING, 0, 0,
                                      XcbRegion(connection_, rects).id());
 
-  xcb_map_window(connection_, border_window);
-
   XCB_SYNC(xcb_input_xi_query_version, connection_, XCB_INPUT_MAJOR_VERSION,
            XCB_INPUT_MINOR_VERSION);
   static constexpr const struct {
@@ -231,6 +229,19 @@ ActiveWindowManager::ActiveWindowManager() {
                              &masks[0].event_mask);
   xcb_flush(connection_);
 
+  struct KeyCodeState {
+    KeyCodeState(uint32_t key_code) : code(key_code) {}
+    const uint32_t code;
+
+    // TODO: Any way to get initial key states?
+    bool key_pressed = false;
+  };
+
+  // TODO: Don't hardcode these keycodes.
+  std::vector<KeyCodeState> key_code_states{133, 134};
+
+  bool any_key = false;
+
   // TODO: verify ->present.
   auto xcb_input_major_opcode =
       xcb_get_extension_data(connection_, &xcb_input_id)->major_opcode;
@@ -244,14 +255,47 @@ ActiveWindowManager::ActiveWindowManager() {
             const auto* key_press_event =
                 reinterpret_cast<const xcb_input_key_press_event_t*>(
                     generic_event);
-            std::cout << key_press_event->detail << std::endl;
+            const auto key = key_press_event->detail;
+            auto it = std::find_if(std::begin(key_code_states),
+                                   std::end(key_code_states),
+                                   [key](const KeyCodeState& key_code_state) {
+                                     return key_code_state.code == key;
+                                   });
+            if (it != std::end(key_code_states))
+              it->key_pressed = true;
+          } else if (generic_event->event_type == XCB_INPUT_KEY_RELEASE) {
+            const auto* key_release_event =
+                reinterpret_cast<const xcb_input_key_release_event_t*>(
+                    generic_event);
+            const auto key = key_release_event->detail;
+            auto it = std::find_if(std::begin(key_code_states),
+                                   std::end(key_code_states),
+                                   [key](const KeyCodeState& key_code_state) {
+                                     return key_code_state.code == key;
+                                   });
+            if (it != std::end(key_code_states))
+              it->key_pressed = false;
           }
         }
+        const bool new_any_key =
+            std::any_of(std::begin(key_code_states), std::end(key_code_states),
+                        [](const KeyCodeState& key_code_state) {
+                          return key_code_state.key_pressed;
+                        });
+        any_key = new_any_key;
+	if (any_key) {
+	  std::cout << "mapping" << std::endl;
+	  xcb_map_window(connection_, border_window);
+	} else {
+	  std::cout << "unmapping" << std::endl;
+	  xcb_unmap_window(connection_, border_window);
+	}
         break;
       }
       default:
         throw "Unhandled event";
     }
+    xcb_flush(connection_);
   }
 }
 
