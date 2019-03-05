@@ -62,11 +62,17 @@ set_target_properties(x-active-window-indicator PROPERTIES CXX_STANDARD 20)
 
 pkg_check_modules(XCB REQUIRED xcb)
 pkg_check_modules(XCB_XFIXES REQUIRED xcb-xfixes)
+pkg_check_modules(XCB_XINPUT REQUIRED xcb-xinput)
 
-target_link_libraries(x-active-window-indicator ${XCB_LIBRARIES} ${XCB_XFIXES_LIBRARIES})
+target_link_libraries(x-active-window-indicator
+                      ${XCB_LIBRARIES}
+                      ${XCB_XFIXES_LIBRARIES}
+                      ${XCB_XINPUT_LIBRARIES})
 target_include_directories(x-active-window-indicator
-                           PUBLIC ${XCB_INCLUDE_DIRS} ${XCB_XFIXES_INCLUDE_DIRS})
-target_compile_options(x-active-window-indicator PUBLIC ${XCB_CFLAGS_OTHER} ${XCB_XFIXES_OTHER})
+                           PUBLIC ${XCB_INCLUDE_DIRS} ${XCB_XFIXES_INCLUDE_DIRS}
+                                  ${XCB_XINPUT_INCLUDE_DIRS})
+target_compile_options(x-active-window-indicator
+                       PUBLIC ${XCB_CFLAGS_OTHER} ${XCB_XFIXES_OTHER} ${XCB_XINPUT_OTHER})
 
 # target_link_libraries(x-active-window-indicator "-lc++") target_compile_options(x-active-window-
 # indicator PUBLIC -stdlib=libc++) SET (CMAKE_CXX_COMPILER "clang++")
