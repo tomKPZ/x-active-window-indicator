@@ -34,3 +34,7 @@ Connection::Connection() {
 Connection::~Connection() {
   xcb_disconnect(connection_);
 }
+
+uint32_t Connection::GenerateId() {
+  return xcb_generate_id(connection_);
+}
