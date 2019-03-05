@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 
+#include "active_window_observer.h"
 #include "connection.h"
 #include "event.h"
 #include "util.h"
@@ -73,23 +74,20 @@ xcb_window_t GetWindow(Connection* connection,
 
 }  // namespace
 
-ActiveWindowTracker::ActiveWindowTracker(Connection* connection)
-    : connection_(connection) {
-  net_supported_ = GetAtom(connection_, "_NET_SUPPORTED");
+ActiveWindowTracker::ActiveWindowTracker(Connection* connection,
+                                         ActiveWindowObserver* observer)
+    : connection_(connection), observer_(observer) {
+  xcb_atom_t net_supported = GetAtom(connection_, "_NET_SUPPORTED");
   net_active_window_ = GetAtom(connection_, "_NET_ACTIVE_WINDOW");
 
   auto atoms =
-      GetAtomArray(connection_, connection_->root_window(), net_supported_);
+      GetAtomArray(connection_, connection_->root_window(), net_supported);
   if (std::find(atoms.begin(), atoms.end(), net_active_window_) == atoms.end())
     throw "WM does not support active window";
 
-  auto window =
+  active_window_ =
       GetWindow(connection_, connection_->root_window(), net_active_window_);
-  auto geometry = XCB_SYNC(xcb_get_geometry, connection_->connection(), window);
-
-  auto root_coordinates =
-      XCB_SYNC(xcb_translate_coordinates, connection_->connection(), window,
-               connection_->root_window(), geometry->x, geometry->y);
+  observer_->ActiveWindowChanged(active_window_);
 }
 
 ActiveWindowTracker::~ActiveWindowTracker() {}

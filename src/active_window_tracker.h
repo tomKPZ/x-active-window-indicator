@@ -21,21 +21,23 @@
 
 #include "util.h"
 
-typedef struct xcb_connection_t xcb_connection_t;
 typedef uint32_t xcb_atom_t;
 typedef uint32_t xcb_window_t;
+
+class ActiveWindowObserver;
 class Connection;
 
 class ActiveWindowTracker {
  public:
-  ActiveWindowTracker(Connection* connection);
+  ActiveWindowTracker(Connection* connection, ActiveWindowObserver* observer);
   ~ActiveWindowTracker();
 
  private:
   Connection* connection_;
+  ActiveWindowObserver* observer_;
 
-  xcb_atom_t net_supported_;
   xcb_atom_t net_active_window_;
+  xcb_window_t active_window_;
 
   DISALLOW_COPY_AND_ASSIGN(ActiveWindowTracker);
 };
