@@ -15,8 +15,12 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
+#pragma once
+
 // TODO: any way to forward declare xcb_generic_event_t?
 #include <xcb/xcb.h>
+
+#include "util.h"
 
 class Event {
  public:
@@ -28,8 +32,7 @@ class Event {
   const xcb_generic_event_t* event() const { return event_; }
 
  private:
-  Event(const Event&) = delete;
-  Event& operator=(const Event&) = delete;
-  
   xcb_generic_event_t* event_;
+
+  DISALLOW_COPY_AND_ASSIGN(Event);
 };

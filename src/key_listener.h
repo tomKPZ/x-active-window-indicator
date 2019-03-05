@@ -15,10 +15,14 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
+#pragma once
+
 #include "event_dispatcher.h"
 
 #include <cstdint>
 #include <vector>
+
+#include "util.h"
 
 class Connection;
 class KeyStateObserver;
@@ -39,9 +43,6 @@ class KeyListener : public EventDispatcher {
     bool key_pressed = false;
   };
 
-  KeyListener(const KeyListener&) = delete;
-  KeyListener& operator=(const KeyListener&) = delete;
-
   // TODO: Don't hardcode these keycodes.
   std::vector<KeyCodeState> key_code_states{133, 134};
 
@@ -50,4 +51,6 @@ class KeyListener : public EventDispatcher {
   Connection* connection_;
 
   KeyStateObserver* observer_;
+
+  DISALLOW_COPY_AND_ASSIGN(KeyListener);
 };

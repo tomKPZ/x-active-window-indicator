@@ -15,7 +15,19 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
+#pragma once
+
+#include <cstddef>
 #include <limits>
+
+#define DISALLOW_COPY_AND_ASSIGN(TypeName)	\
+  TypeName(const TypeName&) = delete;		\
+  TypeName& operator=(const TypeName&) = delete
+
+template <typename T>
+constexpr size_t ArraySize(const T& array) {
+  return sizeof(array) / sizeof(array[0]);
+}
 
 template <typename Dst, typename Src>
 constexpr Dst safe_cast(Src value) {

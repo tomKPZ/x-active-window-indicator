@@ -15,7 +15,11 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
+#pragma once
+
 #include <cstdint>
+
+#include "util.h"
 
 typedef uint32_t xcb_window_t;
 typedef struct xcb_rectangle_t xcb_rectangle_t;
@@ -33,10 +37,9 @@ class BorderWindow {
   void Hide();
   
  private:
-  BorderWindow(const BorderWindow&) = delete;
-  BorderWindow& operator=(const BorderWindow&) = delete;
-
   Connection* connection_;
 
   xcb_window_t window_;
+
+  DISALLOW_COPY_AND_ASSIGN(BorderWindow);
 };
