@@ -29,6 +29,7 @@ int main(int, char**) {
   ActiveWindowTracker tracker{&connection, &indicator};
   KeyListener key_listener{&connection, &indicator};
   EventLoop loop{&connection};
+  loop.RegisterDispatcher(&tracker);
   loop.RegisterDispatcher(&key_listener);
   loop.Run();
   return 0;

@@ -17,11 +17,10 @@
 
 #pragma once
 
-#include "event_dispatcher.h"
-
 #include <cstdint>
 #include <vector>
 
+#include "event_dispatcher.h"
 #include "util.h"
 
 class Connection;
@@ -32,6 +31,7 @@ class KeyListener : public EventDispatcher {
   KeyListener(Connection* connection, KeyStateObserver* observer);
   ~KeyListener() override;
 
+  // EventDispatcher:
   bool DispatchEvent(const Event& event) override;
 
  private:

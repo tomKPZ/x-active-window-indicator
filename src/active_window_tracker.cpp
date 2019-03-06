@@ -76,7 +76,10 @@ xcb_window_t GetWindow(Connection* connection,
 
 ActiveWindowTracker::ActiveWindowTracker(Connection* connection,
                                          ActiveWindowObserver* observer)
-    : connection_(connection), observer_(observer) {
+    : connection_(connection),
+      observer_(observer),
+      net_active_window_(XCB_ATOM_NONE),
+      active_window_(XCB_WINDOW_NONE) {
   xcb_atom_t net_supported = GetAtom(connection_, "_NET_SUPPORTED");
   net_active_window_ = GetAtom(connection_, "_NET_ACTIVE_WINDOW");
 
@@ -85,9 +88,35 @@ ActiveWindowTracker::ActiveWindowTracker(Connection* connection,
   if (std::find(atoms.begin(), atoms.end(), net_active_window_) == atoms.end())
     throw "WM does not support active window";
 
-  active_window_ =
-      GetWindow(connection_, connection_->root_window(), net_active_window_);
-  observer_->ActiveWindowChanged(active_window_);
+  const uint32_t attributes[] = {XCB_EVENT_MASK_PROPERTY_CHANGE};
+  xcb_change_window_attributes(connection_->connection(),
+                               connection_->root_window(), XCB_CW_EVENT_MASK,
+                               attributes);
+
+  SetActiveWindow();
 }
 
 ActiveWindowTracker::~ActiveWindowTracker() {}
+
+bool ActiveWindowTracker::DispatchEvent(const Event& event) {
+  if ((event->response_type & ~0x80) != XCB_PROPERTY_NOTIFY)
+    return false;
+
+  const auto* property_notify_event =
+      reinterpret_cast<const xcb_property_notify_event_t*>(event.event());
+
+  if (property_notify_event->window != connection_->root_window() ||
+      property_notify_event->atom != net_active_window_)
+    return false;
+
+  SetActiveWindow();
+  return true;
+}
+
+void ActiveWindowTracker::SetActiveWindow() {
+  xcb_window_t active_window =
+      GetWindow(connection_, connection_->root_window(), net_active_window_);
+  if (active_window_ != active_window)
+    observer_->ActiveWindowChanged(active_window);
+  active_window_ = active_window;
+}
