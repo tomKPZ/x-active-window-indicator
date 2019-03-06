@@ -17,10 +17,6 @@
 
 #include <xcb/xcb.h>
 
-#include <iostream>
-#include <string>
-#include <vector>
-
 #include "active_window_observer.h"
 #include "active_window_tracker.h"
 #include "border_window.h"

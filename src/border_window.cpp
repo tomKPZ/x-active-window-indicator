@@ -79,18 +79,15 @@ void BorderWindow::SetRect(const xcb_rectangle_t& rect) {
 
   const std::vector<xcb_rectangle_t> rects{
       // Top edge.
-      {safe_cast<int16_t>(rect.x - BORDER_WIDTH),
-       safe_cast<int16_t>(rect.y - BORDER_WIDTH), rect.width, BORDER_WIDTH},
+      {-BORDER_WIDTH, -BORDER_WIDTH, rect.width, BORDER_WIDTH},
       // Bottom edge.
-      {safe_cast<int16_t>(rect.x - BORDER_WIDTH),
-       safe_cast<int16_t>(rect.y + rect.height - 2 * BORDER_WIDTH), rect.width,
-       BORDER_WIDTH},
+      {-BORDER_WIDTH, safe_cast<int16_t>(rect.height - 2 * BORDER_WIDTH),
+       rect.width, BORDER_WIDTH},
       // Left edge.
-      {safe_cast<int16_t>(rect.x - BORDER_WIDTH),
-       safe_cast<int16_t>(rect.y - BORDER_WIDTH), BORDER_WIDTH, rect.height},
+      {-BORDER_WIDTH, -BORDER_WIDTH, BORDER_WIDTH, rect.height},
       // Right edge.
-      {safe_cast<int16_t>(rect.x + rect.width - 2 * BORDER_WIDTH),
-       safe_cast<int16_t>(rect.y - BORDER_WIDTH), BORDER_WIDTH, rect.height},
+      {safe_cast<int16_t>(rect.width - 2 * BORDER_WIDTH), -BORDER_WIDTH,
+       BORDER_WIDTH, rect.height},
   };
   xcb_xfixes_set_window_shape_region(connection_->connection(), window_,
                                      XCB_SHAPE_SK_BOUNDING, 0, 0,
