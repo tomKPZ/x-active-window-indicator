@@ -54,7 +54,8 @@ add_cxx_compiler_flag_if_supported(-Wuseless-cast)
 add_cxx_compiler_flag_if_supported(-Wduplicated-branches)
 
 add_executable(x-active-window-indicator
-               src/indicator.cpp
+               src/active_window_indicator.h
+               src/active_window_indicator.cpp
                src/active_window_observer.h
                src/active_window_tracker.h
                src/active_window_tracker.cpp
@@ -70,6 +71,7 @@ add_executable(x-active-window-indicator
                src/key_listener.h
                src/key_listener.cpp
                src/key_state_observer.h
+               src/main.cpp
                src/util.h)
 
 set_target_properties(x-active-window-indicator PROPERTIES CXX_STANDARD 20)
