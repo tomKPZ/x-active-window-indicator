@@ -17,9 +17,13 @@
 
 #include "event_loop.h"
 
+#include <exception>
+#include <iostream>
+
 #include "connection.h"
 #include "event.h"
 #include "event_dispatcher.h"
+#include "x_error.h"
 
 namespace {
 
@@ -41,7 +45,17 @@ void EventLoop::Run() {
   xcb_flush(connection_->connection());
   while (auto event = WaitForEvent(connection_)) {
     for (EventDispatcher* dispatcher : dispatchers_) {
-      if (dispatcher->DispatchEvent(event))
+      bool dispatched = false;
+      try {
+        dispatched = dispatcher->DispatchEvent(event);
+      } catch (const XError& x_error) {
+        std::cerr << "X Error: " << x_error.what() << std::endl;
+      } catch (const std::exception& exception) {
+        std::cerr << "Exception: " << exception.what() << std::endl;
+      } catch (...) {
+        std::cerr << "Unhandled exception" << std::endl;
+      }
+      if (dispatched)
         break;
     }
     xcb_flush(connection_->connection());

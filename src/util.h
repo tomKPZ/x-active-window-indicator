@@ -17,9 +17,10 @@
 
 #pragma once
 
-#include <cassert>
 #include <cstddef>
 #include <limits>
+#include <stdexcept>
+#include <string>
 
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
   TypeName(const TypeName&) = delete;      \
@@ -32,7 +33,10 @@ constexpr size_t ArraySize(const T& array) {
 
 template <typename Dst, typename Src>
 constexpr Dst CheckedCast(Src value) {
-  assert(value >= std::numeric_limits<Dst>::min() &&
-         value <= std::numeric_limits<Dst>::max());
+  if (value < std::numeric_limits<Dst>::min() ||
+      value > std::numeric_limits<Dst>::max()) {
+    throw std::runtime_error("Cast value not in range: " +
+                             std::to_string(value));
+  }
   return static_cast<Dst>(value);
 }
