@@ -26,6 +26,7 @@
 #include "connection.h"
 #include "event.h"
 #include "key_state_observer.h"
+#include "x_error.h"
 
 KeyListener::KeyListener(Connection* connection, KeyStateObserver* observer)
     : connection_(connection), observer_(observer) {
@@ -34,7 +35,7 @@ KeyListener::KeyListener(Connection* connection, KeyStateObserver* observer)
   auto* input_extension =
       xcb_get_extension_data(connection_->connection(), &xcb_input_id);
   if (!input_extension->present)
-    throw "XINPUT not available";
+    throw XError("XINPUT not available");
   xcb_input_major_opcode_ = input_extension->major_opcode;
 
   static constexpr const struct {

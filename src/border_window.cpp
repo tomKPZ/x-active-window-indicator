@@ -24,6 +24,7 @@
 
 #include "connection.h"
 #include "util.h"
+#include "x_error.h"
 
 namespace {
 
@@ -34,7 +35,7 @@ class XcbRegion {
   XcbRegion(Connection* connection, const std::vector<xcb_rectangle_t> rects)
       : connection_(connection), id_(connection_->GenerateId()) {
     xcb_xfixes_create_region(connection_->connection(), id_,
-                             safe_cast<uint32_t>(rects.size()), rects.data());
+                             CheckedCast<uint32_t>(rects.size()), rects.data());
   }
   ~XcbRegion() { xcb_xfixes_destroy_region(connection_->connection(), id_); }
   uint32_t id() const { return id_; }
@@ -59,7 +60,7 @@ BorderWindow::BorderWindow(Connection* connection) : connection_(connection) {
   auto* fixes_extension =
       xcb_get_extension_data(connection_->connection(), &xcb_xfixes_id);
   if (!fixes_extension->present)
-    throw "XFIXES not available";
+    throw XError("XFIXES not available");
 }
 
 BorderWindow::~BorderWindow() {
@@ -71,8 +72,8 @@ void BorderWindow::SetRect(const xcb_rectangle_t& rect) {
   const xcb_configure_window_value_list_t configure_value_list{
       rect.x,
       rect.y,
-      safe_cast<uint16_t>(rect.width - 2 * BORDER_WIDTH),
-      safe_cast<uint16_t>(rect.height - 2 * BORDER_WIDTH),
+      CheckedCast<uint16_t>(rect.width - 2 * BORDER_WIDTH),
+      CheckedCast<uint16_t>(rect.height - 2 * BORDER_WIDTH),
       0,
       0,
       0};
@@ -85,12 +86,12 @@ void BorderWindow::SetRect(const xcb_rectangle_t& rect) {
       // Top edge.
       {-BORDER_WIDTH, -BORDER_WIDTH, rect.width, BORDER_WIDTH},
       // Bottom edge.
-      {-BORDER_WIDTH, safe_cast<int16_t>(rect.height - 2 * BORDER_WIDTH),
+      {-BORDER_WIDTH, CheckedCast<int16_t>(rect.height - 2 * BORDER_WIDTH),
        rect.width, BORDER_WIDTH},
       // Left edge.
       {-BORDER_WIDTH, -BORDER_WIDTH, BORDER_WIDTH, rect.height},
       // Right edge.
-      {safe_cast<int16_t>(rect.width - 2 * BORDER_WIDTH), -BORDER_WIDTH,
+      {CheckedCast<int16_t>(rect.width - 2 * BORDER_WIDTH), -BORDER_WIDTH,
        BORDER_WIDTH, rect.height},
   };
   xcb_xfixes_set_window_shape_region(connection_->connection(), window_,

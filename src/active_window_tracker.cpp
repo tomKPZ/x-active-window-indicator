@@ -31,12 +31,13 @@
 #include "connection.h"
 #include "event.h"
 #include "util.h"
+#include "x_error.h"
 
 namespace {
 
 xcb_atom_t GetAtom(Connection* connection, const std::string& str) {
   return XCB_SYNC(xcb_intern_atom, connection->connection(), false,
-                  safe_cast<uint16_t>(str.length()), str.c_str())
+                  CheckedCast<uint16_t>(str.length()), str.c_str())
       ->atom;
 }
 
@@ -49,7 +50,7 @@ std::vector<xcb_atom_t> GetAtomArray(Connection* connection,
 
   if (reply->format != 8 * sizeof(xcb_atom_t) || reply->type != XCB_ATOM_ATOM ||
       reply->bytes_after > 0) {
-    throw "Bad property reply";
+    throw XError("Bad property reply");
   }
 
   const xcb_atom_t* value =
@@ -66,7 +67,7 @@ xcb_window_t GetWindow(Connection* connection,
   if (reply->format != 8 * sizeof(xcb_window_t) ||
       reply->type != XCB_ATOM_WINDOW || reply->bytes_after > 0 ||
       xcb_get_property_value_length(reply) != sizeof(xcb_window_t)) {
-    throw "Bad property reply";
+    throw XError("Bad property reply");
   }
 
   return reinterpret_cast<xcb_window_t*>(xcb_get_property_value(reply))[0];
@@ -86,7 +87,7 @@ ActiveWindowTracker::ActiveWindowTracker(Connection* connection,
   auto atoms =
       GetAtomArray(connection_, connection_->root_window(), net_supported);
   if (std::find(atoms.begin(), atoms.end(), net_active_window_) == atoms.end())
-    throw "WM does not support active window";
+    throw XError("WM does not support active window");
 
   const uint32_t attributes[] = {XCB_EVENT_MASK_PROPERTY_CHANGE};
   xcb_change_window_attributes(connection_->connection(),
