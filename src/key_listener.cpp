@@ -91,7 +91,7 @@ bool KeyListener::DispatchEvent(const Event& event) {
                     return key_code_state.key_pressed;
                   });
   if (any_key != new_any_key)
-    observer_->KeyStateChanged(any_key);
+    observer_->KeyStateChanged(new_any_key);
   any_key = new_any_key;
   return true;
 }
