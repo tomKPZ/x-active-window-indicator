@@ -31,6 +31,12 @@ KeyListener::KeyListener(Connection* connection, KeyStateObserver* observer)
     : connection_(connection), observer_(observer) {
   XCB_SYNC(xcb_input_xi_query_version, connection_->connection(),
            XCB_INPUT_MAJOR_VERSION, XCB_INPUT_MINOR_VERSION);
+  auto* input_extension =
+      xcb_get_extension_data(connection_->connection(), &xcb_input_id);
+  if (!input_extension->present)
+    throw "XINPUT not available";
+  xcb_input_major_opcode_ = input_extension->major_opcode;
+
   static constexpr const struct {
     xcb_input_event_mask_t event_mask;
     xcb_input_xi_event_mask_t xi_event_mask;
@@ -47,51 +53,42 @@ KeyListener::KeyListener(Connection* connection, KeyStateObserver* observer)
 KeyListener::~KeyListener() {}
 
 bool KeyListener::DispatchEvent(const Event& event) {
-  // TODO: verify ->present.
-  auto xcb_input_major_opcode =
-      xcb_get_extension_data(connection_->connection(), &xcb_input_id)
-          ->major_opcode;
   if ((event->response_type & ~0x80) != XCB_GE_GENERIC)
     return false;
 
   const auto* generic_event =
       reinterpret_cast<const xcb_ge_generic_event_t*>(event.event());
-  if (generic_event->extension != xcb_input_major_opcode)
+  if (generic_event->extension != xcb_input_major_opcode_)
     return false;
 
-  if (generic_event->event_type == XCB_INPUT_KEY_PRESS) {
-    const auto* key_press_event =
-        reinterpret_cast<const xcb_input_key_press_event_t*>(generic_event);
-    const auto key = key_press_event->detail;
-    auto it =
-        std::find_if(std::begin(key_code_states), std::end(key_code_states),
-                     [key](const KeyCodeState& key_code_state) {
-                       return key_code_state.code == key;
-                     });
-    if (it != std::end(key_code_states))
-      it->key_pressed = true;
-  } else if (generic_event->event_type == XCB_INPUT_KEY_RELEASE) {
-    const auto* key_release_event =
-        reinterpret_cast<const xcb_input_key_release_event_t*>(generic_event);
-    const auto key = key_release_event->detail;
-    auto it =
-        std::find_if(std::begin(key_code_states), std::end(key_code_states),
-                     [key](const KeyCodeState& key_code_state) {
-                       return key_code_state.code == key;
-                     });
-    if (it != std::end(key_code_states))
-      it->key_pressed = false;
-  } else {
-    // TODO: figure out return values
-  }
+  bool press;
+  if (generic_event->event_type == XCB_INPUT_KEY_PRESS)
+    press = true;
+  else if (generic_event->event_type == XCB_INPUT_KEY_RELEASE)
+    press = false;
+  else
+    return false;
 
-  const bool new_any_key =
-      std::any_of(std::begin(key_code_states), std::end(key_code_states),
+  const auto* key_event =
+      reinterpret_cast<const xcb_input_key_press_event_t*>(generic_event);
+  const auto key = key_event->detail;
+  auto it =
+      std::find_if(std::begin(key_code_states_), std::end(key_code_states_),
+                   [key](const KeyCodeState& key_code_state) {
+                     return key_code_state.code == key;
+                   });
+  if (it == std::end(key_code_states_))
+    return false;
+  else
+    it->key_pressed = press;
+
+  const bool any_key_pressed =
+      std::any_of(std::begin(key_code_states_), std::end(key_code_states_),
                   [](const KeyCodeState& key_code_state) {
                     return key_code_state.key_pressed;
                   });
-  if (any_key != new_any_key)
-    observer_->KeyStateChanged(new_any_key);
-  any_key = new_any_key;
+  if (any_key_pressed != any_key_pressed_)
+    observer_->KeyStateChanged(any_key_pressed);
+  any_key_pressed_ = any_key_pressed;
   return true;
 }

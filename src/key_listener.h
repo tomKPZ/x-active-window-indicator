@@ -44,13 +44,13 @@ class KeyListener : public EventDispatcher {
   };
 
   // TODO: Don't hardcode these keycodes.
-  std::vector<KeyCodeState> key_code_states{133, 134};
-
-  bool any_key = false;
+  std::vector<KeyCodeState> key_code_states_{133, 134};
+  bool any_key_pressed_ = false;
 
   Connection* connection_;
-
   KeyStateObserver* observer_;
+
+  uint8_t xcb_input_major_opcode_;
 
   DISALLOW_COPY_AND_ASSIGN(KeyListener);
 };

@@ -56,6 +56,10 @@ BorderWindow::BorderWindow(Connection* connection) : connection_(connection) {
 
   XCB_SYNC(xcb_xfixes_query_version, connection_->connection(),
            XCB_XFIXES_MAJOR_VERSION, XCB_XFIXES_MINOR_VERSION);
+  auto* fixes_extension =
+      xcb_get_extension_data(connection_->connection(), &xcb_xfixes_id);
+  if (!fixes_extension->present)
+    throw "XFIXES not available";
 }
 
 BorderWindow::~BorderWindow() {
