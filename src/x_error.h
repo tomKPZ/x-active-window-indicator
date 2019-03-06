@@ -17,10 +17,15 @@
 
 #pragma once
 
-class KeyStateObserver {
- public:
-  virtual void KeyStateChanged(bool pressed) = 0;
+// TODO: is there a way to forward-declare xcb_generic_error_t?
+#include <xcb/xcb.h>
 
- protected:
-  virtual ~KeyStateObserver(){};
+#include <stdexcept>
+#include <string>
+
+class XError : public std::runtime_error {
+ public:
+  XError(const std::string& what);
+  XError(const char* what);
+  XError(const xcb_generic_error_t& error);
 };

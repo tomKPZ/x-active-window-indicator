@@ -72,7 +72,9 @@ add_executable(x-active-window-indicator
                src/key_listener.cpp
                src/key_state_observer.h
                src/main.cpp
-               src/util.h)
+               src/util.h
+	       src/x_error.h
+	       src/x_error.cpp)
 
 set_target_properties(x-active-window-indicator PROPERTIES CXX_STANDARD 20)
 

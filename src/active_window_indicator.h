@@ -23,7 +23,8 @@
 class BorderWindow;
 class Connection;
 
-class ActiveWindowIndicator : public ActiveWindowObserver, public KeyStateObserver {
+class ActiveWindowIndicator : public ActiveWindowObserver,
+                              public KeyStateObserver {
  public:
   ActiveWindowIndicator(Connection* connection, BorderWindow* border_window_);
   ~ActiveWindowIndicator();
@@ -36,7 +37,7 @@ class ActiveWindowIndicator : public ActiveWindowObserver, public KeyStateObserv
 
  private:
   void OnStateChanged();
-  
+
   Connection* connection_;
 
   BorderWindow* border_window_;

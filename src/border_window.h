@@ -35,7 +35,7 @@ class BorderWindow {
 
   void Show();
   void Hide();
-  
+
  private:
   Connection* connection_;
 

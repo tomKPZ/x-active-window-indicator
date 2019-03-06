@@ -32,7 +32,7 @@ class EventLoop {
   void RegisterDispatcher(EventDispatcher* dispatcher);
 
   void Run();
-  
+
  private:
   Connection* connection_;
 
