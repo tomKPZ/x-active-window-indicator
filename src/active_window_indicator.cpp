@@ -24,23 +24,40 @@
 
 ActiveWindowIndicator::ActiveWindowIndicator(Connection* connection,
                                              BorderWindow* border_window)
-    : connection_(connection), border_window_(border_window) {}
+    : connection_(connection),
+      border_window_(border_window),
+      active_window_(XCB_WINDOW_NONE) {}
 
 ActiveWindowIndicator::~ActiveWindowIndicator() {}
 
 void ActiveWindowIndicator::ActiveWindowChanged(xcb_window_t window) {
-  auto geometry = XCB_SYNC(xcb_get_geometry, connection_->connection(), window);
-  auto root_coordinates =
-      XCB_SYNC(xcb_translate_coordinates, connection_->connection(), window,
-               connection_->root_window(), geometry->x, geometry->y);
-  border_window_->SetRect(xcb_rectangle_t{root_coordinates->dst_x,
-                                          root_coordinates->dst_y,
-                                          geometry->width, geometry->height});
+  if (window != XCB_WINDOW_NONE) {
+    auto geometry =
+        XCB_SYNC(xcb_get_geometry, connection_->connection(), window);
+    auto root_coordinates =
+        XCB_SYNC(xcb_translate_coordinates, connection_->connection(), window,
+                 connection_->root_window(), geometry->x, geometry->y);
+    border_window_->SetRect(xcb_rectangle_t{root_coordinates->dst_x,
+                                            root_coordinates->dst_y,
+                                            geometry->width, geometry->height});
+  }
+
+  active_window_ = window;
+  OnStateChanged();
 }
 
 void ActiveWindowIndicator::KeyStateChanged(bool pressed) {
-  if (pressed)
-    border_window_->Show();
-  else
-    border_window_->Hide();
+  key_pressed_ = pressed;
+  OnStateChanged();
+}
+
+void ActiveWindowIndicator::OnStateChanged() {
+  bool show_border_window = key_pressed_ && active_window_ != XCB_WINDOW_NONE;
+  if (show_border_window != border_window_shown_) {
+    if (show_border_window)
+      border_window_->Show();
+    else
+      border_window_->Hide();
+  }
+  border_window_shown_ = show_border_window;
 }

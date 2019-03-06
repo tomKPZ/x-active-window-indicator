@@ -35,7 +35,13 @@ class ActiveWindowIndicator : public ActiveWindowObserver, public KeyStateObserv
   void KeyStateChanged(bool pressed) override;
 
  private:
+  void OnStateChanged();
+  
   Connection* connection_;
 
   BorderWindow* border_window_;
+  bool border_window_shown_ = false;
+
+  xcb_window_t active_window_;
+  bool key_pressed_ = false;
 };
