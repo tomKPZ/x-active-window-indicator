@@ -23,7 +23,7 @@ class EventDispatcher {
  public:
   // Returns true iff the event was handled.
   virtual bool DispatchEvent(const Event& event) = 0;
-  
+
  protected:
-  virtual ~EventDispatcher() {};
+  virtual ~EventDispatcher(){};
 };

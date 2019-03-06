@@ -26,7 +26,7 @@ class Event {
  public:
   Event(xcb_generic_event_t* event);
   ~Event();
-  
+
   operator bool() const { return event_; }
   const xcb_generic_event_t* operator->() const { return event_; }
   const xcb_generic_event_t* event() const { return event_; }

@@ -2,6 +2,10 @@
 
 #include <xcb/xcb.h>
 
+#include <string>
+
+#include "x_error.h"
+
 namespace {
 
 xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {
@@ -20,15 +24,15 @@ xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {
 Connection::Connection() {
   int screen_number;
   connection_ = xcb_connect(nullptr, &screen_number);
-  if (xcb_connection_has_error(connection_))
-    throw "Connection error";
+  if (int error = xcb_connection_has_error(connection_))
+    throw XError("XCB connection error code " + std::to_string(error));
 
   xcb_screen_t* screen = ScreenOfConnection(connection_, screen_number);
   if (!screen)
-    throw "Could not get screen";
+    throw XError("Could not get screen");
   root_window_ = screen->root;
   if (!root_window_)
-    throw "Could not find root window";
+    throw XError("Could not find root window");
 }
 
 Connection::~Connection() {

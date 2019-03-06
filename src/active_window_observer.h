@@ -24,7 +24,7 @@ typedef uint32_t xcb_window_t;
 class ActiveWindowObserver {
  public:
   virtual void ActiveWindowChanged(xcb_window_t window) = 0;
-  
+
  protected:
-  virtual ~ActiveWindowObserver() {};
+  virtual ~ActiveWindowObserver(){};
 };
