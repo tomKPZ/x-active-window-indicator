@@ -4,8 +4,6 @@
 
 #include <string>
 
-#include "x_error.h"
-
 namespace {
 
 xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {

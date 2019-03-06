@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <cstddef>
 #include <limits>
 
@@ -30,10 +31,8 @@ constexpr size_t ArraySize(const T& array) {
 }
 
 template <typename Dst, typename Src>
-constexpr Dst safe_cast(Src value) {
-  if (value < std::numeric_limits<Dst>::min() ||
-      value > std::numeric_limits<Dst>::max()) {
-    throw "Cast out of range";
-  }
+constexpr Dst CheckedCast(Src value) {
+  assert(value >= std::numeric_limits<Dst>::min() &&
+         value <= std::numeric_limits<Dst>::max());
   return static_cast<Dst>(value);
 }
