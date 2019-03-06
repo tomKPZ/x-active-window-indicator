@@ -19,6 +19,7 @@
 
 #include <cstdint>
 
+#include "event_dispatcher.h"
 #include "util.h"
 
 typedef uint32_t xcb_atom_t;
@@ -27,12 +28,17 @@ typedef uint32_t xcb_window_t;
 class ActiveWindowObserver;
 class Connection;
 
-class ActiveWindowTracker {
+class ActiveWindowTracker : public EventDispatcher {
  public:
   ActiveWindowTracker(Connection* connection, ActiveWindowObserver* observer);
   ~ActiveWindowTracker();
 
+  // EventDispatcher:
+  bool DispatchEvent(const Event& event) override;
+
  private:
+  void SetActiveWindow();
+
   Connection* connection_;
   ActiveWindowObserver* observer_;
 
