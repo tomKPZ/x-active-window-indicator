@@ -32,6 +32,7 @@ Connection::Connection() {
 }
 
 Connection::~Connection() {
+  xcb_flush(connection_);
   xcb_disconnect(connection_);
 }
 
