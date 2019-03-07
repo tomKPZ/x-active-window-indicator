@@ -27,6 +27,13 @@ WindowGeometryTracker::WindowGeometryTracker(Connection* connection,
                                              WindowGeometryObserver* observer)
     : connection_(connection), window_(window), observer_(observer) {
   connection_->SelectEvents(window_, XCB_EVENT_MASK_STRUCTURE_NOTIFY);
+
+  auto tree = XCB_SYNC(xcb_query_tree, connection_->connection(), window_);
+  if (tree->parent != XCB_WINDOW_NONE) {
+    parent_ =
+        std::make_unique<WindowGeometryTracker>(connection, tree->parent, this);
+  }
+
   auto geometry =
       XCB_SYNC(xcb_get_geometry, connection_->connection(), window_);
   x_ = geometry->x;
