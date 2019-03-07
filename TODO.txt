@@ -1,2 +1,3 @@
 IWYU
 noexcept
+Catch SIGINT, SIGTERM, SIGHUP and exit cleanly
