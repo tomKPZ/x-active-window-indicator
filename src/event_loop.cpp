@@ -53,9 +53,6 @@ void EventLoop::RegisterDispatcher(EventDispatcher* dispatcher) {
 
 void EventLoop::Run() {
   while (auto event = WaitForEvent(connection_)) {
-    if ((event->response_type & ~0x80) == XCB_CLIENT_MESSAGE)
-      continue;
-
     bool dispatched = false;
     for (EventDispatcher* dispatcher : dispatchers_) {
       try {
@@ -70,7 +67,7 @@ void EventLoop::Run() {
       if (dispatched)
         break;
     }
-    if (!dispatched)
+    if (!dispatched && (event->response_type & ~0x80) != XCB_CLIENT_MESSAGE)
       std::cerr << MakeUnhandledErrorMessage(event) << std::endl;
   }
 }
