@@ -19,28 +19,60 @@
 
 #include <cstdint>
 
+#include <memory>
+
 #include "event_dispatcher.h"
 #include "util.h"
+#include "window_geometry_observer.h"
 
 typedef uint32_t xcb_window_t;
 
 class Connection;
 class WindowGeometryObserver;
 
-class WindowGeometryTracker : public EventDispatcher {
+class WindowGeometryTracker : public EventDispatcher,
+                              public WindowGeometryObserver {
  public:
+  // Geometry events will not be reported if |window| is the root
+  // window.
   WindowGeometryTracker(Connection* connection,
                         xcb_window_t window,
                         WindowGeometryObserver* observer);
   ~WindowGeometryTracker();
 
+  int16_t X() const;
+  int16_t Y() const;
+
+  uint16_t width() const { return width_; }
+  uint16_t height() const { return height_; }
+
+  uint16_t border_width() const { return border_width_; }
+
+ protected:
   // EventDispatcher:
   bool DispatchEvent(const Event& event) override;
+
+  // WindowGeometryObserver:
+  void WindowPositionChanged() override;
 
  private:
   Connection* connection_;
   xcb_window_t window_;
   WindowGeometryObserver* observer_;
+
+  // Position relative to the parent window.  (0, 0) if this is the
+  // root window.
+  int16_t x_;
+  int16_t y_;
+
+  uint16_t width_;
+  uint16_t height_;
+
+  uint16_t border_width_;
+
+  bool destroyed_ = false;
+
+  std::unique_ptr<WindowGeometryTracker> parent_;
 
   DISALLOW_COPY_AND_ASSIGN(WindowGeometryTracker);
 };

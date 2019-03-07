@@ -34,6 +34,7 @@ class KeyListener : public EventDispatcher {
   KeyListener(Connection* connection, KeyStateObserver* observer);
   ~KeyListener() override;
 
+ protected:
   // EventDispatcher:
   bool DispatchEvent(const Event& event) override;
 

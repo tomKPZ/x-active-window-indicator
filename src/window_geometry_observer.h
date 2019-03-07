@@ -17,12 +17,11 @@
 
 #pragma once
 
-typedef struct xcb_rectangle_t xcb_rectangle_t;
-
 class WindowGeometryObserver {
  public:
-  virtual void WindowPositionChanged(const xcb_rectangle_t& rect) = 0;
-  virtual void WindowSizeChanged(const xcb_rectangle_t& rect) = 0;
+  virtual void WindowPositionChanged() {}
+  virtual void WindowSizeChanged() {}
+  virtual void WindowBorderWidthChanged() {}
 
  protected:
   virtual ~WindowGeometryObserver(){};

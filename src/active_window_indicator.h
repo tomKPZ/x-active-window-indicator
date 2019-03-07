@@ -29,6 +29,7 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
   ActiveWindowIndicator(Connection* connection, BorderWindow* border_window_);
   ~ActiveWindowIndicator();
 
+ protected:
   // ActiveWindowObserver:
   void ActiveWindowChanged(xcb_window_t window) override;
 

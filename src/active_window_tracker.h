@@ -33,6 +33,7 @@ class ActiveWindowTracker : public EventDispatcher {
   ActiveWindowTracker(Connection* connection, ActiveWindowObserver* observer);
   ~ActiveWindowTracker();
 
+ protected:
   // EventDispatcher:
   bool DispatchEvent(const Event& event) override;
 
