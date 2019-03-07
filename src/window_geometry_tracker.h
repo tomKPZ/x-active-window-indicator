@@ -19,6 +19,7 @@
 
 #include <cstdint>
 
+#include "event_dispatcher.h"
 #include "util.h"
 
 typedef uint32_t xcb_window_t;
@@ -26,12 +27,15 @@ typedef uint32_t xcb_window_t;
 class Connection;
 class WindowGeometryObserver;
 
-class WindowGeometryTracker {
+class WindowGeometryTracker : public EventDispatcher {
  public:
   WindowGeometryTracker(Connection* connection,
                         xcb_window_t window,
                         WindowGeometryObserver* observer);
   ~WindowGeometryTracker();
+
+  // EventDispatcher:
+  bool DispatchEvent(const Event& event) override;
 
  private:
   Connection* connection_;
