@@ -73,6 +73,9 @@ add_executable(x-active-window-indicator
                src/key_state_observer.h
                src/main.cpp
                src/util.h
+	       src/window_geometry_observer.h
+	       src/window_geometry_tracker.h
+	       src/window_geometry_tracker.cpp
                src/x_error.h
                src/x_error.cpp)
 
