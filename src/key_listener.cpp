@@ -38,20 +38,13 @@ KeyListener::KeyListener(Connection* connection, KeyStateObserver* observer)
     throw XError("XINPUT not available");
   xcb_input_major_opcode_ = input_extension->major_opcode;
 
-  static constexpr const struct {
-    xcb_input_event_mask_t event_mask;
-    xcb_input_xi_event_mask_t xi_event_mask;
-  } masks[] = {{{XCB_INPUT_DEVICE_ALL,
-                 sizeof(xcb_input_xi_event_mask_t) / sizeof(uint32_t)},
-                static_cast<xcb_input_xi_event_mask_t>(
-                    XCB_INPUT_XI_EVENT_MASK_KEY_PRESS |
-                    XCB_INPUT_XI_EVENT_MASK_KEY_RELEASE)}};
-  xcb_input_xi_select_events(connection_->connection(),
-                             connection_->root_window(), ArraySize(masks),
-                             &masks[0].event_mask);
+  SelectEvents(static_cast<xcb_input_xi_event_mask_t>(
+      XCB_INPUT_XI_EVENT_MASK_KEY_PRESS | XCB_INPUT_XI_EVENT_MASK_KEY_RELEASE));
 }
 
-KeyListener::~KeyListener() {}
+KeyListener::~KeyListener() {
+  SelectEvents(static_cast<xcb_input_xi_event_mask_t>(0));
+}
 
 bool KeyListener::DispatchEvent(const Event& event) {
   if ((event->response_type & ~0x80) != XCB_GE_GENERIC)
@@ -79,7 +72,7 @@ bool KeyListener::DispatchEvent(const Event& event) {
                      return key_code_state.code == key;
                    });
   if (it == std::end(key_code_states_))
-    return false;
+    return true;
   else
     it->key_pressed = press;
 
@@ -92,4 +85,16 @@ bool KeyListener::DispatchEvent(const Event& event) {
     observer_->KeyStateChanged(any_key_pressed);
   any_key_pressed_ = any_key_pressed;
   return true;
+}
+
+void KeyListener::SelectEvents(xcb_input_xi_event_mask_t event_mask) {
+  const struct {
+    xcb_input_event_mask_t event_mask;
+    xcb_input_xi_event_mask_t xi_event_mask;
+  } mask[] = {{{XCB_INPUT_DEVICE_ALL,
+                sizeof(xcb_input_xi_event_mask_t) / sizeof(uint32_t)},
+               event_mask}};
+  xcb_input_xi_select_events(connection_->connection(),
+                             connection_->root_window(), ArraySize(mask),
+                             &mask[0].event_mask);
 }
