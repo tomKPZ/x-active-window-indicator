@@ -17,9 +17,21 @@
 
 #include "window_geometry_tracker.h"
 
+#include "connection.h"
+#include "event.h"
+
 WindowGeometryTracker::WindowGeometryTracker(Connection* connection,
                                              xcb_window_t window,
                                              WindowGeometryObserver* observer)
-    : connection_(connection), window_(window), observer_(observer) {}
+    : connection_(connection), window_(window), observer_(observer) {
+  connection_->SelectEvents(window_, XCB_EVENT_MASK_STRUCTURE_NOTIFY);
+}
 
-WindowGeometryTracker::~WindowGeometryTracker() {}
+WindowGeometryTracker::~WindowGeometryTracker() {
+  connection_->SelectEvents(window_, XCB_EVENT_MASK_NO_EVENT);
+}
+
+bool WindowGeometryTracker::DispatchEvent(const Event& event) {
+  (void)event;
+  return false;
+}

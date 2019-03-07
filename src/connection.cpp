@@ -41,3 +41,15 @@ Connection::~Connection() {
 uint32_t Connection::GenerateId() {
   return xcb_generate_id(connection_);
 }
+
+void Connection::SelectEvents(xcb_window_t window, uint32_t event_mask) {
+  // There's currently no conflicting clients that need to select
+  // different events on the same window, but if there ever are, this
+  // will need to be changed to keep track of a count of event mask
+  // type.  Also a DeselectEvents() method will need to be added, and
+  // window creation will need to be routed through the Connection too
+  // since windows can be created with event masks.
+  const uint32_t attributes[] = {event_mask};
+  xcb_change_window_attributes(connection_, window, XCB_CW_EVENT_MASK,
+                               attributes);
+}

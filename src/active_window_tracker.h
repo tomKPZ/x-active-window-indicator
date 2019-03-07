@@ -37,8 +37,6 @@ class ActiveWindowTracker : public EventDispatcher {
   bool DispatchEvent(const Event& event) override;
 
  private:
-  void SelectEvents(uint32_t event_mask);
-
   void SetActiveWindow();
 
   Connection* connection_;
