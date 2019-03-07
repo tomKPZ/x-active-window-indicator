@@ -17,6 +17,9 @@
 
 #pragma once
 
+// TODO: any way to forward declare xcb_input_xi_event_mask_t?
+#include <xcb/xinput.h>
+
 #include <cstdint>
 #include <vector>
 
@@ -42,6 +45,8 @@ class KeyListener : public EventDispatcher {
     // TODO: Any way to get initial key states?
     bool key_pressed = false;
   };
+
+  void SelectEvents(xcb_input_xi_event_mask_t event_mask);
 
   // TODO: Don't hardcode these keycodes.
   std::vector<KeyCodeState> key_code_states_{133, 134};
