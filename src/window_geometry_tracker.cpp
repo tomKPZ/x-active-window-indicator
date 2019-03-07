@@ -19,19 +19,100 @@
 
 #include "connection.h"
 #include "event.h"
+#include "window_geometry_observer.h"
+#include "x_error.h"
 
 WindowGeometryTracker::WindowGeometryTracker(Connection* connection,
                                              xcb_window_t window,
                                              WindowGeometryObserver* observer)
     : connection_(connection), window_(window), observer_(observer) {
   connection_->SelectEvents(window_, XCB_EVENT_MASK_STRUCTURE_NOTIFY);
+  auto geometry =
+      XCB_SYNC(xcb_get_geometry, connection_->connection(), window_);
+  x_ = geometry->x;
+  y_ = geometry->y;
+  width_ = geometry->width;
+  height_ = geometry->height;
+  border_width_ = geometry->border_width;
 }
 
 WindowGeometryTracker::~WindowGeometryTracker() {
-  connection_->SelectEvents(window_, XCB_EVENT_MASK_NO_EVENT);
+  if (!destroyed_)
+    connection_->SelectEvents(window_, XCB_EVENT_MASK_NO_EVENT);
 }
 
 bool WindowGeometryTracker::DispatchEvent(const Event& event) {
-  (void)event;
+  union {
+    const xcb_generic_event_t* generic;
+
+    const xcb_circulate_notify_event_t* circulate;
+    const xcb_configure_notify_event_t* configure;
+    const xcb_destroy_notify_event_t* destroy;
+    const xcb_gravity_notify_event_t* gravity;
+    const xcb_map_notify_event_t* map;
+    const xcb_reparent_notify_event_t* reparent;
+    const xcb_unmap_notify_event_t* unmap;
+  } const structure_event{event.event()};
+
+  switch (event->response_type & ~0x80) {
+    case XCB_CIRCULATE_NOTIFY:
+      return structure_event.circulate->event == window_;
+    case XCB_CONFIGURE_NOTIFY: {
+      const auto* configure = structure_event.configure;
+
+      if (configure->event != window_)
+        return false;
+
+      if (configure->event != configure->window)
+        throw XError("Bad configure notify event");
+
+      if (x_ != configure->x || y_ != configure->y) {
+        x_ = configure->x;
+        y_ = configure->y;
+        observer_->WindowPositionChanged();
+      }
+
+      if (width_ != configure->width || height_ != configure->height) {
+        width_ = configure->width;
+        height_ = configure->height;
+        observer_->WindowSizeChanged();
+      }
+
+      if (border_width_ != configure->border_width) {
+        border_width_ = configure->border_width;
+        observer_->WindowBorderWidthChanged();
+      }
+
+      return true;
+    }
+    case XCB_DESTROY_NOTIFY:
+      if (structure_event.destroy->event != window_)
+        return false;
+      destroyed_ = true;
+      return true;
+    case XCB_GRAVITY_NOTIFY: {
+      const auto* gravity = structure_event.gravity;
+
+      if (gravity->event != window_)
+        return false;
+
+      x_ = gravity->x;
+      y_ = gravity->y;
+      observer_->WindowPositionChanged();
+
+      return true;
+    }
+    case XCB_MAP_NOTIFY:
+      return structure_event.map->event == window_;
+    case XCB_REPARENT_NOTIFY:
+      // TODO
+      return structure_event.reparent->event == window_;
+    case XCB_UNMAP_NOTIFY:
+      return structure_event.unmap->event == window_;
+  }
   return false;
+}
+
+void WindowGeometryTracker::WindowPositionChanged() {
+  observer_->WindowPositionChanged();
 }

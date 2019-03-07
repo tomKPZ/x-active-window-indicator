@@ -28,6 +28,7 @@
 
 namespace {
 
+static constexpr const uint32_t BORDER_COLOR = 0xff0000;
 static constexpr const uint16_t BORDER_WIDTH = 5;
 
 class XcbRegion {
@@ -49,7 +50,7 @@ class XcbRegion {
 
 BorderWindow::BorderWindow(Connection* connection) : connection_(connection) {
   window_ = connection_->GenerateId();
-  uint32_t attributes[] = {0xff0000, true};
+  uint32_t attributes[] = {BORDER_COLOR, true};
   xcb_create_window(connection_->connection(), XCB_COPY_FROM_PARENT, window_,
                     connection_->root_window(), 0, 0, 1, 1, BORDER_WIDTH,
                     XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
