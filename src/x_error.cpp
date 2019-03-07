@@ -23,11 +23,12 @@ namespace {
 
 std::string MakeErrorMessage(const xcb_generic_error_t& error) {
   std::ostringstream stream;
-  stream << "XCB Error: response_type(" << error.response_type
-         << "), error_code(" << error.error_code << "), sequence("
+  stream << "XCB Error: response_type("
+         << static_cast<uint16_t>(error.response_type) << "), error_code("
+         << static_cast<uint16_t>(error.error_code) << "), sequence("
          << error.sequence << "), resource_id(" << error.resource_id
          << "), minor_code(" << error.minor_code << "), major_code("
-         << error.major_code << ")";
+         << static_cast<uint16_t>(error.major_code) << ")";
   return stream.str();
 }
 

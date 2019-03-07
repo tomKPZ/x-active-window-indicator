@@ -19,6 +19,7 @@
 
 #include <exception>
 #include <iostream>
+#include <sstream>
 
 #include "connection.h"
 #include "event.h"
@@ -28,7 +29,16 @@
 namespace {
 
 Event WaitForEvent(Connection* connection) {
+  xcb_flush(connection->connection());
   return Event(xcb_wait_for_event(connection->connection()));
+}
+
+std::string MakeUnhandledErrorMessage(const Event& event) {
+  std::ostringstream stream;
+  stream << "Unhandled event: response_type("
+         << static_cast<uint16_t>(event->response_type) << "), sequence("
+         << event->sequence << ")";
+  return stream.str();
 }
 
 }  // namespace
@@ -42,10 +52,9 @@ void EventLoop::RegisterDispatcher(EventDispatcher* dispatcher) {
 }
 
 void EventLoop::Run() {
-  xcb_flush(connection_->connection());
   while (auto event = WaitForEvent(connection_)) {
+    bool dispatched = false;
     for (EventDispatcher* dispatcher : dispatchers_) {
-      bool dispatched = false;
       try {
         dispatched = dispatcher->DispatchEvent(event);
       } catch (const XError& x_error) {
@@ -58,6 +67,7 @@ void EventLoop::Run() {
       if (dispatched)
         break;
     }
-    xcb_flush(connection_->connection());
+    if (!dispatched)
+      std::cerr << MakeUnhandledErrorMessage(event) << std::endl;
   }
 }
