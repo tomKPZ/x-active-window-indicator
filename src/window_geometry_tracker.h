@@ -33,8 +33,6 @@ class WindowGeometryObserver;
 class WindowGeometryTracker : public EventDispatcher,
                               public WindowGeometryObserver {
  public:
-  // Geometry events will not be reported if |window| is the root
-  // window.
   WindowGeometryTracker(Connection* connection,
                         xcb_window_t window,
                         WindowGeometryObserver* observer);
