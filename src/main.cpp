@@ -24,11 +24,11 @@
 
 int main(int, char**) {
   Connection connection;
+  EventLoop loop{&connection};
   BorderWindow border_window{&connection};
-  ActiveWindowIndicator indicator{&connection, &border_window};
+  ActiveWindowIndicator indicator{&connection, &loop, &border_window};
   ActiveWindowTracker tracker{&connection, &indicator};
   KeyListener key_listener{&connection, &indicator};
-  EventLoop loop{&connection};
   loop.RegisterDispatcher(&tracker);
   loop.RegisterDispatcher(&key_listener);
   loop.Run();

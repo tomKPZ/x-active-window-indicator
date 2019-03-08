@@ -25,13 +25,16 @@
 
 class BorderWindow;
 class Connection;
+class EventLoop;
 class WindowGeometryTracker;
 
 class ActiveWindowIndicator : public ActiveWindowObserver,
                               public KeyStateObserver,
                               public WindowGeometryObserver {
  public:
-  ActiveWindowIndicator(Connection* connection, BorderWindow* border_window_);
+  ActiveWindowIndicator(Connection* connection,
+                        EventLoop* event_loop,
+                        BorderWindow* border_window_);
   ~ActiveWindowIndicator();
 
  protected:
@@ -52,6 +55,7 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
   void SetBorderWindowBounds();
 
   Connection* connection_;
+  EventLoop* event_loop_;
 
   BorderWindow* border_window_;
   bool border_window_shown_ = false;

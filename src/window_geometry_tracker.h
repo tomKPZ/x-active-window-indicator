@@ -22,6 +22,7 @@
 #include <memory>
 
 #include "event_dispatcher.h"
+#include "event_loop.h"
 #include "util.h"
 #include "window_geometry_observer.h"
 
@@ -34,6 +35,7 @@ class WindowGeometryTracker : public EventDispatcher,
                               public WindowGeometryObserver {
  public:
   WindowGeometryTracker(Connection* connection,
+                        EventLoop* event_loop,
                         xcb_window_t window,
                         WindowGeometryObserver* observer);
   ~WindowGeometryTracker();
@@ -57,6 +59,8 @@ class WindowGeometryTracker : public EventDispatcher,
   void SetParent(xcb_window_t parent);
 
   Connection* connection_;
+  EventLoop* event_loop_;
+
   xcb_window_t window_;
   WindowGeometryObserver* observer_;
 

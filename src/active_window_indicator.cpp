@@ -21,27 +21,20 @@
 
 #include "border_window.h"
 #include "connection.h"
+#include "event_loop.h"
 #include "window_geometry_tracker.h"
 
 ActiveWindowIndicator::ActiveWindowIndicator(Connection* connection,
+                                             EventLoop* event_loop,
                                              BorderWindow* border_window)
     : connection_(connection),
+      event_loop_(event_loop),
       border_window_(border_window),
       active_window_(XCB_WINDOW_NONE) {}
 
 ActiveWindowIndicator::~ActiveWindowIndicator() {}
 
 void ActiveWindowIndicator::ActiveWindowChanged(xcb_window_t window) {
-  if (window != XCB_WINDOW_NONE) {
-    auto geometry = XCB_SYNC(xcb_get_geometry, connection_, window);
-    auto root_coordinates =
-        XCB_SYNC(xcb_translate_coordinates, connection_, window,
-                 connection_->root_window(), geometry->x, geometry->y);
-    border_window_->SetRect(xcb_rectangle_t{root_coordinates->dst_x,
-                                            root_coordinates->dst_y,
-                                            geometry->width, geometry->height});
-  }
-
   active_window_ = window;
   OnStateChanged();
 }
@@ -68,7 +61,7 @@ void ActiveWindowIndicator::OnStateChanged() {
   if (show_border_window != border_window_shown_) {
     if (show_border_window) {
       window_geometry_tracker_ = std::make_unique<WindowGeometryTracker>(
-          connection_, active_window_, this);
+          connection_, event_loop_, active_window_, this);
       SetBorderWindowBounds();
       border_window_->Show();
     } else {
