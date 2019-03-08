@@ -22,7 +22,6 @@
 #include "util.h"
 
 typedef uint32_t xcb_window_t;
-typedef struct xcb_rectangle_t xcb_rectangle_t;
 
 class Connection;
 
@@ -31,7 +30,8 @@ class BorderWindow {
   BorderWindow(Connection* connection);
   ~BorderWindow();
 
-  void SetRect(const xcb_rectangle_t& rect);
+  void SetPosition(int16_t x, int16_t y);
+  void SetSize(uint16_t width, uint16_t height);
 
   void Show();
   void Hide();
