@@ -24,3 +24,15 @@ Event::Event(xcb_generic_event_t* event) : event_(event) {}
 Event::~Event() {
   free(event_);
 }
+
+bool Event::SendEvent() const {
+  return event_->response_type & 0x80;
+}
+
+uint8_t Event::ResponseType() const {
+  return event_->response_type & ~0x80;
+}
+
+uint16_t Event::Sequence() const {
+  return event_->sequence;
+}

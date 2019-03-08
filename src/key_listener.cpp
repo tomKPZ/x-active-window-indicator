@@ -47,7 +47,7 @@ KeyListener::~KeyListener() {
 }
 
 bool KeyListener::DispatchEvent(const Event& event) {
-  if ((event->response_type & ~0x80) != XCB_GE_GENERIC)
+  if (event.ResponseType() != XCB_GE_GENERIC)
     return false;
 
   const auto* generic_event =

@@ -100,7 +100,7 @@ ActiveWindowTracker::~ActiveWindowTracker() {
 }
 
 bool ActiveWindowTracker::DispatchEvent(const Event& event) {
-  if ((event->response_type & ~0x80) != XCB_PROPERTY_NOTIFY)
+  if (event.ResponseType() != XCB_PROPERTY_NOTIFY)
     return false;
 
   const auto* property_notify_event =
