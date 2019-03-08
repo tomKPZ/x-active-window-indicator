@@ -45,14 +45,17 @@ void ActiveWindowIndicator::KeyStateChanged(bool pressed) {
 }
 
 void ActiveWindowIndicator::WindowPositionChanged() {
-  SetBorderWindowBounds();
+  border_window_->SetPosition(window_geometry_tracker_->X(),
+                              window_geometry_tracker_->Y());
 }
 
 void ActiveWindowIndicator::WindowSizeChanged() {
-  SetBorderWindowBounds();
+  border_window_->SetSize(window_geometry_tracker_->width(),
+                          window_geometry_tracker_->height());
 }
 
 void ActiveWindowIndicator::WindowBorderWidthChanged() {
+  // TODO: Use border width.
   SetBorderWindowBounds();
 }
 
@@ -69,8 +72,8 @@ void ActiveWindowIndicator::OnStateChanged() {
 }
 
 void ActiveWindowIndicator::SetBorderWindowBounds() {
-  // TODO: Use border width.
-  border_window_->SetRect(xcb_rectangle_t{
-      window_geometry_tracker_->X(), window_geometry_tracker_->Y(),
-      window_geometry_tracker_->width(), window_geometry_tracker_->height()});
+  border_window_->SetPosition(window_geometry_tracker_->X(),
+                              window_geometry_tracker_->Y());
+  border_window_->SetSize(window_geometry_tracker_->width(),
+                          window_geometry_tracker_->height());
 }

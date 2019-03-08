@@ -68,32 +68,35 @@ BorderWindow::~BorderWindow() {
   xcb_destroy_window(connection_->connection(), window_);
 }
 
-void BorderWindow::SetRect(const xcb_rectangle_t& rect) {
+void BorderWindow::SetPosition(int16_t x, int16_t y) {
+  xcb_configure_window_value_list_t configure{};
+  configure.x = x;
+  configure.y = y;
+  xcb_configure_window_aux(connection_->connection(), window_,
+                           XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                           &configure);
+}
+
+void BorderWindow::SetSize(uint16_t width, uint16_t height) {
   // TODO: Use an outer border instead of an inner border if the window is tiny.
-  const xcb_configure_window_value_list_t configure_value_list{
-      rect.x,
-      rect.y,
-      CheckedCast<uint16_t>(rect.width - 2 * BORDER_WIDTH),
-      CheckedCast<uint16_t>(rect.height - 2 * BORDER_WIDTH),
-      0,
-      0,
-      0};
-  xcb_configure_window(connection_->connection(), window_,
-                       XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y |
+  xcb_configure_window_value_list_t configure{};
+  configure.width = CheckedCast<uint16_t>(width - 2 * BORDER_WIDTH);
+  configure.height = CheckedCast<uint16_t>(height - 2 * BORDER_WIDTH);
+  xcb_configure_window_aux(connection_->connection(), window_,
                            XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                       &configure_value_list);
+                           &configure);
 
   const std::vector<xcb_rectangle_t> rects{
       // Top edge.
-      {-BORDER_WIDTH, -BORDER_WIDTH, rect.width, BORDER_WIDTH},
+      {-BORDER_WIDTH, -BORDER_WIDTH, width, BORDER_WIDTH},
       // Bottom edge.
-      {-BORDER_WIDTH, CheckedCast<int16_t>(rect.height - 2 * BORDER_WIDTH),
-       rect.width, BORDER_WIDTH},
+      {-BORDER_WIDTH, CheckedCast<int16_t>(height - 2 * BORDER_WIDTH), width,
+       BORDER_WIDTH},
       // Left edge.
-      {-BORDER_WIDTH, -BORDER_WIDTH, BORDER_WIDTH, rect.height},
+      {-BORDER_WIDTH, -BORDER_WIDTH, BORDER_WIDTH, height},
       // Right edge.
-      {CheckedCast<int16_t>(rect.width - 2 * BORDER_WIDTH), -BORDER_WIDTH,
-       BORDER_WIDTH, rect.height},
+      {CheckedCast<int16_t>(width - 2 * BORDER_WIDTH), -BORDER_WIDTH,
+       BORDER_WIDTH, height},
   };
   xcb_xfixes_set_window_shape_region(connection_->connection(), window_,
                                      XCB_SHAPE_SK_BOUNDING, 0, 0,
