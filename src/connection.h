@@ -25,9 +25,9 @@
 #include "util.h"
 #include "x_error.h"
 
-#define XCB_SYNC(func, connection, ...) \
-  XcbSyncAux(connection, func##_reply,  \
-             func(connection __VA_OPT__(, ) __VA_ARGS__))
+#define XCB_SYNC(func, c, ...)  \
+  XcbSyncAux((c), func##_reply, \
+             func((c)->connection() __VA_OPT__(, ) __VA_ARGS__))
 
 typedef struct xcb_connection_t xcb_connection_t;
 typedef uint32_t xcb_window_t;
@@ -43,20 +43,6 @@ class XcbReply {
  private:
   T* t_;
 };
-
-template <typename Cookie, typename ReplyFunc>
-auto XcbSyncAux(xcb_connection_t* connection,
-                ReplyFunc reply_func,
-                Cookie cookie)
-    -> XcbReply<typename std::remove_reference<
-        decltype(*reply_func(connection, cookie, nullptr))>::type> {
-  xcb_generic_error_t* error = nullptr;
-  auto* t = reply_func(connection, cookie, &error);
-  if (error)
-    throw XError(*error);
-  assert(t);
-  return XcbReply(t);
-}
 
 class Connection {
  public:
@@ -75,3 +61,14 @@ class Connection {
 
   DISALLOW_COPY_AND_ASSIGN(Connection);
 };
+
+template <typename Cookie, typename ReplyFunc>
+auto XcbSyncAux(Connection* connection, ReplyFunc reply_func, Cookie cookie)
+    -> decltype(auto) {
+  xcb_generic_error_t* error = nullptr;
+  auto* t = reply_func(connection->connection(), cookie, &error);
+  if (error)
+    throw XError(*error);
+  assert(t);
+  return XcbReply(t);
+}

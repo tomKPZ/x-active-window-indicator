@@ -32,10 +32,9 @@ ActiveWindowIndicator::~ActiveWindowIndicator() {}
 
 void ActiveWindowIndicator::ActiveWindowChanged(xcb_window_t window) {
   if (window != XCB_WINDOW_NONE) {
-    auto geometry =
-        XCB_SYNC(xcb_get_geometry, connection_->connection(), window);
+    auto geometry = XCB_SYNC(xcb_get_geometry, connection_, window);
     auto root_coordinates =
-        XCB_SYNC(xcb_translate_coordinates, connection_->connection(), window,
+        XCB_SYNC(xcb_translate_coordinates, connection_, window,
                  connection_->root_window(), geometry->x, geometry->y);
     border_window_->SetRect(xcb_rectangle_t{root_coordinates->dst_x,
                                             root_coordinates->dst_y,

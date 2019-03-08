@@ -56,8 +56,8 @@ BorderWindow::BorderWindow(Connection* connection) : connection_(connection) {
                     XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
                     XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT, attributes);
 
-  XCB_SYNC(xcb_xfixes_query_version, connection_->connection(),
-           XCB_XFIXES_MAJOR_VERSION, XCB_XFIXES_MINOR_VERSION);
+  XCB_SYNC(xcb_xfixes_query_version, connection_, XCB_XFIXES_MAJOR_VERSION,
+           XCB_XFIXES_MINOR_VERSION);
   auto* fixes_extension =
       xcb_get_extension_data(connection_->connection(), &xcb_xfixes_id);
   if (!fixes_extension->present)

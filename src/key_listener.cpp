@@ -30,8 +30,8 @@
 
 KeyListener::KeyListener(Connection* connection, KeyStateObserver* observer)
     : connection_(connection), observer_(observer) {
-  XCB_SYNC(xcb_input_xi_query_version, connection_->connection(),
-           XCB_INPUT_MAJOR_VERSION, XCB_INPUT_MINOR_VERSION);
+  XCB_SYNC(xcb_input_xi_query_version, connection_, XCB_INPUT_MAJOR_VERSION,
+           XCB_INPUT_MINOR_VERSION);
   auto* input_extension =
       xcb_get_extension_data(connection_->connection(), &xcb_input_id);
   if (!input_extension->present)
