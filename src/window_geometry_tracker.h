@@ -54,6 +54,8 @@ class WindowGeometryTracker : public EventDispatcher,
   void WindowPositionChanged() override;
 
  private:
+  void SetParent(xcb_window_t parent);
+
   Connection* connection_;
   xcb_window_t window_;
   WindowGeometryObserver* observer_;
