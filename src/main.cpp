@@ -29,6 +29,7 @@ int main(int, char**) {
   ActiveWindowIndicator indicator{&connection, &loop, &border_window};
   ActiveWindowTracker tracker{&connection, &indicator};
   KeyListener key_listener{&connection, &indicator};
+  // TODO: have |tracker| and |key_listener| register itself.
   loop.RegisterDispatcher(&tracker);
   loop.RegisterDispatcher(&key_listener);
   loop.Run();
