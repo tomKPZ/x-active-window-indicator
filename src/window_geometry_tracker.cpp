@@ -30,7 +30,7 @@ WindowGeometryTracker::WindowGeometryTracker(Connection* connection,
       event_loop_(event_loop),
       window_(window),
       observer_(observer) {
-  event_loop->RegisterDispatcher(this);
+  event_loop_->RegisterDispatcher(this);
   connection_->SelectEvents(window_, XCB_EVENT_MASK_STRUCTURE_NOTIFY);
 
   auto tree = XCB_SYNC(xcb_query_tree, connection_, window_);
@@ -45,8 +45,10 @@ WindowGeometryTracker::WindowGeometryTracker(Connection* connection,
 }
 
 WindowGeometryTracker::~WindowGeometryTracker() {
-  if (!destroyed_)
+  if (!destroyed_) {
     connection_->SelectEvents(window_, XCB_EVENT_MASK_NO_EVENT);
+    event_loop_->UnregisterDispatcher(this);
+  }
 }
 
 int16_t WindowGeometryTracker::X() const {
@@ -105,6 +107,7 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
       if (structure_event.destroy->event != window_)
         return false;
       destroyed_ = true;
+      event_loop_->UnregisterDispatcher(this);
       return true;
     case XCB_GRAVITY_NOTIFY: {
       const auto* gravity = structure_event.gravity;
