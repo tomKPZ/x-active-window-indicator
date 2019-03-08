@@ -19,6 +19,7 @@
 
 // TODO: any way to forward declare xcb_generic_event_t?
 #include <xcb/xcb.h>
+#include <cstdint>
 
 #include "util.h"
 
@@ -27,8 +28,11 @@ class Event {
   Event(xcb_generic_event_t* event);
   ~Event();
 
+  bool SendEvent() const;
+  uint8_t ResponseType() const;
+  uint16_t Sequence() const;
+
   operator bool() const { return event_; }
-  const xcb_generic_event_t* operator->() const { return event_; }
   const xcb_generic_event_t* event() const { return event_; }
 
  private:

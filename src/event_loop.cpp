@@ -35,9 +35,9 @@ Event WaitForEvent(Connection* connection) {
 
 std::string MakeUnhandledErrorMessage(const Event& event) {
   std::ostringstream stream;
-  stream << "Unhandled event: response_type("
-         << static_cast<uint16_t>(event->response_type) << "), sequence("
-         << event->sequence << ")";
+  stream << "Unhandled event: send_event(" << event.SendEvent()
+         << "), response_type(" << static_cast<uint16_t>(event.ResponseType())
+         << "), sequence(" << event.Sequence() << ")";
   return stream.str();
 }
 
@@ -71,7 +71,7 @@ void EventLoop::Run() {
       if (dispatched)
         break;
     }
-    if (!dispatched && (event->response_type & ~0x80) != XCB_CLIENT_MESSAGE)
+    if (!dispatched && event.ResponseType() != XCB_CLIENT_MESSAGE)
       std::cerr << MakeUnhandledErrorMessage(event) << std::endl;
   }
 }

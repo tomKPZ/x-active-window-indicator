@@ -72,7 +72,7 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
     const xcb_unmap_notify_event_t* unmap;
   } const structure_event{event.event()};
 
-  switch (event->response_type & ~0x80) {
+  switch (event.ResponseType()) {
     case XCB_CIRCULATE_NOTIFY:
       return structure_event.circulate->event == window_;
     case XCB_CONFIGURE_NOTIFY: {
@@ -80,7 +80,7 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
 
       if (configure->event != window_)
         return false;
-      if (event->response_type & 0x80)
+      if (event.SendEvent())
         return true;
 
       if (x_ != configure->x || y_ != configure->y) {
@@ -113,7 +113,7 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
 
       if (gravity->event != window_)
         return false;
-      if (event->response_type & 0x80)
+      if (event.SendEvent())
         return true;
 
       x_ = gravity->x;
@@ -129,7 +129,7 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
 
       if (reparent->event != window_)
         return false;
-      if (event->response_type & 0x80)
+      if (event.SendEvent())
         return true;
 
       SetParent(reparent->parent);
