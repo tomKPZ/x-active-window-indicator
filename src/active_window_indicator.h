@@ -17,14 +17,19 @@
 
 #pragma once
 
+#include <memory>
+
 #include "active_window_observer.h"
 #include "key_state_observer.h"
+#include "window_geometry_observer.h"
 
 class BorderWindow;
 class Connection;
+class WindowGeometryTracker;
 
 class ActiveWindowIndicator : public ActiveWindowObserver,
-                              public KeyStateObserver {
+                              public KeyStateObserver,
+                              public WindowGeometryObserver {
  public:
   ActiveWindowIndicator(Connection* connection, BorderWindow* border_window_);
   ~ActiveWindowIndicator();
@@ -36,8 +41,15 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
   // KeyStateObserver:
   void KeyStateChanged(bool pressed) override;
 
+  // WindowGeometryObserver:
+  void WindowPositionChanged() override;
+  void WindowSizeChanged() override;
+  void WindowBorderWidthChanged() override;
+
  private:
   void OnStateChanged();
+
+  void SetBorderWindowBounds();
 
   Connection* connection_;
 
@@ -46,4 +58,6 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
 
   xcb_window_t active_window_;
   bool key_pressed_ = false;
+
+  std::unique_ptr<WindowGeometryTracker> window_geometry_tracker_;
 };

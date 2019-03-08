@@ -21,6 +21,7 @@
 
 #include "border_window.h"
 #include "connection.h"
+#include "window_geometry_tracker.h"
 
 ActiveWindowIndicator::ActiveWindowIndicator(Connection* connection,
                                              BorderWindow* border_window)
@@ -50,13 +51,37 @@ void ActiveWindowIndicator::KeyStateChanged(bool pressed) {
   OnStateChanged();
 }
 
+void ActiveWindowIndicator::WindowPositionChanged() {
+  SetBorderWindowBounds();
+}
+
+void ActiveWindowIndicator::WindowSizeChanged() {
+  SetBorderWindowBounds();
+}
+
+void ActiveWindowIndicator::WindowBorderWidthChanged() {
+  SetBorderWindowBounds();
+}
+
 void ActiveWindowIndicator::OnStateChanged() {
   bool show_border_window = key_pressed_ && active_window_ != XCB_WINDOW_NONE;
   if (show_border_window != border_window_shown_) {
-    if (show_border_window)
+    if (show_border_window) {
+      window_geometry_tracker_ = std::make_unique<WindowGeometryTracker>(
+          connection_, active_window_, this);
+      SetBorderWindowBounds();
       border_window_->Show();
-    else
+    } else {
+      window_geometry_tracker_ = nullptr;
       border_window_->Hide();
+    }
   }
   border_window_shown_ = show_border_window;
+}
+
+void ActiveWindowIndicator::SetBorderWindowBounds() {
+  // TODO: Use border width.
+  border_window_->SetRect(xcb_rectangle_t{
+      window_geometry_tracker_->X(), window_geometry_tracker_->Y(),
+      window_geometry_tracker_->width(), window_geometry_tracker_->height()});
 }
