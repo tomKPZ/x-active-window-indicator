@@ -23,9 +23,14 @@
 #include "x_error.h"
 
 WindowGeometryTracker::WindowGeometryTracker(Connection* connection,
+                                             EventLoop* event_loop,
                                              xcb_window_t window,
                                              WindowGeometryObserver* observer)
-    : connection_(connection), window_(window), observer_(observer) {
+    : connection_(connection),
+      event_loop_(event_loop),
+      window_(window),
+      observer_(observer) {
+  event_loop->RegisterDispatcher(this);
   connection_->SelectEvents(window_, XCB_EVENT_MASK_STRUCTURE_NOTIFY);
 
   auto tree = XCB_SYNC(xcb_query_tree, connection_, window_);
@@ -140,7 +145,7 @@ void WindowGeometryTracker::SetParent(xcb_window_t parent) {
   if (parent == XCB_WINDOW_NONE) {
     parent_ = nullptr;
   } else {
-    parent_ =
-        std::make_unique<WindowGeometryTracker>(connection_, parent, this);
+    parent_ = std::make_unique<WindowGeometryTracker>(connection_, event_loop_,
+                                                      parent, this);
   }
 }
