@@ -58,7 +58,6 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
   EventLoop* event_loop_;
 
   BorderWindow* border_window_;
-  bool border_window_shown_ = false;
 
   xcb_window_t active_window_;
   bool key_pressed_ = false;
