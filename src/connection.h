@@ -21,6 +21,9 @@
 #include <cstdint>
 #include <cstdlib>
 
+#include <memory>
+#include <unordered_map>
+
 #include "util.h"
 #include "x_error.h"
 
@@ -50,13 +53,20 @@ class Connection {
 
   uint32_t GenerateId();
   void SelectEvents(xcb_window_t window, uint32_t event_mask);
+  void DeselectEvents(xcb_window_t window, uint32_t event_mask);
 
   xcb_connection_t* connection() { return connection_; }
   xcb_window_t root_window() const { return root_window_; }
 
  private:
+  class MultiMask;
+
+  void AfterMaskChanged(xcb_window_t window, uint32_t old_mask);
+
   xcb_connection_t* connection_;
   xcb_window_t root_window_;
+
+  std::unordered_map<xcb_window_t, std::unique_ptr<MultiMask>> mask_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Connection);
 };

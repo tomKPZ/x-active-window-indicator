@@ -95,8 +95,8 @@ ActiveWindowTracker::ActiveWindowTracker(Connection* connection,
 }
 
 ActiveWindowTracker::~ActiveWindowTracker() {
-  connection_->SelectEvents(connection_->root_window(),
-                            XCB_EVENT_MASK_NO_EVENT);
+  connection_->DeselectEvents(connection_->root_window(),
+                              XCB_EVENT_MASK_PROPERTY_CHANGE);
 }
 
 bool ActiveWindowTracker::DispatchEvent(const Event& event) {
