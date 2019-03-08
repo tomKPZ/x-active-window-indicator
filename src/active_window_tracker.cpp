@@ -36,7 +36,7 @@
 namespace {
 
 xcb_atom_t GetAtom(Connection* connection, const std::string& str) {
-  return XCB_SYNC(xcb_intern_atom, connection->connection(), false,
+  return XCB_SYNC(xcb_intern_atom, connection, false,
                   CheckedCast<uint16_t>(str.length()), str.c_str())
       ->atom;
 }
@@ -44,9 +44,8 @@ xcb_atom_t GetAtom(Connection* connection, const std::string& str) {
 std::vector<xcb_atom_t> GetAtomArray(Connection* connection,
                                      xcb_window_t window,
                                      xcb_atom_t atom) {
-  auto reply =
-      XCB_SYNC(xcb_get_property, connection->connection(), false, window, atom,
-               XCB_ATOM_ATOM, 0, std::numeric_limits<uint32_t>::max());
+  auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
+                        XCB_ATOM_ATOM, 0, std::numeric_limits<uint32_t>::max());
 
   if (reply->format != 8 * sizeof(xcb_atom_t) || reply->type != XCB_ATOM_ATOM ||
       reply->bytes_after > 0) {
@@ -61,8 +60,8 @@ std::vector<xcb_atom_t> GetAtomArray(Connection* connection,
 xcb_window_t GetWindow(Connection* connection,
                        xcb_window_t window,
                        xcb_atom_t atom) {
-  auto reply = XCB_SYNC(xcb_get_property, connection->connection(), false,
-                        window, atom, XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));
+  auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
+                        XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));
 
   if (reply->format != 8 * sizeof(xcb_window_t) ||
       reply->type != XCB_ATOM_WINDOW || reply->bytes_after > 0 ||
