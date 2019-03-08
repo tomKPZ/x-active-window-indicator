@@ -48,7 +48,11 @@ EventLoop::EventLoop(Connection* connection) : connection_(connection) {}
 EventLoop::~EventLoop() {}
 
 void EventLoop::RegisterDispatcher(EventDispatcher* dispatcher) {
-  dispatchers_.push_back(dispatcher);
+  dispatchers_.insert(dispatcher);
+}
+
+void EventLoop::UnregisterDispatcher(EventDispatcher* dispatcher) {
+  dispatchers_.erase(dispatcher);
 }
 
 void EventLoop::Run() {

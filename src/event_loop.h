@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <vector>
+#include <unordered_set>
 
 #include "util.h"
 
@@ -30,13 +30,14 @@ class EventLoop {
   ~EventLoop();
 
   void RegisterDispatcher(EventDispatcher* dispatcher);
+  void UnregisterDispatcher(EventDispatcher* dispatcher);
 
   void Run();
 
  private:
   Connection* connection_;
 
-  std::vector<EventDispatcher*> dispatchers_;
+  std::unordered_set<EventDispatcher*> dispatchers_;
 
   DISALLOW_COPY_AND_ASSIGN(EventLoop);
 };
