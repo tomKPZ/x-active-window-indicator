@@ -57,19 +57,15 @@ void ActiveWindowIndicator::WindowBorderWidthChanged() {
 }
 
 void ActiveWindowIndicator::OnStateChanged() {
-  bool show_border_window = key_pressed_ && active_window_ != XCB_WINDOW_NONE;
-  if (show_border_window != border_window_shown_) {
-    if (show_border_window) {
-      window_geometry_tracker_ = std::make_unique<WindowGeometryTracker>(
-          connection_, event_loop_, active_window_, this);
-      SetBorderWindowBounds();
-      border_window_->Show();
-    } else {
-      window_geometry_tracker_ = nullptr;
-      border_window_->Hide();
-    }
+  if (key_pressed_ && active_window_ != XCB_WINDOW_NONE) {
+    window_geometry_tracker_ = std::make_unique<WindowGeometryTracker>(
+        connection_, event_loop_, active_window_, this);
+    SetBorderWindowBounds();
+    border_window_->Show();
+  } else {
+    window_geometry_tracker_ = nullptr;
+    border_window_->Hide();
   }
-  border_window_shown_ = show_border_window;
 }
 
 void ActiveWindowIndicator::SetBorderWindowBounds() {
