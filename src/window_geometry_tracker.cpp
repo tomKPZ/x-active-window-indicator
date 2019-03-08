@@ -80,9 +80,8 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
 
       if (configure->event != window_)
         return false;
-
-      if (configure->event != configure->window)
-        throw XError("Bad configure notify event");
+      if (event->response_type & 0x80)
+        return true;
 
       if (x_ != configure->x || y_ != configure->y) {
         x_ = configure->x;
@@ -114,6 +113,8 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
 
       if (gravity->event != window_)
         return false;
+      if (event->response_type & 0x80)
+        return true;
 
       x_ = gravity->x;
       y_ = gravity->y;
@@ -128,6 +129,8 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
 
       if (reparent->event != window_)
         return false;
+      if (event->response_type & 0x80)
+        return true;
 
       SetParent(reparent->parent);
       observer_->WindowPositionChanged();
