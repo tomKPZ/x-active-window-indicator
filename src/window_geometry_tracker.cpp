@@ -29,10 +29,7 @@ WindowGeometryTracker::WindowGeometryTracker(Connection* connection,
   connection_->SelectEvents(window_, XCB_EVENT_MASK_STRUCTURE_NOTIFY);
 
   auto tree = XCB_SYNC(xcb_query_tree, connection_, window_);
-  if (tree->parent != XCB_WINDOW_NONE) {
-    parent_ =
-        std::make_unique<WindowGeometryTracker>(connection, tree->parent, this);
-  }
+  SetParent(tree->parent);
 
   auto geometry = XCB_SYNC(xcb_get_geometry, connection_, window_);
   x_ = geometry->x;
@@ -45,6 +42,14 @@ WindowGeometryTracker::WindowGeometryTracker(Connection* connection,
 WindowGeometryTracker::~WindowGeometryTracker() {
   if (!destroyed_)
     connection_->SelectEvents(window_, XCB_EVENT_MASK_NO_EVENT);
+}
+
+int16_t WindowGeometryTracker::X() const {
+  return parent_ ? parent_->X() + x_ : 0;
+}
+
+int16_t WindowGeometryTracker::Y() const {
+  return parent_ ? parent_->Y() + y_ : 0;
 }
 
 bool WindowGeometryTracker::DispatchEvent(const Event& event) {
@@ -110,9 +115,17 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
     }
     case XCB_MAP_NOTIFY:
       return structure_event.map->event == window_;
-    case XCB_REPARENT_NOTIFY:
-      // TODO
-      return structure_event.reparent->event == window_;
+    case XCB_REPARENT_NOTIFY: {
+      const auto* reparent = structure_event.reparent;
+
+      if (reparent->event != window_)
+        return false;
+
+      SetParent(reparent->parent);
+      observer_->WindowPositionChanged();
+
+      return true;
+    }
     case XCB_UNMAP_NOTIFY:
       return structure_event.unmap->event == window_;
   }
@@ -121,4 +134,13 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
 
 void WindowGeometryTracker::WindowPositionChanged() {
   observer_->WindowPositionChanged();
+}
+
+void WindowGeometryTracker::SetParent(xcb_window_t parent) {
+  if (parent == XCB_WINDOW_NONE) {
+    parent_ = nullptr;
+  } else {
+    parent_ =
+        std::make_unique<WindowGeometryTracker>(connection_, parent, this);
+  }
 }

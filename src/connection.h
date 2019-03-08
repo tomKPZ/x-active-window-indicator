@@ -20,7 +20,6 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
-#include <type_traits>
 
 #include "util.h"
 #include "x_error.h"
