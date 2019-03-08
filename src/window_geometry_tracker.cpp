@@ -45,10 +45,9 @@ WindowGeometryTracker::WindowGeometryTracker(Connection* connection,
 }
 
 WindowGeometryTracker::~WindowGeometryTracker() {
-  if (!destroyed_) {
-    connection_->SelectEvents(window_, XCB_EVENT_MASK_NO_EVENT);
+  connection_->DeselectEvents(window_, XCB_EVENT_MASK_STRUCTURE_NOTIFY);
+  if (!destroyed_)
     event_loop_->UnregisterDispatcher(this);
-  }
 }
 
 int16_t WindowGeometryTracker::X() const {

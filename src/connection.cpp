@@ -1,6 +1,7 @@
 #include "connection.h"
 
 #include <xcb/xcb.h>
+#include <cassert>
 
 #include <string>
 
@@ -17,7 +18,60 @@ xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {
   return nullptr;
 }
 
+void SetEventMask(xcb_connection_t* connection,
+                  xcb_window_t window,
+                  uint32_t new_mask) {
+  auto cookie = xcb_change_window_attributes(connection, window,
+                                             XCB_CW_EVENT_MASK, &new_mask);
+  // Window |window| may already be destroyed at this point, so the
+  // change_attributes request may give a BadWindow error.  In this case, just
+  // ignore the error.
+  xcb_discard_reply(connection, cookie.sequence);
+}
+
 }  // namespace
+
+class Connection::MultiMask {
+ public:
+  MultiMask() {
+    for (int i = 0; i < kMaskSize; i++)
+      mask_bits_[i] = 0;
+  }
+
+  ~MultiMask() {}
+
+  void AddMask(uint32_t mask) {
+    for (int i = 0; i < kMaskSize; i++) {
+      if (mask & (1 << i))
+        mask_bits_[i]++;
+    }
+  }
+
+  void RemoveMask(uint32_t mask) {
+    for (int i = 0; i < kMaskSize; i++) {
+      if (mask & (1 << i)) {
+        assert(mask_bits_[i]);
+        mask_bits_[i]--;
+      }
+    }
+  }
+
+  uint32_t ToMask() const {
+    uint32_t mask = XCB_EVENT_MASK_NO_EVENT;
+    for (int i = 0; i < kMaskSize; i++) {
+      if (mask_bits_[i])
+        mask |= (1 << i);
+    }
+    return mask;
+  }
+
+ private:
+  static constexpr auto kMaskSize = 25;
+
+  int mask_bits_[kMaskSize];
+
+  DISALLOW_COPY_AND_ASSIGN(MultiMask);
+};
 
 Connection::Connection() {
   int screen_number;
@@ -34,6 +88,8 @@ Connection::Connection() {
 }
 
 Connection::~Connection() {
+  for (const auto& mask_pair : mask_map_)
+    SetEventMask(connection_, mask_pair.first, XCB_EVENT_MASK_NO_EVENT);
   xcb_flush(connection_);
   xcb_disconnect(connection_);
 }
@@ -43,13 +99,29 @@ uint32_t Connection::GenerateId() {
 }
 
 void Connection::SelectEvents(xcb_window_t window, uint32_t event_mask) {
-  // There's currently no conflicting clients that need to select
-  // different events on the same window, but if there ever are, this
-  // will need to be changed to keep track of a count of event mask
-  // type.  Also a DeselectEvents() method will need to be added, and
-  // window creation will need to be routed through the Connection too
-  // since windows can be created with event masks.
-  const uint32_t attributes[] = {event_mask};
-  xcb_change_window_attributes(connection_, window, XCB_CW_EVENT_MASK,
-                               attributes);
+  std::unique_ptr<MultiMask>& mask = mask_map_[window];
+  if (!mask)
+    mask.reset(new MultiMask());
+  uint32_t old_mask = mask_map_[window]->ToMask();
+  mask->AddMask(event_mask);
+  AfterMaskChanged(window, old_mask);
+}
+
+void Connection::DeselectEvents(xcb_window_t window, uint32_t event_mask) {
+  assert(mask_map_.find(window) != mask_map_.end());
+  std::unique_ptr<MultiMask>& mask = mask_map_[window];
+  uint32_t old_mask = mask->ToMask();
+  mask->RemoveMask(event_mask);
+  AfterMaskChanged(window, old_mask);
+}
+
+void Connection::AfterMaskChanged(xcb_window_t window, uint32_t old_mask) {
+  uint32_t new_mask = mask_map_[window]->ToMask();
+  if (new_mask == old_mask)
+    return;
+
+  SetEventMask(connection_, window, new_mask);
+
+  if (new_mask == XCB_EVENT_MASK_NO_EVENT)
+    mask_map_.erase(window);
 }
