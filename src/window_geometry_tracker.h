@@ -38,7 +38,7 @@ class WindowGeometryTracker : public EventDispatcher,
                         EventLoop* event_loop,
                         xcb_window_t window,
                         WindowGeometryObserver* observer);
-  ~WindowGeometryTracker();
+  ~WindowGeometryTracker() override;
 
   int16_t X() const;
   int16_t Y() const;

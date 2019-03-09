@@ -25,5 +25,5 @@ class EventDispatcher {
   virtual bool DispatchEvent(const Event& event) = 0;
 
  protected:
-  virtual ~EventDispatcher(){};
+  virtual ~EventDispatcher(){}
 };

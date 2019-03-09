@@ -24,5 +24,5 @@ class WindowGeometryObserver {
   virtual void WindowBorderWidthChanged() {}
 
  protected:
-  virtual ~WindowGeometryObserver(){};
+  virtual ~WindowGeometryObserver(){}
 };
