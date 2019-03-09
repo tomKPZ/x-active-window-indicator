@@ -22,5 +22,5 @@ class EventLoopIdleObserver {
   virtual void OnIdle() = 0;
 
  protected:
-  virtual ~EventLoopIdleObserver(){}
+  virtual ~EventLoopIdleObserver() {}
 };
