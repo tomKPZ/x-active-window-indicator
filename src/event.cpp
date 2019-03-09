@@ -30,7 +30,7 @@ bool Event::SendEvent() const {
 }
 
 uint8_t Event::ResponseType() const {
-  return event_->response_type & ~0x80;
+  return event_->response_type & 0x7f;
 }
 
 uint16_t Event::Sequence() const {
