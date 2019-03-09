@@ -36,10 +36,12 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
                               public KeyStateObserver,
                               public WindowGeometryObserver {
  public:
-  ActiveWindowIndicator(Connection* connection,
-                        EventLoop* event_loop,
-                        BorderWindow* border_window_,
-                        Observable<KeyStateObserver>* observable_);
+  ActiveWindowIndicator(
+      Connection* connection,
+      EventLoop* event_loop,
+      BorderWindow* border_window_,
+      Observable<ActiveWindowObserver>* active_window_observable,
+      Observable<KeyStateObserver>* key_state_observable);
   ~ActiveWindowIndicator() override;
 
  protected:
@@ -65,7 +67,8 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
   Connection* connection_;
   EventLoop* event_loop_;
   BorderWindow* border_window_;
-  ScopedObserver<KeyStateObserver> observer_;
+  ScopedObserver<ActiveWindowObserver> active_window_observer_;
+  ScopedObserver<KeyStateObserver> key_state_observer_;
 
   xcb_window_t active_window_;
   bool key_pressed_ = false;

@@ -28,11 +28,13 @@ ActiveWindowIndicator::ActiveWindowIndicator(
     Connection* connection,
     EventLoop* event_loop,
     BorderWindow* border_window,
-    Observable<KeyStateObserver>* observable)
+    Observable<ActiveWindowObserver>* active_window_observable,
+    Observable<KeyStateObserver>* key_state_observable)
     : connection_(connection),
       event_loop_(event_loop),
       border_window_(border_window),
-      observer_(this, observable),
+      active_window_observer_(this, active_window_observable),
+      key_state_observer_(this, key_state_observable),
       active_window_(XCB_WINDOW_NONE) {
   event_loop_->AddIdleObserver(this);
 }

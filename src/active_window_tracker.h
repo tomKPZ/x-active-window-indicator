@@ -20,6 +20,7 @@
 #include <cstdint>
 
 #include "event_dispatcher.h"
+#include "observable.h"
 #include "util.h"
 
 typedef uint32_t xcb_atom_t;
@@ -29,11 +30,10 @@ class ActiveWindowObserver;
 class Connection;
 class EventLoop;
 
-class ActiveWindowTracker : public EventDispatcher {
+class ActiveWindowTracker : public EventDispatcher,
+                            public Observable<ActiveWindowObserver> {
  public:
-  ActiveWindowTracker(Connection* connection,
-                      EventLoop* event_loop,
-                      ActiveWindowObserver* observer);
+  ActiveWindowTracker(Connection* connection, EventLoop* event_loop);
   ~ActiveWindowTracker() override;
 
  protected:
@@ -45,7 +45,6 @@ class ActiveWindowTracker : public EventDispatcher {
 
   Connection* connection_;
   EventLoop* event_loop_;
-  ActiveWindowObserver* observer_;
 
   xcb_atom_t net_active_window_;
   xcb_window_t active_window_;
