@@ -23,6 +23,7 @@
 
 #include "event_dispatcher.h"
 #include "event_loop.h"
+#include "scoped_observer.h"
 #include "util.h"
 #include "window_geometry_observer.h"
 
@@ -60,6 +61,7 @@ class WindowGeometryTracker : public EventDispatcher,
 
   Connection* connection_;
   EventLoop* event_loop_;
+  ScopedObserver<EventDispatcher> event_dispatcher_;
 
   xcb_window_t window_;
   WindowGeometryObserver* observer_;
@@ -73,8 +75,6 @@ class WindowGeometryTracker : public EventDispatcher,
   uint16_t height_;
 
   uint16_t border_width_;
-
-  bool destroyed_ = false;
 
   std::unique_ptr<WindowGeometryTracker> parent_;
 

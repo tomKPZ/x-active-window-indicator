@@ -19,20 +19,20 @@
 
 #include <cassert>
 
-#include <unordered_set>
+#include <forward_list>
 
 template <typename Observer>
 class Observable {
  public:
-  void AddObserver(Observer* observer) { observers_.insert(observer); }
+  void AddObserver(Observer* observer) { observers_.push_front(observer); }
 
-  void RemoveObserver(Observer* observer) { observers_.erase(observer); }
+  void RemoveObserver(Observer* observer) { observers_.remove(observer); }
 
  protected:
   virtual ~Observable() { assert(observers_.empty()); }
 
-  const std::unordered_set<Observer*>& observers() const { return observers_; }
+  const std::forward_list<Observer*>& observers() const { return observers_; }
 
  private:
-  std::unordered_set<Observer*> observers_;
+  std::forward_list<Observer*> observers_;
 };

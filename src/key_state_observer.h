@@ -19,7 +19,7 @@
 
 class KeyStateObserver {
  public:
-  virtual void KeyStateChanged(bool pressed) = 0;
+  virtual void KeyStateChanged() = 0;
 
  protected:
   virtual ~KeyStateObserver() {}

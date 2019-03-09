@@ -21,6 +21,7 @@
 
 #include "event_dispatcher.h"
 #include "observable.h"
+#include "scoped_observer.h"
 #include "util.h"
 
 typedef uint32_t xcb_atom_t;
@@ -36,6 +37,8 @@ class ActiveWindowTracker : public EventDispatcher,
   ActiveWindowTracker(Connection* connection, EventLoop* event_loop);
   ~ActiveWindowTracker() override;
 
+  xcb_window_t active_window() const { return active_window_; }
+
  protected:
   // EventDispatcher:
   bool DispatchEvent(const Event& event) override;
@@ -44,7 +47,7 @@ class ActiveWindowTracker : public EventDispatcher,
   void SetActiveWindow();
 
   Connection* connection_;
-  EventLoop* event_loop_;
+  ScopedObserver<EventDispatcher> event_dispatcher_;
 
   xcb_atom_t net_active_window_;
   xcb_window_t active_window_;

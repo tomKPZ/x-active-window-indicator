@@ -16,20 +16,13 @@
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 #include "active_window_indicator.h"
-#include "active_window_tracker.h"
-#include "border_window.h"
 #include "connection.h"
 #include "event_loop.h"
-#include "key_listener.h"
 
 int main(int, char**) {
   Connection connection;
   EventLoop loop{&connection};
-  BorderWindow border_window{&connection};
-  ActiveWindowTracker tracker{&connection, &loop};
-  KeyListener key_listener{&connection, &loop};
-  ActiveWindowIndicator indicator{&connection, &loop, &border_window, &tracker,
-                                  &key_listener};
+  ActiveWindowIndicator indicator{&connection, &loop};
   loop.Run();
   return 0;
 }

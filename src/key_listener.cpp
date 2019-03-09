@@ -47,7 +47,7 @@ void SelectEvents(Connection* connection,
 }  // namespace
 
 KeyListener::KeyListener(Connection* connection, EventLoop* event_loop)
-    : connection_(connection), event_loop_(event_loop) {
+    : connection_(connection), dispatcher_(this, event_loop) {
   XCB_SYNC(xcb_input_xi_query_version, connection_, XCB_INPUT_MAJOR_VERSION,
            XCB_INPUT_MINOR_VERSION);
   auto* input_extension =
@@ -59,11 +59,9 @@ KeyListener::KeyListener(Connection* connection, EventLoop* event_loop)
   SelectEvents(connection_, static_cast<xcb_input_xi_event_mask_t>(
                                 XCB_INPUT_XI_EVENT_MASK_KEY_PRESS |
                                 XCB_INPUT_XI_EVENT_MASK_KEY_RELEASE));
-  event_loop_->RegisterDispatcher(this);
 }
 
 KeyListener::~KeyListener() {
-  event_loop_->UnregisterDispatcher(this);
   SelectEvents(connection_, static_cast<xcb_input_xi_event_mask_t>(0));
 }
 
@@ -103,9 +101,9 @@ bool KeyListener::DispatchEvent(const Event& event) {
                     return key_code_state.key_pressed;
                   });
   if (any_key_pressed != any_key_pressed_) {
+    any_key_pressed_ = any_key_pressed;
     for (auto* observer : observers())
-      observer->KeyStateChanged(any_key_pressed);
+      observer->KeyStateChanged();
   }
-  any_key_pressed_ = any_key_pressed;
   return true;
 }

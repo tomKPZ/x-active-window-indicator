@@ -20,7 +20,10 @@
 #include <memory>
 
 #include "active_window_observer.h"
+#include "active_window_tracker.h"
+#include "border_window.h"
 #include "event_loop_idle_observer.h"
+#include "key_listener.h"
 #include "key_state_observer.h"
 #include "observable.h"
 #include "scoped_observer.h"
@@ -36,23 +39,18 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
                               public KeyStateObserver,
                               public WindowGeometryObserver {
  public:
-  ActiveWindowIndicator(
-      Connection* connection,
-      EventLoop* event_loop,
-      BorderWindow* border_window_,
-      Observable<ActiveWindowObserver>* active_window_observable,
-      Observable<KeyStateObserver>* key_state_observable);
+  ActiveWindowIndicator(Connection* connection, EventLoop* event_loop);
   ~ActiveWindowIndicator() override;
 
  protected:
   // ActiveWindowObserver:
-  void ActiveWindowChanged(xcb_window_t window) override;
+  void ActiveWindowChanged() override;
 
   // EventLoopIdleObserver:
   void OnIdle() override;
 
   // KeyStateObserver:
-  void KeyStateChanged(bool pressed) override;
+  void KeyStateChanged() override;
 
   // WindowGeometryObserver:
   void WindowPositionChanged() override;
@@ -66,12 +64,12 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
 
   Connection* connection_;
   EventLoop* event_loop_;
-  BorderWindow* border_window_;
+  BorderWindow border_window_;
+  ActiveWindowTracker active_window_tracker_;
+  KeyListener key_listener_;
   ScopedObserver<ActiveWindowObserver> active_window_observer_;
+  ScopedObserver<EventLoopIdleObserver> event_loop_idle_observer_;
   ScopedObserver<KeyStateObserver> key_state_observer_;
-
-  xcb_window_t active_window_;
-  bool key_pressed_ = false;
 
   bool needs_set_position_ = false;
   bool needs_set_size_ = false;
