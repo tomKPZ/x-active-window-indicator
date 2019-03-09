@@ -35,6 +35,8 @@ class KeyListener : public EventDispatcher,
   KeyListener(Connection* connection, EventLoop* event_loop);
   ~KeyListener() override;
 
+  bool any_key_pressed() const { return any_key_pressed_; }
+
  protected:
   // EventDispatcher:
   bool DispatchEvent(const Event& event) override;
@@ -53,7 +55,7 @@ class KeyListener : public EventDispatcher,
   bool any_key_pressed_ = false;
 
   Connection* connection_;
-  EventLoop* event_loop_;
+  ScopedObserver<EventDispatcher> dispatcher_;
 
   uint8_t xcb_input_major_opcode_;
 

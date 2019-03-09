@@ -24,51 +24,43 @@
 #include "event_loop.h"
 #include "window_geometry_tracker.h"
 
-ActiveWindowIndicator::ActiveWindowIndicator(
-    Connection* connection,
-    EventLoop* event_loop,
-    BorderWindow* border_window,
-    Observable<ActiveWindowObserver>* active_window_observable,
-    Observable<KeyStateObserver>* key_state_observable)
+ActiveWindowIndicator::ActiveWindowIndicator(Connection* connection,
+                                             EventLoop* event_loop)
     : connection_(connection),
       event_loop_(event_loop),
-      border_window_(border_window),
-      active_window_observer_(this, active_window_observable),
-      key_state_observer_(this, key_state_observable),
-      active_window_(XCB_WINDOW_NONE) {
-  event_loop_->AddIdleObserver(this);
-}
+      border_window_(connection_),
+      active_window_tracker_(connection_, event_loop_),
+      key_listener_(connection_, event_loop_),
+      active_window_observer_(this, &active_window_tracker_),
+      event_loop_idle_observer_(this, event_loop),
+      key_state_observer_(this, &key_listener_) {}
 
-ActiveWindowIndicator::~ActiveWindowIndicator() {
-  event_loop_->RemoveIdleObserver(this);
-}
+ActiveWindowIndicator::~ActiveWindowIndicator() {}
 
-void ActiveWindowIndicator::ActiveWindowChanged(xcb_window_t window) {
-  active_window_ = window;
+void ActiveWindowIndicator::ActiveWindowChanged() {
   OnStateChanged();
 }
 
 void ActiveWindowIndicator::OnIdle() {
   // TODO: take border width into account for position and size.
   if (needs_set_position_) {
-    border_window_->SetPosition(window_geometry_tracker_->X(),
-                                window_geometry_tracker_->Y());
+    border_window_.SetPosition(window_geometry_tracker_->X(),
+                               window_geometry_tracker_->Y());
   }
   needs_set_position_ = false;
 
   if (needs_set_size_) {
-    border_window_->SetSize(window_geometry_tracker_->width(),
-                            window_geometry_tracker_->height());
+    border_window_.SetSize(window_geometry_tracker_->width(),
+                           window_geometry_tracker_->height());
   }
   needs_set_size_ = false;
 
   if (needs_show_)
-    border_window_->Show();
+    border_window_.Show();
   needs_show_ = false;
 }
 
-void ActiveWindowIndicator::KeyStateChanged(bool pressed) {
-  key_pressed_ = pressed;
+void ActiveWindowIndicator::KeyStateChanged() {
   OnStateChanged();
 }
 
@@ -86,14 +78,16 @@ void ActiveWindowIndicator::WindowBorderWidthChanged() {
 }
 
 void ActiveWindowIndicator::OnStateChanged() {
-  const bool show = key_pressed_ && active_window_ != XCB_WINDOW_NONE;
+  const bool show = key_listener_.any_key_pressed() &&
+                    active_window_tracker_.active_window() != XCB_WINDOW_NONE;
   needs_set_position_ = show;
   needs_set_size_ = show;
   needs_show_ = show;
   window_geometry_tracker_ =
-      show ? std::make_unique<WindowGeometryTracker>(connection_, event_loop_,
-                                                     active_window_, this)
+      show ? std::make_unique<WindowGeometryTracker>(
+                 connection_, event_loop_,
+                 active_window_tracker_.active_window(), this)
            : nullptr;
   if (!show)
-    border_window_->Hide();
+    border_window_.Hide();
 }

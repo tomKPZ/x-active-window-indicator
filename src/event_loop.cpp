@@ -43,26 +43,10 @@ EventLoop::EventLoop(Connection* connection) : connection_(connection) {}
 
 EventLoop::~EventLoop() {}
 
-void EventLoop::RegisterDispatcher(EventDispatcher* dispatcher) {
-  dispatchers_.insert(dispatcher);
-}
-
-void EventLoop::UnregisterDispatcher(EventDispatcher* dispatcher) {
-  dispatchers_.erase(dispatcher);
-}
-
-void EventLoop::AddIdleObserver(EventLoopIdleObserver* observer) {
-  idle_observers_.insert(observer);
-}
-
-void EventLoop::RemoveIdleObserver(EventLoopIdleObserver* observer) {
-  idle_observers_.erase(observer);
-}
-
 void EventLoop::Run() {
   while (auto event = WaitForEvent()) {
     bool dispatched = false;
-    for (EventDispatcher* dispatcher : dispatchers_) {
+    for (auto* dispatcher : Observable<EventDispatcher>::observers()) {
       try {
         dispatched = dispatcher->DispatchEvent(event);
       } catch (const XError& x_error) {
@@ -87,7 +71,7 @@ Event EventLoop::WaitForEvent() {
   if (event || xcb_connection_has_error(connection))
     return Event(event);
 
-  for (EventLoopIdleObserver* observer : idle_observers_)
+  for (auto* observer : Observable<EventLoopIdleObserver>::observers())
     observer->OnIdle();
 
   xcb_flush(connection);

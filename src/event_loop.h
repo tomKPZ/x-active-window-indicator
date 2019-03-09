@@ -17,8 +17,7 @@
 
 #pragma once
 
-#include <unordered_set>
-
+#include "observable.h"
 #include "util.h"
 
 class Connection;
@@ -26,16 +25,11 @@ class Event;
 class EventDispatcher;
 class EventLoopIdleObserver;
 
-class EventLoop {
+class EventLoop : public Observable<EventDispatcher>,
+                  public Observable<EventLoopIdleObserver> {
  public:
   EventLoop(Connection* connection_);
   ~EventLoop();
-
-  void RegisterDispatcher(EventDispatcher* dispatcher);
-  void UnregisterDispatcher(EventDispatcher* dispatcher);
-
-  void AddIdleObserver(EventLoopIdleObserver* observer);
-  void RemoveIdleObserver(EventLoopIdleObserver* observer);
 
   void Run();
 
@@ -43,9 +37,6 @@ class EventLoop {
   Event WaitForEvent();
 
   Connection* connection_;
-
-  std::unordered_set<EventDispatcher*> dispatchers_;
-  std::unordered_set<EventLoopIdleObserver*> idle_observers_;
 
   DISALLOW_COPY_AND_ASSIGN(EventLoop);
 };

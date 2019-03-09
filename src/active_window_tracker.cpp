@@ -78,7 +78,7 @@ xcb_window_t GetWindow(Connection* connection,
 ActiveWindowTracker::ActiveWindowTracker(Connection* connection,
                                          EventLoop* event_loop)
     : connection_(connection),
-      event_loop_(event_loop),
+      event_dispatcher_(this, event_loop),
       net_active_window_(XCB_ATOM_NONE),
       active_window_(XCB_WINDOW_NONE) {
   xcb_atom_t net_supported = GetAtom(connection_, "_NET_SUPPORTED");
@@ -92,11 +92,9 @@ ActiveWindowTracker::ActiveWindowTracker(Connection* connection,
   connection_->SelectEvents(connection_->root_window(),
                             XCB_EVENT_MASK_PROPERTY_CHANGE);
   SetActiveWindow();
-  event_loop_->RegisterDispatcher(this);
 }
 
 ActiveWindowTracker::~ActiveWindowTracker() {
-  event_loop_->UnregisterDispatcher(this);
   connection_->DeselectEvents(connection_->root_window(),
                               XCB_EVENT_MASK_PROPERTY_CHANGE);
 }
@@ -122,8 +120,8 @@ void ActiveWindowTracker::SetActiveWindow() {
   xcb_window_t active_window =
       GetWindow(connection_, connection_->root_window(), net_active_window_);
   if (active_window_ != active_window) {
+    active_window_ = active_window;
     for (auto* observer : observers())
-      observer->ActiveWindowChanged(active_window);
+      observer->ActiveWindowChanged();
   }
-  active_window_ = active_window;
 }
