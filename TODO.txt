@@ -1,4 +1,3 @@
 IWYU
 noexcept
 Catch SIG{INT,TERM,QUIT,HUP} and exit cleanly
-Coalesce configure events
