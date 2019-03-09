@@ -26,5 +26,5 @@ class ActiveWindowObserver {
   virtual void ActiveWindowChanged(xcb_window_t window) = 0;
 
  protected:
-  virtual ~ActiveWindowObserver(){}
+  virtual ~ActiveWindowObserver() {}
 };
