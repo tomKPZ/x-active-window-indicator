@@ -11,9 +11,10 @@ xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {
   xcb_screen_iterator_t iter;
 
   iter = xcb_setup_roots_iterator(xcb_get_setup(c));
-  for (; iter.rem; --screen, xcb_screen_next(&iter))
+  for (; iter.rem; --screen, xcb_screen_next(&iter)) {
     if (screen == 0)
       return iter.data;
+  }
 
   return nullptr;
 }
@@ -42,14 +43,14 @@ class Connection::MultiMask {
 
   void AddMask(uint32_t mask) {
     for (int i = 0; i < kMaskSize; i++) {
-      if (mask & (1 << i))
+      if (mask & (1U << i))
         mask_bits_[i]++;
     }
   }
 
   void RemoveMask(uint32_t mask) {
     for (int i = 0; i < kMaskSize; i++) {
-      if (mask & (1 << i)) {
+      if (mask & (1U << i)) {
         assert(mask_bits_[i]);
         mask_bits_[i]--;
       }
@@ -60,7 +61,7 @@ class Connection::MultiMask {
     uint32_t mask = XCB_EVENT_MASK_NO_EVENT;
     for (int i = 0; i < kMaskSize; i++) {
       if (mask_bits_[i])
-        mask |= (1 << i);
+        mask |= (1U << i);
     }
     return mask;
   }
@@ -68,7 +69,7 @@ class Connection::MultiMask {
  private:
   static constexpr auto kMaskSize = 25;
 
-  int mask_bits_[kMaskSize];
+  unsigned int mask_bits_[kMaskSize];
 
   DISALLOW_COPY_AND_ASSIGN(MultiMask);
 };

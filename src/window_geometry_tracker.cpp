@@ -51,11 +51,11 @@ WindowGeometryTracker::~WindowGeometryTracker() {
 }
 
 int16_t WindowGeometryTracker::X() const {
-  return parent_ ? parent_->X() + x_ : 0;
+  return parent_ ? CheckedCast<int16_t>(parent_->X() + x_) : 0;
 }
 
 int16_t WindowGeometryTracker::Y() const {
-  return parent_ ? parent_->Y() + y_ : 0;
+  return parent_ ? CheckedCast<int16_t>(parent_->Y() + y_) : 0;
 }
 
 bool WindowGeometryTracker::DispatchEvent(const Event& event) {
