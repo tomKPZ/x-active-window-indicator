@@ -103,7 +103,7 @@ bool KeyListener::DispatchEvent(const Event& event) {
                     return key_code_state.key_pressed;
                   });
   if (any_key_pressed != any_key_pressed_) {
-    for (const auto& observer : observers())
+    for (auto* observer : observers())
       observer->KeyStateChanged(any_key_pressed);
   }
   any_key_pressed_ = any_key_pressed;

@@ -76,11 +76,9 @@ xcb_window_t GetWindow(Connection* connection,
 }  // namespace
 
 ActiveWindowTracker::ActiveWindowTracker(Connection* connection,
-                                         EventLoop* event_loop,
-                                         ActiveWindowObserver* observer)
+                                         EventLoop* event_loop)
     : connection_(connection),
       event_loop_(event_loop),
-      observer_(observer),
       net_active_window_(XCB_ATOM_NONE),
       active_window_(XCB_WINDOW_NONE) {
   xcb_atom_t net_supported = GetAtom(connection_, "_NET_SUPPORTED");
@@ -123,7 +121,9 @@ bool ActiveWindowTracker::DispatchEvent(const Event& event) {
 void ActiveWindowTracker::SetActiveWindow() {
   xcb_window_t active_window =
       GetWindow(connection_, connection_->root_window(), net_active_window_);
-  if (active_window_ != active_window)
-    observer_->ActiveWindowChanged(active_window);
+  if (active_window_ != active_window) {
+    for (auto* observer : observers())
+      observer->ActiveWindowChanged(active_window);
+  }
   active_window_ = active_window;
 }
