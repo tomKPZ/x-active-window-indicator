@@ -28,7 +28,7 @@ class EventLoopIdleObserver;
 class EventLoop : public Observable<EventDispatcher>,
                   public Observable<EventLoopIdleObserver> {
  public:
-  EventLoop(Connection* connection_);
+  EventLoop(Connection* connection_, int should_quit_fd);
   ~EventLoop();
 
   void Run();
@@ -37,6 +37,7 @@ class EventLoop : public Observable<EventDispatcher>,
   Event WaitForEvent();
 
   Connection* connection_;
+  int should_quit_fd_;
 
   DISALLOW_COPY_AND_ASSIGN(EventLoop);
 };

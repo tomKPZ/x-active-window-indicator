@@ -15,13 +15,49 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
+#include <fcntl.h>
+#include <signal.h>
+#include <unistd.h>
+#include <cstdlib>
+
+#include <stdexcept>
+
 #include "active_window_indicator.h"
 #include "connection.h"
 #include "event_loop.h"
 
+// Self-pipe trick.
+static int pipe_fds[2];
+
+void signal_handler(int, siginfo_t*, void*) {
+  if (write(pipe_fds[1], "", 1) == -1)
+    std::abort();
+}
+
 int main(int, char**) {
+  if (pipe(pipe_fds) == -1)
+    throw std::logic_error("pipe() failed");
+  for (int fd : pipe_fds) {
+    int flags = fcntl(pipe_fds[0], F_GETFL);
+    if (flags == -1 || fcntl(fd, F_SETFL, flags) == -1)
+      throw std::logic_error("fcntl() failed");
+  }
+
+  struct sigaction sa;
+  sa.sa_flags = SA_RESTART;
+  sa.sa_sigaction = signal_handler;
+  for (auto sig : {
+           SIGHUP,
+           SIGINT,
+           SIGQUIT,
+           SIGTERM,
+       }) {
+    if (sigaction(sig, &sa, nullptr) == -1)
+      throw std::logic_error("sigaction() failed");
+  }
+
   Connection connection;
-  EventLoop loop{&connection};
+  EventLoop loop{&connection, pipe_fds[0]};
   ActiveWindowIndicator indicator{&connection, &loop};
   loop.Run();
   return 0;

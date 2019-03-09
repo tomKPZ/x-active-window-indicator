@@ -17,6 +17,8 @@
 
 #include "event_loop.h"
 
+#include <poll.h>
+
 #include <exception>
 #include <iostream>
 #include <sstream>
@@ -39,7 +41,8 @@ std::string MakeUnhandledErrorMessage(const Event& event) {
 
 }  // namespace
 
-EventLoop::EventLoop(Connection* connection) : connection_(connection) {}
+EventLoop::EventLoop(Connection* connection, int should_quit_fd)
+    : connection_(connection), should_quit_fd_(should_quit_fd) {}
 
 EventLoop::~EventLoop() {}
 
@@ -76,5 +79,21 @@ Event EventLoop::WaitForEvent() {
 
   xcb_flush(connection);
 
-  return Event(xcb_wait_for_event(connection));
+  while (true) {
+    struct pollfd poll_fds[] = {
+        {should_quit_fd_, POLLIN, 0},
+        {xcb_get_file_descriptor(connection), POLLIN, 0},
+    };
+    int ready = poll(poll_fds, ArraySize(poll_fds), -1);
+    if (ready == -1) {
+      if (errno == EINTR)
+        continue;
+      throw std::logic_error("poll() failed");
+    }
+    if (poll_fds[0].revents)
+      return Event(nullptr);
+    event = xcb_poll_for_event(connection);
+    if (event || xcb_connection_has_error(connection))
+      return Event(event);
+  }
 }

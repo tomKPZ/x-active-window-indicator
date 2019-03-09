@@ -26,7 +26,7 @@
 class Event {
  public:
   // Takes ownership of |event|.
-  Event(xcb_generic_event_t* event);
+  explicit Event(xcb_generic_event_t* event);
   ~Event();
 
   bool SendEvent() const;
