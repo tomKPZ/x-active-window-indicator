@@ -76,4 +76,6 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
   bool needs_show_ = false;
 
   std::unique_ptr<WindowGeometryTracker> window_geometry_tracker_;
+  std::unique_ptr<ScopedObserver<WindowGeometryObserver>>
+      window_geometry_observer_;
 };
