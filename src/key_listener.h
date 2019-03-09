@@ -52,6 +52,7 @@ class KeyListener : public EventDispatcher {
   bool any_key_pressed_ = false;
 
   Connection* connection_;
+  EventLoop* event_loop_;
   KeyStateObserver* observer_;
 
   uint8_t xcb_input_major_opcode_;

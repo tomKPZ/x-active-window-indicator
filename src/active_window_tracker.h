@@ -44,6 +44,7 @@ class ActiveWindowTracker : public EventDispatcher {
   void SetActiveWindow();
 
   Connection* connection_;
+  EventLoop* event_loop_;
   ActiveWindowObserver* observer_;
 
   xcb_atom_t net_active_window_;
