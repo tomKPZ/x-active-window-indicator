@@ -98,5 +98,7 @@ target_include_directories(x-active-window-indicator
 target_compile_options(x-active-window-indicator
                        PUBLIC ${XCB_CFLAGS_OTHER} ${XCB_XFIXES_OTHER} ${XCB_XINPUT_OTHER})
 
+install(TARGETS x-active-window-indicator DESTINATION bin)
+
 # target_link_libraries(x-active-window-indicator "-lc++") target_compile_options(x-active-window-
 # indicator PUBLIC -stdlib=libc++) SET (CMAKE_CXX_COMPILER "clang++")
