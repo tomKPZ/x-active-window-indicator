@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "active_window_observer.h"
+#include "event_loop_idle_observer.h"
 #include "key_state_observer.h"
 #include "window_geometry_observer.h"
 
@@ -29,6 +30,7 @@ class EventLoop;
 class WindowGeometryTracker;
 
 class ActiveWindowIndicator : public ActiveWindowObserver,
+                              public EventLoopIdleObserver,
                               public KeyStateObserver,
                               public WindowGeometryObserver {
  public:
@@ -40,6 +42,9 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
  protected:
   // ActiveWindowObserver:
   void ActiveWindowChanged(xcb_window_t window) override;
+
+  // EventLoopIdleObserver:
+  void OnIdle() override;
 
   // KeyStateObserver:
   void KeyStateChanged(bool pressed) override;
@@ -61,6 +66,10 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
 
   xcb_window_t active_window_;
   bool key_pressed_ = false;
+
+  bool needs_set_position_ = false;
+  bool needs_set_size_ = false;
+  bool needs_show_ = false;
 
   std::unique_ptr<WindowGeometryTracker> window_geometry_tracker_;
 };

@@ -68,14 +68,15 @@ add_executable(x-active-window-indicator
                src/event_dispatcher.h
                src/event_loop.h
                src/event_loop.cpp
+               src/event_loop_idle_observer.h
                src/key_listener.h
                src/key_listener.cpp
                src/key_state_observer.h
                src/main.cpp
                src/util.h
-	       src/window_geometry_observer.h
-	       src/window_geometry_tracker.h
-	       src/window_geometry_tracker.cpp
+               src/window_geometry_observer.h
+               src/window_geometry_tracker.h
+               src/window_geometry_tracker.cpp
                src/x_error.h
                src/x_error.cpp)
 

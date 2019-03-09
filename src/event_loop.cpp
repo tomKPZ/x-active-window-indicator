@@ -24,14 +24,10 @@
 #include "connection.h"
 #include "event.h"
 #include "event_dispatcher.h"
+#include "event_loop_idle_observer.h"
 #include "x_error.h"
 
 namespace {
-
-Event WaitForEvent(Connection* connection) {
-  xcb_flush(connection->connection());
-  return Event(xcb_wait_for_event(connection->connection()));
-}
 
 std::string MakeUnhandledErrorMessage(const Event& event) {
   std::ostringstream stream;
@@ -55,8 +51,16 @@ void EventLoop::UnregisterDispatcher(EventDispatcher* dispatcher) {
   dispatchers_.erase(dispatcher);
 }
 
+void EventLoop::AddIdleObserver(EventLoopIdleObserver* observer) {
+  idle_observers_.insert(observer);
+}
+
+void EventLoop::RemoveIdleObserver(EventLoopIdleObserver* observer) {
+  idle_observers_.erase(observer);
+}
+
 void EventLoop::Run() {
-  while (auto event = WaitForEvent(connection_)) {
+  while (auto event = WaitForEvent()) {
     bool dispatched = false;
     for (EventDispatcher* dispatcher : dispatchers_) {
       try {
@@ -74,4 +78,19 @@ void EventLoop::Run() {
     if (!dispatched && event.ResponseType() != XCB_CLIENT_MESSAGE)
       std::cerr << MakeUnhandledErrorMessage(event) << std::endl;
   }
+}
+
+Event EventLoop::WaitForEvent() {
+  auto* connection = connection_->connection();
+
+  xcb_generic_event_t* event = xcb_poll_for_event(connection);
+  if (event || xcb_connection_has_error(connection))
+    return Event(event);
+
+  for (EventLoopIdleObserver* observer : idle_observers_)
+    observer->OnIdle();
+
+  xcb_flush(connection);
+
+  return Event(xcb_wait_for_event(connection));
 }

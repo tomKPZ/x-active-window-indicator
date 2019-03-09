@@ -30,7 +30,8 @@
 
 namespace {
 
-void SelectEvents(Connection* connection, xcb_input_xi_event_mask_t event_mask) {
+void SelectEvents(Connection* connection,
+                  xcb_input_xi_event_mask_t event_mask) {
   const struct {
     xcb_input_event_mask_t event_mask;
     xcb_input_xi_event_mask_t xi_event_mask;
@@ -41,7 +42,7 @@ void SelectEvents(Connection* connection, xcb_input_xi_event_mask_t event_mask) 
                              connection->root_window(), ArraySize(mask),
                              &mask[0].event_mask);
 }
-  
+
 }  // namespace
 
 KeyListener::KeyListener(Connection* connection, KeyStateObserver* observer)
@@ -55,7 +56,8 @@ KeyListener::KeyListener(Connection* connection, KeyStateObserver* observer)
   xcb_input_major_opcode_ = input_extension->major_opcode;
 
   SelectEvents(connection_, static_cast<xcb_input_xi_event_mask_t>(
-      XCB_INPUT_XI_EVENT_MASK_KEY_PRESS | XCB_INPUT_XI_EVENT_MASK_KEY_RELEASE));
+                                XCB_INPUT_XI_EVENT_MASK_KEY_PRESS |
+                                XCB_INPUT_XI_EVENT_MASK_KEY_RELEASE));
 }
 
 KeyListener::~KeyListener() {
