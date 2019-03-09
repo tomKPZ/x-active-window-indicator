@@ -15,21 +15,21 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include "active_window_indicator.h"
-#include "active_window_tracker.h"
-#include "border_window.h"
-#include "connection.h"
-#include "event_loop.h"
-#include "key_listener.h"
+#pragma once
 
-int main(int, char**) {
-  Connection connection;
-  EventLoop loop{&connection};
-  BorderWindow border_window{&connection};
-  KeyListener key_listener{&connection, &loop};
-  ActiveWindowIndicator indicator{&connection, &loop, &border_window,
-                                  &key_listener};
-  ActiveWindowTracker tracker{&connection, &loop, &indicator};
-  loop.Run();
-  return 0;
-}
+#include "observable.h"
+
+template <typename Observer>
+class ScopedObserver {
+ public:
+  ScopedObserver(Observer* observer, Observable<Observer>* observable)
+      : observer_(observer), observable_(observable) {
+    observable_->AddObserver(observer_);
+  }
+
+  ~ScopedObserver() { observable_->RemoveObserver(observer_); }
+
+ private:
+  Observer* observer_;
+  Observable<Observer>* observable_;
+};
