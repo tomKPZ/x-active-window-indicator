@@ -31,7 +31,7 @@ class Connection;
 class ActiveWindowTracker : public EventDispatcher {
  public:
   ActiveWindowTracker(Connection* connection, ActiveWindowObserver* observer);
-  ~ActiveWindowTracker();
+  ~ActiveWindowTracker() override;
 
  protected:
   // EventDispatcher:

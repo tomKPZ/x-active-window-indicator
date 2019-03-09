@@ -37,7 +37,7 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
   ActiveWindowIndicator(Connection* connection,
                         EventLoop* event_loop,
                         BorderWindow* border_window_);
-  ~ActiveWindowIndicator();
+  ~ActiveWindowIndicator() override;
 
  protected:
   // ActiveWindowObserver:
