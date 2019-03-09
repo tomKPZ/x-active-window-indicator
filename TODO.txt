@@ -1,3 +1,4 @@
 IWYU
 noexcept
 Catch SIG{INT,TERM,QUIT,HUP} and exit cleanly
+Scoped observer

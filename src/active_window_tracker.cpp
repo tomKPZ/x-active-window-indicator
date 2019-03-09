@@ -79,6 +79,7 @@ ActiveWindowTracker::ActiveWindowTracker(Connection* connection,
                                          EventLoop* event_loop,
                                          ActiveWindowObserver* observer)
     : connection_(connection),
+      event_loop_(event_loop),
       observer_(observer),
       net_active_window_(XCB_ATOM_NONE),
       active_window_(XCB_WINDOW_NONE) {
@@ -93,10 +94,11 @@ ActiveWindowTracker::ActiveWindowTracker(Connection* connection,
   connection_->SelectEvents(connection_->root_window(),
                             XCB_EVENT_MASK_PROPERTY_CHANGE);
   SetActiveWindow();
-  event_loop->RegisterDispatcher(this);
+  event_loop_->RegisterDispatcher(this);
 }
 
 ActiveWindowTracker::~ActiveWindowTracker() {
+  event_loop_->UnregisterDispatcher(this);
   connection_->DeselectEvents(connection_->root_window(),
                               XCB_EVENT_MASK_PROPERTY_CHANGE);
 }

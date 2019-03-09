@@ -49,7 +49,7 @@ void SelectEvents(Connection* connection,
 KeyListener::KeyListener(Connection* connection,
                          EventLoop* event_loop,
                          KeyStateObserver* observer)
-    : connection_(connection), observer_(observer) {
+    : connection_(connection), event_loop_(event_loop), observer_(observer) {
   XCB_SYNC(xcb_input_xi_query_version, connection_, XCB_INPUT_MAJOR_VERSION,
            XCB_INPUT_MINOR_VERSION);
   auto* input_extension =
@@ -61,10 +61,11 @@ KeyListener::KeyListener(Connection* connection,
   SelectEvents(connection_, static_cast<xcb_input_xi_event_mask_t>(
                                 XCB_INPUT_XI_EVENT_MASK_KEY_PRESS |
                                 XCB_INPUT_XI_EVENT_MASK_KEY_RELEASE));
-  event_loop->RegisterDispatcher(this);
+  event_loop_->RegisterDispatcher(this);
 }
 
 KeyListener::~KeyListener() {
+  event_loop_->UnregisterDispatcher(this);
   SelectEvents(connection_, static_cast<xcb_input_xi_event_mask_t>(0));
 }
 
