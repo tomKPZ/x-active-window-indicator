@@ -24,11 +24,14 @@
 #include "util.h"
 
 class Connection;
+class EventLoop;
 class KeyStateObserver;
 
 class KeyListener : public EventDispatcher {
  public:
-  KeyListener(Connection* connection, KeyStateObserver* observer);
+  KeyListener(Connection* connection,
+              EventLoop* event_loop,
+              KeyStateObserver* observer);
   ~KeyListener() override;
 
  protected:

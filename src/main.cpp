@@ -27,11 +27,8 @@ int main(int, char**) {
   EventLoop loop{&connection};
   BorderWindow border_window{&connection};
   ActiveWindowIndicator indicator{&connection, &loop, &border_window};
-  ActiveWindowTracker tracker{&connection, &indicator};
-  KeyListener key_listener{&connection, &indicator};
-  // TODO: have |tracker| and |key_listener| register itself.
-  loop.RegisterDispatcher(&tracker);
-  loop.RegisterDispatcher(&key_listener);
+  ActiveWindowTracker tracker{&connection, &loop, &indicator};
+  KeyListener key_listener{&connection, &loop, &indicator};
   loop.Run();
   return 0;
 }

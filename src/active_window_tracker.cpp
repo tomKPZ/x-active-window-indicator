@@ -30,6 +30,7 @@
 #include "active_window_observer.h"
 #include "connection.h"
 #include "event.h"
+#include "event_loop.h"
 #include "util.h"
 #include "x_error.h"
 
@@ -75,6 +76,7 @@ xcb_window_t GetWindow(Connection* connection,
 }  // namespace
 
 ActiveWindowTracker::ActiveWindowTracker(Connection* connection,
+                                         EventLoop* event_loop,
                                          ActiveWindowObserver* observer)
     : connection_(connection),
       observer_(observer),
@@ -90,8 +92,8 @@ ActiveWindowTracker::ActiveWindowTracker(Connection* connection,
 
   connection_->SelectEvents(connection_->root_window(),
                             XCB_EVENT_MASK_PROPERTY_CHANGE);
-
   SetActiveWindow();
+  event_loop->RegisterDispatcher(this);
 }
 
 ActiveWindowTracker::~ActiveWindowTracker() {
