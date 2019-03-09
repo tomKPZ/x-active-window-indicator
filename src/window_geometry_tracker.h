@@ -23,6 +23,7 @@
 
 #include "event_dispatcher.h"
 #include "event_loop.h"
+#include "observable.h"
 #include "scoped_observer.h"
 #include "util.h"
 #include "window_geometry_observer.h"
@@ -33,12 +34,12 @@ class Connection;
 class WindowGeometryObserver;
 
 class WindowGeometryTracker : public EventDispatcher,
+                              public Observable<WindowGeometryObserver>,
                               public WindowGeometryObserver {
  public:
   WindowGeometryTracker(Connection* connection,
                         EventLoop* event_loop,
-                        xcb_window_t window,
-                        WindowGeometryObserver* observer);
+                        xcb_window_t window);
   ~WindowGeometryTracker() override;
 
   int16_t X() const;
@@ -62,9 +63,7 @@ class WindowGeometryTracker : public EventDispatcher,
   Connection* connection_;
   EventLoop* event_loop_;
   ScopedObserver<EventDispatcher> event_dispatcher_;
-
   xcb_window_t window_;
-  WindowGeometryObserver* observer_;
 
   // Position relative to the parent window.  (0, 0) if this is the
   // root window.
@@ -77,6 +76,7 @@ class WindowGeometryTracker : public EventDispatcher,
   uint16_t border_width_;
 
   std::unique_ptr<WindowGeometryTracker> parent_;
+  std::unique_ptr<ScopedObserver<WindowGeometryObserver>> observer_;
 
   DISALLOW_COPY_AND_ASSIGN(WindowGeometryTracker);
 };

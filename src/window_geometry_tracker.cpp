@@ -24,13 +24,11 @@
 
 WindowGeometryTracker::WindowGeometryTracker(Connection* connection,
                                              EventLoop* event_loop,
-                                             xcb_window_t window,
-                                             WindowGeometryObserver* observer)
+                                             xcb_window_t window)
     : connection_(connection),
       event_loop_(event_loop),
-      event_dispatcher_(this, event_loop),
-      window_(window),
-      observer_(observer) {
+      event_dispatcher_(this, event_loop_),
+      window_(window) {
   connection_->SelectEvents(window_, XCB_EVENT_MASK_STRUCTURE_NOTIFY);
 
   auto tree = XCB_SYNC(xcb_query_tree, connection_, window_);
@@ -83,18 +81,21 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
       if (x_ != configure->x || y_ != configure->y) {
         x_ = configure->x;
         y_ = configure->y;
-        observer_->WindowPositionChanged();
+        for (auto* observer : observers())
+          observer->WindowPositionChanged();
       }
 
       if (width_ != configure->width || height_ != configure->height) {
         width_ = configure->width;
         height_ = configure->height;
-        observer_->WindowSizeChanged();
+        for (auto* observer : observers())
+          observer->WindowSizeChanged();
       }
 
       if (border_width_ != configure->border_width) {
         border_width_ = configure->border_width;
-        observer_->WindowBorderWidthChanged();
+        for (auto* observer : observers())
+          observer->WindowBorderWidthChanged();
       }
 
       return true;
@@ -111,7 +112,8 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
 
       x_ = gravity->x;
       y_ = gravity->y;
-      observer_->WindowPositionChanged();
+      for (auto* observer : observers())
+        observer->WindowPositionChanged();
 
       return true;
     }
@@ -126,7 +128,8 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
         return true;
 
       SetParent(reparent->parent);
-      observer_->WindowPositionChanged();
+      for (auto* observer : observers())
+        observer->WindowPositionChanged();
 
       return true;
     }
@@ -137,14 +140,19 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
 }
 
 void WindowGeometryTracker::WindowPositionChanged() {
-  observer_->WindowPositionChanged();
+  for (auto* observer : observers())
+    observer->WindowPositionChanged();
 }
 
 void WindowGeometryTracker::SetParent(xcb_window_t parent) {
-  if (parent == XCB_WINDOW_NONE) {
-    parent_ = nullptr;
-  } else {
+  // |observer_| must be destroyed before |parent_|.  Reset them now
+  // to prevent recreating them in the wrong order below.
+  observer_.reset();
+  parent_.reset();
+  if (parent != XCB_WINDOW_NONE) {
     parent_ = std::make_unique<WindowGeometryTracker>(connection_, event_loop_,
-                                                      parent, this);
+                                                      parent);
+    observer_ = std::make_unique<ScopedObserver<WindowGeometryObserver>>(
+        this, parent_.get());
   }
 }

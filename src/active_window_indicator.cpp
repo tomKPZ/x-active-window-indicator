@@ -83,11 +83,19 @@ void ActiveWindowIndicator::OnStateChanged() {
   needs_set_position_ = show;
   needs_set_size_ = show;
   needs_show_ = show;
-  window_geometry_tracker_ =
-      show ? std::make_unique<WindowGeometryTracker>(
-                 connection_, event_loop_,
-                 active_window_tracker_.active_window(), this)
-           : nullptr;
-  if (!show)
+
+  // |window_geometry_observer_| must be destroyed before
+  // window_geometry_tracker_|.  Reset them now to prevent recreating
+  // them in the wrong order below.
+  window_geometry_observer_.reset();
+  window_geometry_tracker_.reset();
+  if (show) {
+    window_geometry_tracker_ = std::make_unique<WindowGeometryTracker>(
+        connection_, event_loop_, active_window_tracker_.active_window());
+    window_geometry_observer_ =
+        std::make_unique<ScopedObserver<WindowGeometryObserver>>(
+            this, window_geometry_tracker_.get());
+  } else {
     border_window_.Hide();
+  }
 }
