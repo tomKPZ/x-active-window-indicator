@@ -25,6 +25,7 @@
 
 #include "connection.h"
 #include "event.h"
+#include "event_loop.h"
 #include "key_state_observer.h"
 #include "x_error.h"
 
@@ -45,7 +46,9 @@ void SelectEvents(Connection* connection,
 
 }  // namespace
 
-KeyListener::KeyListener(Connection* connection, KeyStateObserver* observer)
+KeyListener::KeyListener(Connection* connection,
+                         EventLoop* event_loop,
+                         KeyStateObserver* observer)
     : connection_(connection), observer_(observer) {
   XCB_SYNC(xcb_input_xi_query_version, connection_, XCB_INPUT_MAJOR_VERSION,
            XCB_INPUT_MINOR_VERSION);
@@ -58,6 +61,7 @@ KeyListener::KeyListener(Connection* connection, KeyStateObserver* observer)
   SelectEvents(connection_, static_cast<xcb_input_xi_event_mask_t>(
                                 XCB_INPUT_XI_EVENT_MASK_KEY_PRESS |
                                 XCB_INPUT_XI_EVENT_MASK_KEY_RELEASE));
+  event_loop->RegisterDispatcher(this);
 }
 
 KeyListener::~KeyListener() {

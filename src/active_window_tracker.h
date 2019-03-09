@@ -27,10 +27,13 @@ typedef uint32_t xcb_window_t;
 
 class ActiveWindowObserver;
 class Connection;
+class EventLoop;
 
 class ActiveWindowTracker : public EventDispatcher {
  public:
-  ActiveWindowTracker(Connection* connection, ActiveWindowObserver* observer);
+  ActiveWindowTracker(Connection* connection,
+                      EventLoop* event_loop,
+                      ActiveWindowObserver* observer);
   ~ActiveWindowTracker() override;
 
  protected:
