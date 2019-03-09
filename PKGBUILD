@@ -13,11 +13,11 @@ md5sums=("SKIP")
 
 build() {
     cd "$srcdir/${pkgname}"
-    cmake .
+    cmake . -DCMAKE_INSTALL_PREFIX=/usr
     make
 }
 
 package() {
     cd "$srcdir/${pkgname}"
-    make DESTDIR="$pkgdir" PREFIX=/usr install
+    make DESTDIR="$pkgdir" install
 }
