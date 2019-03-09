@@ -21,17 +21,18 @@
 #include <vector>
 
 #include "event_dispatcher.h"
+#include "observable.h"
+#include "scoped_observer.h"
 #include "util.h"
 
 class Connection;
 class EventLoop;
 class KeyStateObserver;
 
-class KeyListener : public EventDispatcher {
+class KeyListener : public EventDispatcher,
+                    public Observable<KeyStateObserver> {
  public:
-  KeyListener(Connection* connection,
-              EventLoop* event_loop,
-              KeyStateObserver* observer);
+  KeyListener(Connection* connection, EventLoop* event_loop);
   ~KeyListener() override;
 
  protected:
@@ -53,7 +54,6 @@ class KeyListener : public EventDispatcher {
 
   Connection* connection_;
   EventLoop* event_loop_;
-  KeyStateObserver* observer_;
 
   uint8_t xcb_input_major_opcode_;
 

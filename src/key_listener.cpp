@@ -46,10 +46,8 @@ void SelectEvents(Connection* connection,
 
 }  // namespace
 
-KeyListener::KeyListener(Connection* connection,
-                         EventLoop* event_loop,
-                         KeyStateObserver* observer)
-    : connection_(connection), event_loop_(event_loop), observer_(observer) {
+KeyListener::KeyListener(Connection* connection, EventLoop* event_loop)
+    : connection_(connection), event_loop_(event_loop) {
   XCB_SYNC(xcb_input_xi_query_version, connection_, XCB_INPUT_MAJOR_VERSION,
            XCB_INPUT_MINOR_VERSION);
   auto* input_extension =
@@ -104,8 +102,10 @@ bool KeyListener::DispatchEvent(const Event& event) {
                   [](const KeyCodeState& key_code_state) {
                     return key_code_state.key_pressed;
                   });
-  if (any_key_pressed != any_key_pressed_)
-    observer_->KeyStateChanged(any_key_pressed);
+  if (any_key_pressed != any_key_pressed_) {
+    for (const auto& observer : observers())
+      observer->KeyStateChanged(any_key_pressed);
+  }
   any_key_pressed_ = any_key_pressed;
   return true;
 }

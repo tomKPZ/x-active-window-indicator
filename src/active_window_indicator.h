@@ -22,6 +22,8 @@
 #include "active_window_observer.h"
 #include "event_loop_idle_observer.h"
 #include "key_state_observer.h"
+#include "observable.h"
+#include "scoped_observer.h"
 #include "window_geometry_observer.h"
 
 class BorderWindow;
@@ -36,7 +38,8 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
  public:
   ActiveWindowIndicator(Connection* connection,
                         EventLoop* event_loop,
-                        BorderWindow* border_window_);
+                        BorderWindow* border_window_,
+                        Observable<KeyStateObserver>* observable_);
   ~ActiveWindowIndicator() override;
 
  protected:
@@ -61,8 +64,8 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
 
   Connection* connection_;
   EventLoop* event_loop_;
-
   BorderWindow* border_window_;
+  ScopedObserver<KeyStateObserver> observer_;
 
   xcb_window_t active_window_;
   bool key_pressed_ = false;

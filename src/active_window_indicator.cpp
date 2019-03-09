@@ -24,12 +24,15 @@
 #include "event_loop.h"
 #include "window_geometry_tracker.h"
 
-ActiveWindowIndicator::ActiveWindowIndicator(Connection* connection,
-                                             EventLoop* event_loop,
-                                             BorderWindow* border_window)
+ActiveWindowIndicator::ActiveWindowIndicator(
+    Connection* connection,
+    EventLoop* event_loop,
+    BorderWindow* border_window,
+    Observable<KeyStateObserver>* observable)
     : connection_(connection),
       event_loop_(event_loop),
       border_window_(border_window),
+      observer_(this, observable),
       active_window_(XCB_WINDOW_NONE) {
   event_loop_->AddIdleObserver(this);
 }

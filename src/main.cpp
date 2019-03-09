@@ -26,9 +26,10 @@ int main(int, char**) {
   Connection connection;
   EventLoop loop{&connection};
   BorderWindow border_window{&connection};
-  ActiveWindowIndicator indicator{&connection, &loop, &border_window};
+  KeyListener key_listener{&connection, &loop};
+  ActiveWindowIndicator indicator{&connection, &loop, &border_window,
+                                  &key_listener};
   ActiveWindowTracker tracker{&connection, &loop, &indicator};
-  KeyListener key_listener{&connection, &loop, &indicator};
   loop.Run();
   return 0;
 }
