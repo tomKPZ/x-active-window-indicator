@@ -33,7 +33,7 @@ class Event {
   uint8_t ResponseType() const;
   uint16_t Sequence() const;
 
-  operator bool() const { return event_; }
+  explicit operator bool() const { return event_; }
   const xcb_generic_event_t* event() const { return event_; }
 
  private:

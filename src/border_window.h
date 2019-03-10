@@ -27,7 +27,7 @@ class Connection;
 
 class BorderWindow {
  public:
-  BorderWindow(Connection* connection);
+  explicit BorderWindow(Connection* connection);
   ~BorderWindow();
 
   void SetPosition(int16_t x, int16_t y);

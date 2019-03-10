@@ -37,10 +37,10 @@ typedef uint32_t xcb_window_t;
 template <typename T>
 class XcbReply {
  public:
-  XcbReply(T* t) : t_(t) {}
+  explicit XcbReply(T* t) : t_(t) {}
   ~XcbReply() { free(t_); }
-  operator const T*() const { return t_; }
   const T* operator->() const { return t_; }
+  const T* get() const { return t_; }
 
  private:
   T* t_;
