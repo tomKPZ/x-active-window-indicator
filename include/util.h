@@ -28,6 +28,9 @@
 #define STRINGIZE_AUX(x) #x
 #define STRINGIZE(x) STRINGIZE_AUX(x)
 
+#if defined(NDEBUG)
+#define DCHECK(x)
+#else
 #define DCHECK(x)                                                    \
   do {                                                               \
     if (!(x)) {                                                      \
@@ -36,6 +39,7 @@
       std::abort();                                                  \
     }                                                                \
   } while (0)
+#endif
 
 #define DELETE_COPY_AND_MOVE(TypeName)                                  \
   TypeName(const TypeName&) = delete;                                   \
