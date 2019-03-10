@@ -15,21 +15,27 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#pragma once
+#ifndef OBSERVABLE_H
+#define OBSERVABLE_H
 
-#include "observable.h"
+#include <cassert>
+
+#include <forward_list>
 
 template <typename Observer>
-class ScopedObserver {
+class Observable {
  public:
-  ScopedObserver(Observer* observer, Observable<Observer>* observable)
-      : observer_(observer), observable_(observable) {
-    observable_->AddObserver(observer_);
-  }
+  void AddObserver(Observer* observer) { observers_.push_front(observer); }
 
-  ~ScopedObserver() { observable_->RemoveObserver(observer_); }
+  void RemoveObserver(Observer* observer) { observers_.remove(observer); }
+
+ protected:
+  virtual ~Observable() { assert(observers_.empty()); }
+
+  const std::forward_list<Observer*>& observers() const { return observers_; }
 
  private:
-  Observer* observer_;
-  Observable<Observer>* observable_;
+  std::forward_list<Observer*> observers_;
 };
+
+#endif

@@ -15,16 +15,32 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#pragma once
+#ifndef EVENT_LOOP_H
+#define EVENT_LOOP_H
 
-#include <cstdint>
+#include "observable.h"
+#include "util.h"
 
-using xcb_window_t = uint32_t;
+class Connection;
+class Event;
+class EventDispatcher;
+class EventLoopIdleObserver;
 
-class ActiveWindowObserver {
+class EventLoop : public Observable<EventDispatcher>,
+                  public Observable<EventLoopIdleObserver> {
  public:
-  virtual void ActiveWindowChanged() = 0;
+  EventLoop(Connection* connection_, int should_quit_fd);
+  ~EventLoop() override;
 
- protected:
-  virtual ~ActiveWindowObserver() = default;
+  void Run();
+
+ private:
+  Event WaitForEvent();
+
+  Connection* connection_;
+  int should_quit_fd_;
+
+  DISALLOW_COPY_AND_ASSIGN(EventLoop);
 };
+
+#endif

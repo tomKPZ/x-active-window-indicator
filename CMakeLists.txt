@@ -53,33 +53,18 @@ add_cxx_compiler_flag_if_supported(-Wuseless-cast)
 # Warn if if / else branches have duplicated code.
 add_cxx_compiler_flag_if_supported(-Wduplicated-branches)
 
+include_directories(include)
+
 add_executable(x-active-window-indicator
-               src/active_window_indicator.h
                src/active_window_indicator.cpp
-               src/active_window_observer.h
-               src/active_window_tracker.h
                src/active_window_tracker.cpp
-               src/border_window.h
                src/border_window.cpp
-               src/connection.h
                src/connection.cpp
-               src/event.h
                src/event.cpp
-               src/event_dispatcher.h
-               src/event_loop.h
                src/event_loop.cpp
-               src/event_loop_idle_observer.h
-               src/key_listener.h
                src/key_listener.cpp
-               src/key_state_observer.h
                src/main.cpp
-               src/observable.h
-               src/scoped_observer.h
-               src/util.h
-               src/window_geometry_observer.h
-               src/window_geometry_tracker.h
                src/window_geometry_tracker.cpp
-               src/x_error.h
                src/x_error.cpp)
 
 set_target_properties(x-active-window-indicator PROPERTIES CXX_STANDARD 20)

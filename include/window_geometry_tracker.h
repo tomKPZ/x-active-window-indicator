@@ -15,7 +15,8 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#pragma once
+#ifndef WINDOW_GEOMETRY_TRACKER_H
+#define WINDOW_GEOMETRY_TRACKER_H
 
 #include <cstdint>
 
@@ -80,3 +81,5 @@ class WindowGeometryTracker : public EventDispatcher,
 
   DISALLOW_COPY_AND_ASSIGN(WindowGeometryTracker);
 };
+
+#endif
