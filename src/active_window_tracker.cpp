@@ -17,11 +17,10 @@
 
 #include "active_window_tracker.h"
 
-#include <xcb/xcb.h>
+#include <xcb/xproto.h>
 
 #include <algorithm>
-#include <cstring>
-#include <iostream>
+#include <forward_list>
 #include <limits>
 #include <string>
 #include <vector>

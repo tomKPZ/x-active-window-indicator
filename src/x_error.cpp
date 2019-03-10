@@ -17,6 +17,7 @@
 
 #include "x_error.h"
 
+#include <cstdint>
 #include <sstream>
 
 namespace {

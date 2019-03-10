@@ -17,10 +17,15 @@
 
 #include "window_geometry_tracker.h"
 
+#include <xcb/xcb.h>
+#include <xcb/xproto.h>
+
+#include <forward_list>
+
 #include "connection.h"
 #include "event.h"
+#include "event_loop.h"
 #include "window_geometry_observer.h"
-#include "x_error.h"
 
 WindowGeometryTracker::WindowGeometryTracker(Connection* connection,
                                              EventLoop* event_loop,

@@ -17,10 +17,9 @@
 
 #include "active_window_indicator.h"
 
-#include <xcb/xcb.h>
+#include <xcb/xproto.h>
 
 #include "border_window.h"
-#include "connection.h"
 #include "event_loop.h"
 #include "window_geometry_tracker.h"
 

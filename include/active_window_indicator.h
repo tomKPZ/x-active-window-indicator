@@ -26,11 +26,10 @@
 #include "event_loop_idle_observer.h"
 #include "key_listener.h"
 #include "key_state_observer.h"
-#include "observable.h"
 #include "scoped_observer.h"
+#include "util.h"
 #include "window_geometry_observer.h"
 
-class BorderWindow;
 class Connection;
 class EventLoop;
 class WindowGeometryTracker;

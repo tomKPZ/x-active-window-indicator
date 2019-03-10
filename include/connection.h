@@ -18,9 +18,11 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
+#include <xcb/xcb.h>
+#include <xcb/xproto.h>
+
 #include <cstdint>
 #include <cstdlib>
-
 #include <memory>
 #include <unordered_map>
 
@@ -30,9 +32,6 @@
 #define XCB_SYNC(func, c, ...)  \
   XcbSyncAux((c), func##_reply, \
              func((c)->connection() __VA_OPT__(, ) __VA_ARGS__))
-
-using xcb_connection_t = struct xcb_connection_t;
-using xcb_window_t = uint32_t;
 
 template <typename T>
 class XcbReply {

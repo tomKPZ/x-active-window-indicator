@@ -18,11 +18,18 @@
 #include "event_loop.h"
 
 #include <poll.h>
+#include <xcb/xcb.h>
+#include <xcb/xproto.h>
 
+#include <cerrno>
+#include <cstdint>
 #include <exception>
+#include <forward_list>
 #include <iostream>
 #include <iterator>
 #include <sstream>
+#include <stdexcept>
+#include <string>
 
 #include "connection.h"
 #include "event.h"

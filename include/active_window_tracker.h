@@ -25,11 +25,12 @@
 #include "scoped_observer.h"
 #include "util.h"
 
-using xcb_atom_t = uint32_t;
-using xcb_window_t = uint32_t;
+using xcb_atom_t = std::uint32_t;
+using xcb_window_t = std::uint32_t;
 
 class ActiveWindowObserver;
 class Connection;
+class Event;
 class EventLoop;
 
 class ActiveWindowTracker : public EventDispatcher,
