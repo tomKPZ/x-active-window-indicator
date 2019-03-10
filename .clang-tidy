@@ -1,2 +1,2 @@
-Checks: 'llvm-include-order'
+Checks: '*'
 User: tomKPZ
