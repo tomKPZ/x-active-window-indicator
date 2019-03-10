@@ -26,5 +26,5 @@ class ActiveWindowObserver {
   virtual void ActiveWindowChanged() = 0;
 
  protected:
-  virtual ~ActiveWindowObserver() {}
+  virtual ~ActiveWindowObserver() = default;
 };

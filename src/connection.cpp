@@ -41,7 +41,7 @@ class Connection::MultiMask {
     }
   }
 
-  ~MultiMask() {}
+  ~MultiMask() = default;
 
   void AddMask(uint32_t mask) {
     for (int i = 0; i < kMaskSize; i++) {
@@ -73,7 +73,7 @@ class Connection::MultiMask {
  private:
   static constexpr auto kMaskSize = 25;
 
-  unsigned int mask_bits_[kMaskSize];
+  unsigned int mask_bits_[kMaskSize]{};
 
   DISALLOW_COPY_AND_ASSIGN(MultiMask);
 };

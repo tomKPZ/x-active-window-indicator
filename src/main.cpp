@@ -16,8 +16,8 @@
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 #include <fcntl.h>
-#include <signal.h>
 #include <unistd.h>
+#include <csignal>
 #include <cstdlib>
 
 #include <stdexcept>
@@ -46,7 +46,7 @@ int main(int, char**) {
     }
   }
 
-  struct sigaction sa;
+  struct sigaction sa {};
   sa.sa_flags = SA_RESTART;
   sa.sa_sigaction = signal_handler;
   for (auto sig : {
