@@ -17,7 +17,7 @@
 
 #pragma once
 
-// TODO: is there a way to forward-declare xcb_generic_error_t?
+// TODO(tomKPZ): is there a way to forward-declare xcb_generic_error_t?
 #include <xcb/xcb.h>
 
 #include <stdexcept>

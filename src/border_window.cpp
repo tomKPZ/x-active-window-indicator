@@ -79,7 +79,8 @@ void BorderWindow::SetPosition(int16_t x, int16_t y) {
 }
 
 void BorderWindow::SetSize(uint16_t width, uint16_t height) {
-  // TODO: Use an outer border instead of an inner border if the window is tiny.
+  // TODO(tomKPZ): Use an outer border instead of an inner border if the window
+  // is tiny.
   xcb_configure_window_value_list_t configure{};
   configure.width = CheckedCast<uint16_t>(width - 2 * BORDER_WIDTH);
   configure.height = CheckedCast<uint16_t>(height - 2 * BORDER_WIDTH);

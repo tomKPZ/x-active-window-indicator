@@ -46,11 +46,11 @@ class KeyListener : public EventDispatcher,
     explicit KeyCodeState(uint32_t key_code) : code(key_code) {}
     const uint32_t code;
 
-    // TODO: Any way to get initial key states?
+    // TODO(tomKPZ): Any way to get initial key states?
     bool key_pressed = false;
   };
 
-  // TODO: Don't hardcode these keycodes.
+  // TODO(tomKPZ): Don't hardcode these keycodes.
   std::vector<KeyCodeState> key_code_states_{KeyCodeState{133},
                                              KeyCodeState{134}};
   bool any_key_pressed_ = false;

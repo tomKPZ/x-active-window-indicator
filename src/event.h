@@ -17,9 +17,9 @@
 
 #pragma once
 
-// TODO: any way to forward declare xcb_generic_event_t?
-#include <cstdint>
+// TODO(tomKPZ): any way to forward declare xcb_generic_event_t?
 #include <xcb/xcb.h>
+#include <cstdint>
 
 #include "util.h"
 

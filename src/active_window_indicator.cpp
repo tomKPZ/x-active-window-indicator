@@ -42,7 +42,7 @@ void ActiveWindowIndicator::ActiveWindowChanged() {
 }
 
 void ActiveWindowIndicator::OnIdle() {
-  // TODO: take border width into account for position and size.
+  // TODO(tomKPZ): take border width into account for position and size.
   if (needs_set_position_) {
     border_window_.SetPosition(window_geometry_tracker_->X(),
                                window_geometry_tracker_->Y());
