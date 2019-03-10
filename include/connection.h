@@ -18,7 +18,6 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
-#include <cassert>
 #include <cstdint>
 #include <cstdlib>
 
@@ -82,7 +81,7 @@ auto XcbSyncAux(Connection* connection, ReplyFunc reply_func, Cookie cookie)
   if (error) {
     throw XError(*error);
   }
-  assert(t);
+  DCHECK(t);
   return XcbReply(t);
 }
 

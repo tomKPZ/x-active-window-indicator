@@ -18,9 +18,9 @@
 #ifndef OBSERVABLE_H
 #define OBSERVABLE_H
 
-#include <cassert>
-
 #include <forward_list>
+
+#include "util.h"
 
 template <typename Observer>
 class Observable {
@@ -30,7 +30,7 @@ class Observable {
   void RemoveObserver(Observer* observer) { observers_.remove(observer); }
 
  protected:
-  virtual ~Observable() { assert(observers_.empty()); }
+  virtual ~Observable() { DCHECK(observers_.empty()); }
 
   const std::forward_list<Observer*>& observers() const { return observers_; }
 

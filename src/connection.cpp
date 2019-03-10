@@ -2,7 +2,6 @@
 
 #include <xcb/xcb.h>
 
-#include <cassert>
 #include <memory>
 #include <string>
 
@@ -36,37 +35,39 @@ void SetEventMask(xcb_connection_t* connection,
 
 class Connection::MultiMask {
  public:
-  MultiMask() {
-    for (unsigned int& mask_bit : mask_bits_) {
-      mask_bit = 0;
-    }
-  }
+  MultiMask() = default;
 
   ~MultiMask() = default;
 
   void AddMask(uint32_t mask) {
-    for (int i = 0; i < kMaskSize; i++) {
-      if ((mask & (1U << i)) != 0u) {
-        mask_bits_[i]++;
+    uint32_t mask_bit = 1;
+    for (auto& mask_count : mask_counts_) {
+      if ((mask & mask_bit) != XCB_EVENT_MASK_NO_EVENT) {
+        mask_count++;
       }
+      mask_bit <<= 1u;
     }
   }
 
   void RemoveMask(uint32_t mask) {
-    for (int i = 0; i < kMaskSize; i++) {
-      if ((mask & (1U << i)) != 0u) {
-        assert(mask_bits_[i]);
-        mask_bits_[i]--;
+    uint32_t mask_bit = 1;
+    for (auto& mask_count : mask_counts_) {
+      if ((mask & mask_bit) != XCB_EVENT_MASK_NO_EVENT) {
+        DCHECK(mask_count > 0);
+        mask_count--;
       }
+      mask_bit <<= 1u;
     }
   }
 
   uint32_t ToMask() const {
     uint32_t mask = XCB_EVENT_MASK_NO_EVENT;
-    for (int i = 0; i < kMaskSize; i++) {
-      if (mask_bits_[i] != 0u) {
-        mask |= (1U << i);
+    uint32_t mask_bit = 1;
+    for (auto mask_count : mask_counts_) {
+      if (mask_count > 0) {
+        mask |= mask_bit;
       }
+      mask_bit <<= 1u;
     }
     return mask;
   }
@@ -74,7 +75,7 @@ class Connection::MultiMask {
  private:
   static constexpr auto kMaskSize = 25;
 
-  unsigned int mask_bits_[kMaskSize]{};
+  unsigned int mask_counts_[kMaskSize]{};
 
   DELETE_COPY_AND_MOVE(MultiMask);
 };
@@ -119,7 +120,7 @@ void Connection::SelectEvents(xcb_window_t window, uint32_t event_mask) {
 }
 
 void Connection::DeselectEvents(xcb_window_t window, uint32_t event_mask) {
-  assert(mask_map_.find(window) != mask_map_.end());
+  DCHECK(mask_map_.find(window) != mask_map_.end());
   std::unique_ptr<MultiMask>& mask = mask_map_[window];
   uint32_t old_mask = mask->ToMask();
   mask->RemoveMask(event_mask);

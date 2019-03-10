@@ -19,9 +19,23 @@
 #define UTIL_H
 
 #include <cstddef>
+#include <cstdlib>
+#include <iostream>
 #include <limits>
 #include <stdexcept>
 #include <string>
+
+#define STRINGIZE_AUX(x) #x
+#define STRINGIZE(x) STRINGIZE_AUX(x)
+
+#define DCHECK(x)                                                    \
+  do {                                                               \
+    if (!(x)) {                                                      \
+      std::cerr << __FILE__ << ":" << __LINE__                       \
+                << ": DCHECK failed: " << STRINGIZE(x) << std::endl; \
+      std::abort();                                                  \
+    }                                                                \
+  } while (0)
 
 #define DELETE_COPY_AND_MOVE(TypeName)                                  \
   TypeName(const TypeName&) = delete;                                   \

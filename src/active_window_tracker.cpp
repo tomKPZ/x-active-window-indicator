@@ -20,7 +20,6 @@
 #include <xcb/xcb.h>
 
 #include <algorithm>
-#include <cassert>
 #include <cstring>
 #include <iostream>
 #include <limits>
