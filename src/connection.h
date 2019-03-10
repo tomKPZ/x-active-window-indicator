@@ -31,8 +31,8 @@
   XcbSyncAux((c), func##_reply, \
              func((c)->connection() __VA_OPT__(, ) __VA_ARGS__))
 
-typedef struct xcb_connection_t xcb_connection_t;
-typedef uint32_t xcb_window_t;
+using xcb_connection_t = struct xcb_connection_t;
+using xcb_window_t = uint32_t;
 
 template <typename T>
 class XcbReply {

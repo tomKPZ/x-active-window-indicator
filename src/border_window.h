@@ -21,7 +21,7 @@
 
 #include "util.h"
 
-typedef uint32_t xcb_window_t;
+using xcb_window_t = uint32_t;
 
 class Connection;
 

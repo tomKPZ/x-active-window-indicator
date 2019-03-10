@@ -24,8 +24,8 @@
 #include "scoped_observer.h"
 #include "util.h"
 
-typedef uint32_t xcb_atom_t;
-typedef uint32_t xcb_window_t;
+using xcb_atom_t = uint32_t;
+using xcb_window_t = uint32_t;
 
 class ActiveWindowObserver;
 class Connection;

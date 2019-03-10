@@ -28,7 +28,7 @@
 #include "util.h"
 #include "window_geometry_observer.h"
 
-typedef uint32_t xcb_window_t;
+using xcb_window_t = uint32_t;
 
 class Connection;
 class WindowGeometryObserver;

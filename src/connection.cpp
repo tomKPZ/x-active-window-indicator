@@ -3,6 +3,7 @@
 #include <xcb/xcb.h>
 #include <cassert>
 
+#include <memory>
 #include <string>
 
 namespace {
@@ -36,8 +37,8 @@ void SetEventMask(xcb_connection_t* connection,
 class Connection::MultiMask {
  public:
   MultiMask() {
-    for (int i = 0; i < kMaskSize; i++) {
-      mask_bits_[i] = 0;
+    for (unsigned int & mask_bit : mask_bits_) {
+      mask_bit = 0;
     }
   }
 
@@ -110,7 +111,7 @@ uint32_t Connection::GenerateId() {
 void Connection::SelectEvents(xcb_window_t window, uint32_t event_mask) {
   std::unique_ptr<MultiMask>& mask = mask_map_[window];
   if (!mask) {
-    mask.reset(new MultiMask());
+    mask = std::make_unique<MultiMask>();
   }
   uint32_t old_mask = mask_map_[window]->ToMask();
   mask->AddMask(event_mask);
