@@ -18,12 +18,14 @@
 #ifndef KEY_STATE_OBSERVER_H
 #define KEY_STATE_OBSERVER_H
 
+#include "util.h"
+
 class KeyStateObserver {
  public:
   virtual void KeyStateChanged() = 0;
 
  protected:
-  virtual ~KeyStateObserver() = default;
+  DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(KeyStateObserver);
 };
 
 #endif

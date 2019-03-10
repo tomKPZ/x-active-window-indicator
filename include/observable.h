@@ -31,6 +31,7 @@ class Observable {
 
  protected:
   virtual ~Observable() { DCHECK(observers_.empty()); }
+  DEFAULT_SPECIAL_MEMBERS(Observable);
 
   const std::forward_list<Observer*>& observers() const { return observers_; }
 

@@ -38,14 +38,16 @@ template <typename T>
 class XcbReply {
  public:
   explicit XcbReply(T* t) : t_(t) {}
-  ~XcbReply() { free(t_); }
+  ~XcbReply() {
+    free(t_);  // NOLINT
+  }
   const T* operator->() const { return t_; }
   const T* get() const { return t_; }
 
  private:
   T* t_;
 
-  DELETE_COPY_AND_MOVE(XcbReply);
+  DELETE_SPECIAL_MEMBERS(XcbReply);
 };
 
 class Connection {
@@ -70,7 +72,7 @@ class Connection {
 
   std::unordered_map<xcb_window_t, std::unique_ptr<MultiMask>> mask_map_;
 
-  DELETE_COPY_AND_MOVE(Connection);
+  DELETE_SPECIAL_MEMBERS(Connection);
 };
 
 template <typename Cookie, typename ReplyFunc>

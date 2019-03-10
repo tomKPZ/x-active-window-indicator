@@ -18,12 +18,14 @@
 #ifndef EVENT_LOOP_IDLE_OBSERVER_H
 #define EVENT_LOOP_IDLE_OBSERVER_H
 
+#include "util.h"
+
 class EventLoopIdleObserver {
  public:
   virtual void OnIdle() = 0;
 
  protected:
-  virtual ~EventLoopIdleObserver() = default;
+  DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(EventLoopIdleObserver);
 };
 
 #endif

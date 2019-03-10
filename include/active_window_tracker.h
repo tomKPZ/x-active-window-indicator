@@ -53,7 +53,7 @@ class ActiveWindowTracker : public EventDispatcher,
   xcb_atom_t net_active_window_;
   xcb_window_t active_window_;
 
-  DELETE_COPY_AND_MOVE(ActiveWindowTracker);
+  DELETE_SPECIAL_MEMBERS(ActiveWindowTracker);
 };
 
 #endif

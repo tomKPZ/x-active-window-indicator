@@ -77,7 +77,7 @@ class Connection::MultiMask {
 
   unsigned int mask_counts_[kMaskSize]{};
 
-  DELETE_COPY_AND_MOVE(MultiMask);
+  DELETE_SPECIAL_MEMBERS(MultiMask);
 };
 
 Connection::Connection() {
