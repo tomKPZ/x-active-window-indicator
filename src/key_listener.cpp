@@ -40,7 +40,7 @@ void SelectEvents(Connection* connection,
                 sizeof(xcb_input_xi_event_mask_t) / sizeof(uint32_t)},
                event_mask}};
   xcb_input_xi_select_events(connection->connection(),
-                             connection->root_window(), ArraySize(mask),
+                             connection->root_window(), std::size(mask),
                              &mask[0].event_mask);
 }
 
