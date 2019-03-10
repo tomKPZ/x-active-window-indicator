@@ -21,7 +21,7 @@ xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {
 }
 
 void SetEventMask(xcb_connection_t* connection,
-                  xcb_window_t window,
+                  const xcb_window_t& window,
                   uint32_t new_mask) {
   auto cookie = xcb_change_window_attributes(connection, window,
                                              XCB_CW_EVENT_MASK, &new_mask);
