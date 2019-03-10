@@ -23,9 +23,10 @@
 #include <stdexcept>
 #include <string>
 
-#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName&) = delete;      \
-  TypeName& operator=(const TypeName&) = delete
+#define DISALLOW_COPY_AND_ASSIGN(TypeName)                    \
+  TypeName(const TypeName&) = delete;                         \
+  TypeName& /*NOLINT(bugprone-macro-parentheses)*/ operator=( \
+      const TypeName&) = delete
 
 template <typename T>
 constexpr size_t ArraySize(const T& array) {
