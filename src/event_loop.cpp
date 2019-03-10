@@ -59,11 +59,13 @@ void EventLoop::Run() {
       } catch (...) {
         std::cerr << "Unknown exception" << std::endl;
       }
-      if (dispatched)
+      if (dispatched) {
         break;
+      }
     }
-    if (!dispatched && event.ResponseType() != XCB_CLIENT_MESSAGE)
+    if (!dispatched && event.ResponseType() != XCB_CLIENT_MESSAGE) {
       std::cerr << MakeUnhandledErrorMessage(event) << std::endl;
+    }
   }
 }
 
@@ -71,11 +73,13 @@ Event EventLoop::WaitForEvent() {
   auto* connection = connection_->connection();
 
   xcb_generic_event_t* event = xcb_poll_for_event(connection);
-  if (event || xcb_connection_has_error(connection))
+  if (event || xcb_connection_has_error(connection)) {
     return Event(event);
+  }
 
-  for (auto* observer : Observable<EventLoopIdleObserver>::observers())
+  for (auto* observer : Observable<EventLoopIdleObserver>::observers()) {
     observer->OnIdle();
+  }
 
   xcb_flush(connection);
 
@@ -86,14 +90,17 @@ Event EventLoop::WaitForEvent() {
     };
     int ready = poll(poll_fds, ArraySize(poll_fds), -1);
     if (ready == -1) {
-      if (errno == EINTR)
+      if (errno == EINTR) {
         continue;
+      }
       throw std::logic_error("poll() failed");
     }
-    if (poll_fds[0].revents)
+    if (poll_fds[0].revents) {
       return Event(nullptr);
+    }
     event = xcb_poll_for_event(connection);
-    if (event || xcb_connection_has_error(connection))
+    if (event || xcb_connection_has_error(connection)) {
       return Event(event);
+    }
   }
 }

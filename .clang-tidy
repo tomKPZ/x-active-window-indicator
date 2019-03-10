@@ -1,1 +1,3 @@
-Checks: '*'
+#Checks: '*'
+Checks: 'hicpp-braces-around-statements'
+User: tomKPZ

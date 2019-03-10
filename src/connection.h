@@ -76,8 +76,9 @@ auto XcbSyncAux(Connection* connection, ReplyFunc reply_func, Cookie cookie)
     -> decltype(auto) {
   xcb_generic_error_t* error = nullptr;
   auto* t = reply_func(connection->connection(), cookie, &error);
-  if (error)
+  if (error) {
     throw XError(*error);
+  }
   assert(t);
   return XcbReply(t);
 }

@@ -55,8 +55,9 @@ void ActiveWindowIndicator::OnIdle() {
   }
   needs_set_size_ = false;
 
-  if (needs_show_)
+  if (needs_show_) {
     border_window_.Show();
+  }
   needs_show_ = false;
 }
 

@@ -30,17 +30,20 @@
 static int pipe_fds[2];
 
 void signal_handler(int, siginfo_t*, void*) {
-  if (write(pipe_fds[1], "", 1) == -1)
+  if (write(pipe_fds[1], "", 1) == -1) {
     std::abort();
+  }
 }
 
 int main(int, char**) {
-  if (pipe(pipe_fds) == -1)
+  if (pipe(pipe_fds) == -1) {
     throw std::logic_error("pipe() failed");
+  }
   for (int fd : pipe_fds) {
     int flags = fcntl(pipe_fds[0], F_GETFL);
-    if (flags == -1 || fcntl(fd, F_SETFL, flags) == -1)
+    if (flags == -1 || fcntl(fd, F_SETFL, flags) == -1) {
       throw std::logic_error("fcntl() failed");
+    }
   }
 
   struct sigaction sa;
@@ -52,8 +55,9 @@ int main(int, char**) {
            SIGQUIT,
            SIGTERM,
        }) {
-    if (sigaction(sig, &sa, nullptr) == -1)
+    if (sigaction(sig, &sa, nullptr) == -1) {
       throw std::logic_error("sigaction() failed");
+    }
   }
 
   Connection connection;
