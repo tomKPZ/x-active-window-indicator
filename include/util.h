@@ -23,14 +23,13 @@
 #include <stdexcept>
 #include <string>
 
-#define DISALLOW_COPY_AND_ASSIGN(TypeName)                               \
-  TypeName(const TypeName&) = delete;                                    \
-  TypeName& /*NOLINT(bugprone-macro-parentheses)*/ operator=(            \
-      const TypeName&) = delete;                                         \
-  TypeName(TypeName&& /*NOLINT(bugprone-macro-parentheses)*/) noexcept = \
-      default;                                                           \
-  TypeName& /*NOLINT(bugprone-macro-parentheses)*/ operator=(            \
-      TypeName&& /*NOLINT(bugprone-macro-parentheses)*/) noexcept = default
+#define DELETE_COPY_AND_MOVE(TypeName)                                  \
+  TypeName(const TypeName&) = delete;                                   \
+  TypeName& /*NOLINT(bugprone-macro-parentheses)*/ operator=(           \
+      const TypeName&) = delete;                                        \
+  TypeName(TypeName&& /*NOLINT(bugprone-macro-parentheses)*/) = delete; \
+  TypeName& /*NOLINT(bugprone-macro-parentheses)*/ operator=(           \
+      TypeName&& /*NOLINT(bugprone-macro-parentheses)*/) = delete
 
 template <typename Dst, typename Src>
 constexpr Dst CheckedCast(Src value) {

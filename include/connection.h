@@ -46,7 +46,7 @@ class XcbReply {
  private:
   T* t_;
 
-  DISALLOW_COPY_AND_ASSIGN(XcbReply);
+  DELETE_COPY_AND_MOVE(XcbReply);
 };
 
 class Connection {
@@ -71,7 +71,7 @@ class Connection {
 
   std::unordered_map<xcb_window_t, std::unique_ptr<MultiMask>> mask_map_;
 
-  DISALLOW_COPY_AND_ASSIGN(Connection);
+  DELETE_COPY_AND_MOVE(Connection);
 };
 
 template <typename Cookie, typename ReplyFunc>

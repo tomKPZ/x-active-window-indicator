@@ -79,7 +79,7 @@ class WindowGeometryTracker : public EventDispatcher,
   std::unique_ptr<WindowGeometryTracker> parent_;
   std::unique_ptr<ScopedObserver<WindowGeometryObserver>> observer_;
 
-  DISALLOW_COPY_AND_ASSIGN(WindowGeometryTracker);
+  DELETE_COPY_AND_MOVE(WindowGeometryTracker);
 };
 
 #endif
