@@ -25,7 +25,7 @@
 
 class XError : public std::runtime_error {
  public:
-  XError(const std::string& what);
-  XError(const char* what);
-  XError(const xcb_generic_error_t& error);
+  explicit XError(const std::string& what);
+  explicit XError(const char* what);
+  explicit XError(const xcb_generic_error_t& error);
 };
