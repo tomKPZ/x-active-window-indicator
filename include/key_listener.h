@@ -27,6 +27,7 @@
 #include "util.h"
 
 class Connection;
+class Event;
 class EventLoop;
 class KeyStateObserver;
 

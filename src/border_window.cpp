@@ -17,8 +17,10 @@
 
 #include "border_window.h"
 
+#include <xcb/shape.h>
 #include <xcb/xcb.h>
 #include <xcb/xfixes.h>
+#include <xcb/xproto.h>
 
 #include <vector>
 

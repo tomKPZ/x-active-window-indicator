@@ -20,6 +20,7 @@
 
 #include <csignal>
 #include <cstdlib>
+#include <initializer_list>
 #include <stdexcept>
 
 #include "active_window_indicator.h"

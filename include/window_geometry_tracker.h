@@ -23,7 +23,6 @@
 #include <memory>
 
 #include "event_dispatcher.h"
-#include "event_loop.h"
 #include "observable.h"
 #include "scoped_observer.h"
 #include "util.h"
@@ -32,7 +31,8 @@
 using xcb_window_t = uint32_t;
 
 class Connection;
-class WindowGeometryObserver;
+class Event;
+class EventLoop;
 
 class WindowGeometryTracker : public EventDispatcher,
                               public Observable<WindowGeometryObserver>,

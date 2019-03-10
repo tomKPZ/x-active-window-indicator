@@ -19,8 +19,10 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xinput.h>
+#include <xcb/xproto.h>
 
 #include <algorithm>
+#include <forward_list>
 #include <iterator>
 
 #include "connection.h"

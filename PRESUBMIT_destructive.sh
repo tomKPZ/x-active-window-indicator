@@ -1,5 +1,9 @@
 #! /usr/bin/env bash
 
+cmake . -DCMAKE_EXPORT_COMPILE_COMMANDS=On
+
+iwyu-tool -p . -j8 -- --mapping_file=iwyu.imp
+
 /usr/share/clang/run-clang-tidy.py . -fix -quiet
 
 cppcheck src --inconclusive --enable=all --std=posix --max-configs=1 -Iinclude \
