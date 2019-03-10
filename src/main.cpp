@@ -35,14 +35,16 @@ void signal_handler(int /*unused*/, siginfo_t* /*unused*/, void* /*unused*/) {
   }
 }
 
-int main(int /*unused*/, char** /*unused*/) {
-  if (pipe(pipe_fds) == -1) {
-    throw std::logic_error("pipe() failed");
+int main() {
+  if (pipe(static_cast<int*>(pipe_fds)) == -1) {
+    throw std::runtime_error("pipe() failed");
   }
   for (int fd : pipe_fds) {
+    // NOLINTNEXTLINE
     int flags = fcntl(pipe_fds[0], F_GETFL);
+    // NOLINTNEXTLINE
     if (flags == -1 || fcntl(fd, F_SETFL, flags) == -1) {
-      throw std::logic_error("fcntl() failed");
+      throw std::runtime_error("fcntl() failed");
     }
   }
 
@@ -56,7 +58,7 @@ int main(int /*unused*/, char** /*unused*/) {
            SIGTERM,
        }) {
     if (sigaction(sig, &sa, nullptr) == -1) {
-      throw std::logic_error("sigaction() failed");
+      throw std::runtime_error("sigaction() failed");
     }
   }
 

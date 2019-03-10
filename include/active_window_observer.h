@@ -18,16 +18,14 @@
 #ifndef ACTIVE_WINDOW_OBSERVER_H
 #define ACTIVE_WINDOW_OBSERVER_H
 
-#include <cstdint>
-
-using xcb_window_t = uint32_t;
+#include "util.h"
 
 class ActiveWindowObserver {
  public:
   virtual void ActiveWindowChanged() = 0;
 
  protected:
-  virtual ~ActiveWindowObserver() = default;
+  DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(ActiveWindowObserver);
 };
 
 #endif
