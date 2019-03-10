@@ -21,6 +21,7 @@
 
 #include <exception>
 #include <iostream>
+#include <iterator>
 #include <sstream>
 
 #include "connection.h"
@@ -88,7 +89,7 @@ Event EventLoop::WaitForEvent() {
         {should_quit_fd_, POLLIN, 0},
         {xcb_get_file_descriptor(connection), POLLIN, 0},
     };
-    int ready = poll(poll_fds, ArraySize(poll_fds), -1);
+    int ready = poll(poll_fds, std::size(poll_fds), -1);
     if (ready == -1) {
       if (errno == EINTR) {
         continue;

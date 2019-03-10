@@ -28,11 +28,6 @@
   TypeName& /*NOLINT(bugprone-macro-parentheses)*/ operator=( \
       const TypeName&) = delete
 
-template <typename T>
-constexpr size_t ArraySize(const T& array) {
-  return sizeof(array) / sizeof(array[0]);
-}
-
 template <typename Dst, typename Src>
 constexpr Dst CheckedCast(Src value) {
   if (value < std::numeric_limits<Dst>::min() ||

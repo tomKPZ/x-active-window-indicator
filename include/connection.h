@@ -45,6 +45,8 @@ class XcbReply {
 
  private:
   T* t_;
+
+  DISALLOW_COPY_AND_ASSIGN(XcbReply);
 };
 
 class Connection {
