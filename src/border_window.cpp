@@ -28,12 +28,12 @@
 
 namespace {
 
-static constexpr const uint32_t BORDER_COLOR = 0xff0000;
-static constexpr const uint16_t BORDER_WIDTH = 5;
+constexpr const uint32_t BORDER_COLOR = 0xff0000;
+constexpr const uint16_t BORDER_WIDTH = 5;
 
 class XcbRegion {
  public:
-  XcbRegion(Connection* connection, const std::vector<xcb_rectangle_t> rects)
+  XcbRegion(Connection* connection, const std::vector<xcb_rectangle_t>& rects)
       : connection_(connection), id_(connection_->GenerateId()) {
     xcb_xfixes_create_region(connection_->connection(), id_,
                              CheckedCast<uint32_t>(rects.size()), rects.data());

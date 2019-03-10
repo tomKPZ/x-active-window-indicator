@@ -1,3 +1,2 @@
-Checks: 'llvm-*'
-#Checks: 'readability-implicit-bool-conversion'
+Checks: 'llvm-include-order'
 User: tomKPZ
