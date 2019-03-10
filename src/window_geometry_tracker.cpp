@@ -24,7 +24,7 @@
 
 WindowGeometryTracker::WindowGeometryTracker(Connection* connection,
                                              EventLoop* event_loop,
-                                             xcb_window_t window)
+                                             const xcb_window_t& window)
     : connection_(connection),
       event_loop_(event_loop),
       event_dispatcher_(this, event_loop_),

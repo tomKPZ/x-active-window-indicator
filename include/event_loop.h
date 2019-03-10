@@ -29,7 +29,7 @@ class EventLoopIdleObserver;
 class EventLoop : public Observable<EventDispatcher>,
                   public Observable<EventLoopIdleObserver> {
  public:
-  EventLoop(Connection* connection_, int should_quit_fd);
+  EventLoop(Connection* connection, int should_quit_fd);
   ~EventLoop() override;
 
   void Run();

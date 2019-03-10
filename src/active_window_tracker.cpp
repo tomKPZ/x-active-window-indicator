@@ -42,7 +42,7 @@ xcb_atom_t GetAtom(Connection* connection, const std::string& str) {
 }
 
 std::vector<xcb_atom_t> GetAtomArray(Connection* connection,
-                                     xcb_window_t window,
+                                     const xcb_window_t& window,
                                      xcb_atom_t atom) {
   auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
                         XCB_ATOM_ATOM, 0, std::numeric_limits<uint32_t>::max());
@@ -58,7 +58,7 @@ std::vector<xcb_atom_t> GetAtomArray(Connection* connection,
 }
 
 xcb_window_t GetWindow(Connection* connection,
-                       xcb_window_t window,
+                       const xcb_window_t& window,
                        xcb_atom_t atom) {
   auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
                         XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));

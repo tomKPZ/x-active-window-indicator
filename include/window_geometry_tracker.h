@@ -40,7 +40,7 @@ class WindowGeometryTracker : public EventDispatcher,
  public:
   WindowGeometryTracker(Connection* connection,
                         EventLoop* event_loop,
-                        xcb_window_t window);
+                        const xcb_window_t& window);
   ~WindowGeometryTracker() override;
 
   int16_t X() const;
