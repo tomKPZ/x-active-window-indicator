@@ -40,7 +40,7 @@ class EventLoop : public Observable<EventDispatcher>,
   Connection* connection_;
   int should_quit_fd_;
 
-  DELETE_COPY_AND_MOVE(EventLoop);
+  DELETE_SPECIAL_MEMBERS(EventLoop);
 };
 
 #endif

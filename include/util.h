@@ -41,13 +41,22 @@
   } while (0)
 #endif
 
-#define DELETE_COPY_AND_MOVE(TypeName)                                  \
-  TypeName(const TypeName&) = delete;                                   \
-  TypeName& /*NOLINT(bugprone-macro-parentheses)*/ operator=(           \
-      const TypeName&) = delete;                                        \
-  TypeName(TypeName&& /*NOLINT(bugprone-macro-parentheses)*/) = delete; \
-  TypeName& /*NOLINT(bugprone-macro-parentheses)*/ operator=(           \
-      TypeName&& /*NOLINT(bugprone-macro-parentheses)*/) = delete
+#define DELETE_SPECIAL_MEMBERS(Type)                \
+  Type(const Type&) = delete;                       \
+  Type& operator=(const Type&) = delete; /*NOLINT*/ \
+  Type(Type&&) = delete;                 /*NOLINT*/ \
+  Type& operator=(Type&&) = delete       /*NOLINT*/
+
+#define DEFAULT_SPECIAL_MEMBERS(Type)                \
+  Type() = default;                                  \
+  Type(const Type&) = default;                       \
+  Type& operator=(const Type&) = default; /*NOLINT*/ \
+  Type(Type&&) = default;                 /*NOLINT*/ \
+  Type& operator=(Type&&) = default       /*NOLINT*/
+
+#define DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(Type) \
+  virtual ~Type() = default;                                 \
+  DEFAULT_SPECIAL_MEMBERS(Type)
 
 template <typename Dst, typename Src>
 constexpr Dst CheckedCast(Src value) {

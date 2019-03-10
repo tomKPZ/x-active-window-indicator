@@ -42,7 +42,7 @@ class BorderWindow {
 
   xcb_window_t window_;
 
-  DELETE_COPY_AND_MOVE(BorderWindow);
+  DELETE_SPECIAL_MEMBERS(BorderWindow);
 };
 
 #endif

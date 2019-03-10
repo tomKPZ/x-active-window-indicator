@@ -18,6 +18,8 @@
 #ifndef EVENT_DISPATCHER_H
 #define EVENT_DISPATCHER_H
 
+#include "util.h"
+
 class Event;
 
 class EventDispatcher {
@@ -26,7 +28,7 @@ class EventDispatcher {
   virtual bool DispatchEvent(const Event& event) = 0;
 
  protected:
-  virtual ~EventDispatcher() = default;
+  DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(EventDispatcher);
 };
 
 #endif

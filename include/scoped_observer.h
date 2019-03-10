@@ -29,6 +29,7 @@ class ScopedObserver {
   }
 
   ~ScopedObserver() { observable_->RemoveObserver(observer_); }
+  DEFAULT_SPECIAL_MEMBERS(ScopedObserver);
 
  private:
   Observer* observer_;

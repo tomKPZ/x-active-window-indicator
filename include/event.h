@@ -41,7 +41,7 @@ class Event {
  private:
   xcb_generic_event_t* event_;
 
-  DELETE_COPY_AND_MOVE(Event);
+  DELETE_SPECIAL_MEMBERS(Event);
 };
 
 #endif

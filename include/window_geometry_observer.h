@@ -18,6 +18,8 @@
 #ifndef WINDOW_GEOMETRY_OBSERVER_H
 #define WINDOW_GEOMETRY_OBSERVER_H
 
+#include "util.h"
+
 class WindowGeometryObserver {
  public:
   virtual void WindowPositionChanged() {}
@@ -25,7 +27,7 @@ class WindowGeometryObserver {
   virtual void WindowBorderWidthChanged() {}
 
  protected:
-  virtual ~WindowGeometryObserver() = default;
+  DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(WindowGeometryObserver);
 };
 
 #endif
