@@ -15,11 +15,11 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include <csignal>
-#include <cstdlib>
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <csignal>
+#include <cstdlib>
 #include <stdexcept>
 
 #include "active_window_indicator.h"
@@ -29,13 +29,13 @@
 // Self-pipe trick.
 static int pipe_fds[2];
 
-void signal_handler(int, siginfo_t*, void*) {
+void signal_handler(int /*unused*/, siginfo_t* /*unused*/, void* /*unused*/) {
   if (write(pipe_fds[1], "", 1) == -1) {
     std::abort();
   }
 }
 
-int main(int, char**) {
+int main(int /*unused*/, char** /*unused*/) {
   if (pipe(pipe_fds) == -1) {
     throw std::logic_error("pipe() failed");
   }

@@ -96,9 +96,8 @@ bool KeyListener::DispatchEvent(const Event& event) {
                    });
   if (it == std::end(key_code_states_)) {
     return true;
-  } else {
-    it->key_pressed = press;
   }
+  it->key_pressed = press;
 
   const bool any_key_pressed =
       std::any_of(std::begin(key_code_states_), std::end(key_code_states_),
