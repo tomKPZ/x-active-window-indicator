@@ -15,28 +15,15 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#pragma once
+#ifndef EVENT_LOOP_IDLE_OBSERVER_H
+#define EVENT_LOOP_IDLE_OBSERVER_H
 
-#include <cstddef>
-#include <limits>
-#include <stdexcept>
-#include <string>
+class EventLoopIdleObserver {
+ public:
+  virtual void OnIdle() = 0;
 
-#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName&) = delete;      \
-  TypeName& operator=(const TypeName&) = delete
+ protected:
+  virtual ~EventLoopIdleObserver() = default;
+};
 
-template <typename T>
-constexpr size_t ArraySize(const T& array) {
-  return sizeof(array) / sizeof(array[0]);
-}
-
-template <typename Dst, typename Src>
-constexpr Dst CheckedCast(Src value) {
-  if (value < std::numeric_limits<Dst>::min() ||
-      value > std::numeric_limits<Dst>::max()) {
-    throw std::runtime_error("Cast value not in range: " +
-                             std::to_string(value));
-  }
-  return static_cast<Dst>(value);
-}
+#endif

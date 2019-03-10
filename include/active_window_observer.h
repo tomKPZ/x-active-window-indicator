@@ -15,12 +15,19 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#pragma once
+#ifndef ACTIVE_WINDOW_OBSERVER_H
+#define ACTIVE_WINDOW_OBSERVER_H
 
-class KeyStateObserver {
+#include <cstdint>
+
+using xcb_window_t = uint32_t;
+
+class ActiveWindowObserver {
  public:
-  virtual void KeyStateChanged() = 0;
+  virtual void ActiveWindowChanged() = 0;
 
  protected:
-  virtual ~KeyStateObserver() = default;
+  virtual ~ActiveWindowObserver() = default;
 };
+
+#endif

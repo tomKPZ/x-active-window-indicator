@@ -15,12 +15,34 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#pragma once
+#ifndef BORDER_WINDOW_H
+#define BORDER_WINDOW_H
 
-class EventLoopIdleObserver {
+#include <cstdint>
+
+#include "util.h"
+
+using xcb_window_t = uint32_t;
+
+class Connection;
+
+class BorderWindow {
  public:
-  virtual void OnIdle() = 0;
+  explicit BorderWindow(Connection* connection);
+  ~BorderWindow();
 
- protected:
-  virtual ~EventLoopIdleObserver() = default;
+  void SetPosition(int16_t x, int16_t y);
+  void SetSize(uint16_t width, uint16_t height);
+
+  void Show();
+  void Hide();
+
+ private:
+  Connection* connection_;
+
+  xcb_window_t window_;
+
+  DISALLOW_COPY_AND_ASSIGN(BorderWindow);
 };
+
+#endif

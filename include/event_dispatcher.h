@@ -15,31 +15,18 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#pragma once
+#ifndef EVENT_DISPATCHER_H
+#define EVENT_DISPATCHER_H
 
-#include <cstdint>
+class Event;
 
-#include "util.h"
-
-using xcb_window_t = uint32_t;
-
-class Connection;
-
-class BorderWindow {
+class EventDispatcher {
  public:
-  explicit BorderWindow(Connection* connection);
-  ~BorderWindow();
+  // Returns true iff the event was handled.
+  virtual bool DispatchEvent(const Event& event) = 0;
 
-  void SetPosition(int16_t x, int16_t y);
-  void SetSize(uint16_t width, uint16_t height);
-
-  void Show();
-  void Hide();
-
- private:
-  Connection* connection_;
-
-  xcb_window_t window_;
-
-  DISALLOW_COPY_AND_ASSIGN(BorderWindow);
+ protected:
+  virtual ~EventDispatcher() = default;
 };
+
+#endif

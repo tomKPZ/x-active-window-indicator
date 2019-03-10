@@ -15,17 +15,32 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#pragma once
+#ifndef EVENT_H
+#define EVENT_H
 
-// TODO(tomKPZ): is there a way to forward-declare xcb_generic_error_t?
+// TODO(tomKPZ): any way to forward declare xcb_generic_event_t?
 #include <xcb/xcb.h>
+#include <cstdint>
 
-#include <stdexcept>
-#include <string>
+#include "util.h"
 
-class XError : public std::runtime_error {
+class Event {
  public:
-  explicit XError(const std::string& what);
-  explicit XError(const char* what);
-  explicit XError(const xcb_generic_error_t& error);
+  // Takes ownership of |event|.
+  explicit Event(xcb_generic_event_t* event);
+  ~Event();
+
+  bool SendEvent() const;
+  uint8_t ResponseType() const;
+  uint16_t Sequence() const;
+
+  explicit operator bool() const { return event_ != nullptr; }
+  const xcb_generic_event_t* event() const { return event_; }
+
+ private:
+  xcb_generic_event_t* event_;
+
+  DISALLOW_COPY_AND_ASSIGN(Event);
 };
+
+#endif

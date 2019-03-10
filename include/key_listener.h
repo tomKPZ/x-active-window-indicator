@@ -15,42 +15,53 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#pragma once
+#ifndef KEY_LISTENER_H
+#define KEY_LISTENER_H
 
 #include <cstdint>
+#include <vector>
 
 #include "event_dispatcher.h"
 #include "observable.h"
 #include "scoped_observer.h"
 #include "util.h"
 
-using xcb_atom_t = uint32_t;
-using xcb_window_t = uint32_t;
-
-class ActiveWindowObserver;
 class Connection;
 class EventLoop;
+class KeyStateObserver;
 
-class ActiveWindowTracker : public EventDispatcher,
-                            public Observable<ActiveWindowObserver> {
+class KeyListener : public EventDispatcher,
+                    public Observable<KeyStateObserver> {
  public:
-  ActiveWindowTracker(Connection* connection, EventLoop* event_loop);
-  ~ActiveWindowTracker() override;
+  KeyListener(Connection* connection, EventLoop* event_loop);
+  ~KeyListener() override;
 
-  xcb_window_t active_window() const { return active_window_; }
+  bool any_key_pressed() const { return any_key_pressed_; }
 
  protected:
   // EventDispatcher:
   bool DispatchEvent(const Event& event) override;
 
  private:
-  void SetActiveWindow();
+  struct KeyCodeState {
+    explicit KeyCodeState(uint32_t key_code) : code(key_code) {}
+    const uint32_t code;
+
+    // TODO(tomKPZ): Any way to get initial key states?
+    bool key_pressed = false;
+  };
+
+  // TODO(tomKPZ): Don't hardcode these keycodes.
+  std::vector<KeyCodeState> key_code_states_{KeyCodeState{133},
+                                             KeyCodeState{134}};
+  bool any_key_pressed_ = false;
 
   Connection* connection_;
-  ScopedObserver<EventDispatcher> event_dispatcher_;
+  ScopedObserver<EventDispatcher> dispatcher_;
 
-  xcb_atom_t net_active_window_;
-  xcb_window_t active_window_;
+  uint8_t xcb_input_major_opcode_;
 
-  DISALLOW_COPY_AND_ASSIGN(ActiveWindowTracker);
+  DISALLOW_COPY_AND_ASSIGN(KeyListener);
 };
+
+#endif

@@ -15,24 +15,15 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#pragma once
+#ifndef KEY_STATE_OBSERVER_H
+#define KEY_STATE_OBSERVER_H
 
-#include <cassert>
-
-#include <forward_list>
-
-template <typename Observer>
-class Observable {
+class KeyStateObserver {
  public:
-  void AddObserver(Observer* observer) { observers_.push_front(observer); }
-
-  void RemoveObserver(Observer* observer) { observers_.remove(observer); }
+  virtual void KeyStateChanged() = 0;
 
  protected:
-  virtual ~Observable() { assert(observers_.empty()); }
-
-  const std::forward_list<Observer*>& observers() const { return observers_; }
-
- private:
-  std::forward_list<Observer*> observers_;
+  virtual ~KeyStateObserver() = default;
 };
+
+#endif

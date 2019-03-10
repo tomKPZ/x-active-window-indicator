@@ -15,14 +15,20 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#pragma once
+#ifndef X_ERROR_H
+#define X_ERROR_H
 
-class WindowGeometryObserver {
+// TODO(tomKPZ): is there a way to forward-declare xcb_generic_error_t?
+#include <xcb/xcb.h>
+
+#include <stdexcept>
+#include <string>
+
+class XError : public std::runtime_error {
  public:
-  virtual void WindowPositionChanged() {}
-  virtual void WindowSizeChanged() {}
-  virtual void WindowBorderWidthChanged() {}
-
- protected:
-  virtual ~WindowGeometryObserver() = default;
+  explicit XError(const std::string& what);
+  explicit XError(const char* what);
+  explicit XError(const xcb_generic_error_t& error);
 };
+
+#endif
