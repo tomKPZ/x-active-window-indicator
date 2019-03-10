@@ -1,7 +1,7 @@
 #include "connection.h"
 
-#include <cassert>
 #include <xcb/xcb.h>
+#include <cassert>
 
 #include <memory>
 #include <string>
@@ -37,7 +37,7 @@ void SetEventMask(xcb_connection_t* connection,
 class Connection::MultiMask {
  public:
   MultiMask() {
-    for (unsigned int & mask_bit : mask_bits_) {
+    for (unsigned int& mask_bit : mask_bits_) {
       mask_bit = 0;
     }
   }
