@@ -61,7 +61,7 @@ class KeyListener : public EventDispatcher,
 
   uint8_t xcb_input_major_opcode_;
 
-  DISALLOW_COPY_AND_ASSIGN(KeyListener);
+  DELETE_COPY_AND_MOVE(KeyListener);
 };
 
 #endif

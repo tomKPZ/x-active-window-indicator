@@ -42,7 +42,7 @@ class BorderWindow {
 
   xcb_window_t window_;
 
-  DISALLOW_COPY_AND_ASSIGN(BorderWindow);
+  DELETE_COPY_AND_MOVE(BorderWindow);
 };
 
 #endif

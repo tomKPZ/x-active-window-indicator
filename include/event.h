@@ -41,7 +41,7 @@ class Event {
  private:
   xcb_generic_event_t* event_;
 
-  DISALLOW_COPY_AND_ASSIGN(Event);
+  DELETE_COPY_AND_MOVE(Event);
 };
 
 #endif

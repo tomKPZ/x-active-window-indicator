@@ -76,7 +76,7 @@ class Connection::MultiMask {
 
   unsigned int mask_bits_[kMaskSize]{};
 
-  DISALLOW_COPY_AND_ASSIGN(MultiMask);
+  DELETE_COPY_AND_MOVE(MultiMask);
 };
 
 Connection::Connection() {
