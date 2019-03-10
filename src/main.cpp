@@ -30,6 +30,7 @@
 // Self-pipe trick.
 static int pipe_fds[2];
 
+void signal_handler(int /*unused*/, siginfo_t* /*unused*/, void* /*unused*/);
 void signal_handler(int /*unused*/, siginfo_t* /*unused*/, void* /*unused*/) {
   if (write(pipe_fds[1], "", 1) == -1) {
     std::abort();
