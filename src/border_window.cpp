@@ -50,7 +50,7 @@ class XcbRegion {
 
 BorderWindow::BorderWindow(Connection* connection) : connection_(connection) {
   window_ = connection_->GenerateId();
-  uint32_t attributes[] = {BORDER_COLOR, true};
+  uint32_t attributes[] = {BORDER_COLOR, 1u};
   xcb_create_window(connection_->connection(), XCB_COPY_FROM_PARENT, window_,
                     connection_->root_window(), 0, 0, 1, 1, BORDER_WIDTH,
                     XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
@@ -60,7 +60,7 @@ BorderWindow::BorderWindow(Connection* connection) : connection_(connection) {
            XCB_XFIXES_MINOR_VERSION);
   auto* fixes_extension =
       xcb_get_extension_data(connection_->connection(), &xcb_xfixes_id);
-  if (!fixes_extension->present) {
+  if (fixes_extension->present == 0u) {
     throw XError("XFIXES not available");
   }
 }

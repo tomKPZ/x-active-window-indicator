@@ -26,7 +26,7 @@ Event::~Event() {
 }
 
 bool Event::SendEvent() const {
-  return event_->response_type & 0x80;
+  return (event_->response_type & 0x80) != 0;
 }
 
 uint8_t Event::ResponseType() const {
