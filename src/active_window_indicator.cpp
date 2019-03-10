@@ -35,7 +35,7 @@ ActiveWindowIndicator::ActiveWindowIndicator(Connection* connection,
       event_loop_idle_observer_(this, event_loop),
       key_state_observer_(this, &key_listener_) {}
 
-ActiveWindowIndicator::~ActiveWindowIndicator() {}
+ActiveWindowIndicator::~ActiveWindowIndicator() = default;
 
 void ActiveWindowIndicator::ActiveWindowChanged() {
   OnStateChanged();

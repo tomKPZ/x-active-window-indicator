@@ -22,5 +22,5 @@ class KeyStateObserver {
   virtual void KeyStateChanged() = 0;
 
  protected:
-  virtual ~KeyStateObserver() {}
+  virtual ~KeyStateObserver() = default;
 };

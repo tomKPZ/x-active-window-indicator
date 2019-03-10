@@ -44,7 +44,7 @@ std::string MakeUnhandledErrorMessage(const Event& event) {
 EventLoop::EventLoop(Connection* connection, int should_quit_fd)
     : connection_(connection), should_quit_fd_(should_quit_fd) {}
 
-EventLoop::~EventLoop() {}
+EventLoop::~EventLoop() = default;
 
 void EventLoop::Run() {
   while (auto event = WaitForEvent()) {
