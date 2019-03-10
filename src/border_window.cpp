@@ -44,6 +44,8 @@ class XcbRegion {
  private:
   Connection* connection_;
   uint32_t id_;
+
+  DELETE_SPECIAL_MEMBERS(XcbRegion);
 };
 
 }  // namespace
@@ -54,7 +56,8 @@ BorderWindow::BorderWindow(Connection* connection) : connection_(connection) {
   xcb_create_window(connection_->connection(), XCB_COPY_FROM_PARENT, window_,
                     connection_->root_window(), 0, 0, 1, 1, BORDER_WIDTH,
                     XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
-                    XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT, attributes);
+                    XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT,
+                    static_cast<uint32_t*>(attributes));
 
   XCB_SYNC(xcb_xfixes_query_version, connection_, XCB_XFIXES_MAJOR_VERSION,
            XCB_XFIXES_MINOR_VERSION);

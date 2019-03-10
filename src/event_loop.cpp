@@ -89,7 +89,8 @@ Event EventLoop::WaitForEvent() {
         {should_quit_fd_, POLLIN, 0},
         {xcb_get_file_descriptor(connection), POLLIN, 0},
     };
-    int ready = poll(poll_fds, std::size(poll_fds), -1);
+    int ready =
+        poll(static_cast<struct pollfd*>(poll_fds), std::size(poll_fds), -1);
     if (ready == -1) {
       if (errno == EINTR) {
         continue;
