@@ -19,8 +19,8 @@
 #define EVENT_H
 
 // TODO(tomKPZ): any way to forward declare xcb_generic_event_t?
-#include <xcb/xcb.h>
 #include <cstdint>
+#include <xcb/xcb.h>
 
 #include "util.h"
 
