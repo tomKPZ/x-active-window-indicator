@@ -43,7 +43,7 @@ class KeyListener : public EventDispatcher,
 
  private:
   struct KeyCodeState {
-    KeyCodeState(uint32_t key_code) : code(key_code) {}
+    explicit KeyCodeState(uint32_t key_code) : code(key_code) {}
     const uint32_t code;
 
     // TODO: Any way to get initial key states?
@@ -51,7 +51,8 @@ class KeyListener : public EventDispatcher,
   };
 
   // TODO: Don't hardcode these keycodes.
-  std::vector<KeyCodeState> key_code_states_{133, 134};
+  std::vector<KeyCodeState> key_code_states_{KeyCodeState{133},
+                                             KeyCodeState{134}};
   bool any_key_pressed_ = false;
 
   Connection* connection_;

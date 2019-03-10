@@ -54,7 +54,7 @@ std::vector<xcb_atom_t> GetAtomArray(Connection* connection,
   }
 
   const xcb_atom_t* value =
-      reinterpret_cast<xcb_atom_t*>(xcb_get_property_value(reply));
+      reinterpret_cast<xcb_atom_t*>(xcb_get_property_value(reply.get()));
   return std::vector<xcb_atom_t>(value, value + reply->value_len);
 }
 
@@ -66,11 +66,12 @@ xcb_window_t GetWindow(Connection* connection,
 
   if (reply->format != 8 * sizeof(xcb_window_t) ||
       reply->type != XCB_ATOM_WINDOW || reply->bytes_after > 0 ||
-      xcb_get_property_value_length(reply) != sizeof(xcb_window_t)) {
+      xcb_get_property_value_length(reply.get()) != sizeof(xcb_window_t)) {
     throw XError("Bad property reply");
   }
 
-  return reinterpret_cast<xcb_window_t*>(xcb_get_property_value(reply))[0];
+  return reinterpret_cast<xcb_window_t*>(
+      xcb_get_property_value(reply.get()))[0];
 }
 
 }  // namespace
