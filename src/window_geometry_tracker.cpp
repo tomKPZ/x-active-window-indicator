@@ -65,7 +65,8 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
     const xcb_map_notify_event_t* map;
     const xcb_reparent_notify_event_t* reparent;
     const xcb_unmap_notify_event_t* unmap;
-  } const structure_event{event.event()};
+  } structure_event;
+  structure_event.generic = event.event();
 
   switch (event.ResponseType()) {
     case XCB_CIRCULATE_NOTIFY:

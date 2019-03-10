@@ -1,7 +1,7 @@
 #include "connection.h"
 
-#include <xcb/xcb.h>
 #include <cassert>
+#include <xcb/xcb.h>
 
 #include <memory>
 #include <string>
