@@ -26,8 +26,6 @@
 #include "connection.h"
 #include "event_loop.h"
 
-// DUMMY COMMIT PLEASE REVERT
-
 // Self-pipe trick.
 static int pipe_fds[2];
 
