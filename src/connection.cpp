@@ -11,7 +11,7 @@ xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {
   xcb_screen_iterator_t iter;
 
   iter = xcb_setup_roots_iterator(xcb_get_setup(c));
-  for (; iter.rem; --screen, xcb_screen_next(&iter)) {
+  for (; iter.rem != 0; --screen, xcb_screen_next(&iter)) {
     if (screen == 0) {
       return iter.data;
     }
@@ -45,7 +45,7 @@ class Connection::MultiMask {
 
   void AddMask(uint32_t mask) {
     for (int i = 0; i < kMaskSize; i++) {
-      if (mask & (1U << i)) {
+      if ((mask & (1U << i)) != 0u) {
         mask_bits_[i]++;
       }
     }
@@ -53,7 +53,7 @@ class Connection::MultiMask {
 
   void RemoveMask(uint32_t mask) {
     for (int i = 0; i < kMaskSize; i++) {
-      if (mask & (1U << i)) {
+      if ((mask & (1U << i)) != 0u) {
         assert(mask_bits_[i]);
         mask_bits_[i]--;
       }
@@ -63,7 +63,7 @@ class Connection::MultiMask {
   uint32_t ToMask() const {
     uint32_t mask = XCB_EVENT_MASK_NO_EVENT;
     for (int i = 0; i < kMaskSize; i++) {
-      if (mask_bits_[i]) {
+      if (mask_bits_[i] != 0u) {
         mask |= (1U << i);
       }
     }
@@ -86,11 +86,11 @@ Connection::Connection() {
   }
 
   xcb_screen_t* screen = ScreenOfConnection(connection_, screen_number);
-  if (!screen) {
+  if (screen == nullptr) {
     throw XError("Could not get screen");
   }
   root_window_ = screen->root;
-  if (!root_window_) {
+  if (root_window_ == 0u) {
     throw XError("Could not find root window");
   }
 }

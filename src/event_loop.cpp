@@ -73,7 +73,7 @@ Event EventLoop::WaitForEvent() {
   auto* connection = connection_->connection();
 
   xcb_generic_event_t* event = xcb_poll_for_event(connection);
-  if (event || xcb_connection_has_error(connection)) {
+  if ((event != nullptr) || (xcb_connection_has_error(connection) != 0)) {
     return Event(event);
   }
 
@@ -95,11 +95,11 @@ Event EventLoop::WaitForEvent() {
       }
       throw std::logic_error("poll() failed");
     }
-    if (poll_fds[0].revents) {
+    if (poll_fds[0].revents != 0) {
       return Event(nullptr);
     }
     event = xcb_poll_for_event(connection);
-    if (event || xcb_connection_has_error(connection)) {
+    if ((event != nullptr) || (xcb_connection_has_error(connection) != 0)) {
       return Event(event);
     }
   }
