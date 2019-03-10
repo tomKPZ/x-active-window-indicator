@@ -73,29 +73,34 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
     case XCB_CONFIGURE_NOTIFY: {
       const auto* configure = structure_event.configure;
 
-      if (configure->event != window_)
+      if (configure->event != window_) {
         return false;
-      if (event.SendEvent())
+      }
+      if (event.SendEvent()) {
         return true;
+      }
 
       if (x_ != configure->x || y_ != configure->y) {
         x_ = configure->x;
         y_ = configure->y;
-        for (auto* observer : observers())
+        for (auto* observer : observers()) {
           observer->WindowPositionChanged();
+        }
       }
 
       if (width_ != configure->width || height_ != configure->height) {
         width_ = configure->width;
         height_ = configure->height;
-        for (auto* observer : observers())
+        for (auto* observer : observers()) {
           observer->WindowSizeChanged();
+        }
       }
 
       if (border_width_ != configure->border_width) {
         border_width_ = configure->border_width;
-        for (auto* observer : observers())
+        for (auto* observer : observers()) {
           observer->WindowBorderWidthChanged();
+        }
       }
 
       return true;
@@ -105,15 +110,18 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
     case XCB_GRAVITY_NOTIFY: {
       const auto* gravity = structure_event.gravity;
 
-      if (gravity->event != window_)
+      if (gravity->event != window_) {
         return false;
-      if (event.SendEvent())
+      }
+      if (event.SendEvent()) {
         return true;
+      }
 
       x_ = gravity->x;
       y_ = gravity->y;
-      for (auto* observer : observers())
+      for (auto* observer : observers()) {
         observer->WindowPositionChanged();
+      }
 
       return true;
     }
@@ -122,14 +130,17 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
     case XCB_REPARENT_NOTIFY: {
       const auto* reparent = structure_event.reparent;
 
-      if (reparent->event != window_)
+      if (reparent->event != window_) {
         return false;
-      if (event.SendEvent())
+      }
+      if (event.SendEvent()) {
         return true;
+      }
 
       SetParent(reparent->parent);
-      for (auto* observer : observers())
+      for (auto* observer : observers()) {
         observer->WindowPositionChanged();
+      }
 
       return true;
     }
@@ -140,8 +151,9 @@ bool WindowGeometryTracker::DispatchEvent(const Event& event) {
 }
 
 void WindowGeometryTracker::WindowPositionChanged() {
-  for (auto* observer : observers())
+  for (auto* observer : observers()) {
     observer->WindowPositionChanged();
+  }
 }
 
 void WindowGeometryTracker::SetParent(xcb_window_t parent) {

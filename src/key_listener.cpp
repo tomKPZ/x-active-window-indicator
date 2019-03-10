@@ -52,8 +52,9 @@ KeyListener::KeyListener(Connection* connection, EventLoop* event_loop)
            XCB_INPUT_MINOR_VERSION);
   auto* input_extension =
       xcb_get_extension_data(connection_->connection(), &xcb_input_id);
-  if (!input_extension->present)
+  if (!input_extension->present) {
     throw XError("XINPUT not available");
+  }
   xcb_input_major_opcode_ = input_extension->major_opcode;
 
   SelectEvents(connection_, static_cast<xcb_input_xi_event_mask_t>(
@@ -66,21 +67,24 @@ KeyListener::~KeyListener() {
 }
 
 bool KeyListener::DispatchEvent(const Event& event) {
-  if (event.ResponseType() != XCB_GE_GENERIC)
+  if (event.ResponseType() != XCB_GE_GENERIC) {
     return false;
+  }
 
   const auto* generic_event =
       reinterpret_cast<const xcb_ge_generic_event_t*>(event.event());
-  if (generic_event->extension != xcb_input_major_opcode_)
+  if (generic_event->extension != xcb_input_major_opcode_) {
     return false;
+  }
 
   bool press;
-  if (generic_event->event_type == XCB_INPUT_KEY_PRESS)
+  if (generic_event->event_type == XCB_INPUT_KEY_PRESS) {
     press = true;
-  else if (generic_event->event_type == XCB_INPUT_KEY_RELEASE)
+  } else if (generic_event->event_type == XCB_INPUT_KEY_RELEASE) {
     press = false;
-  else
+  } else {
     return false;
+  }
 
   const auto* key_event =
       reinterpret_cast<const xcb_input_key_press_event_t*>(generic_event);
@@ -90,10 +94,11 @@ bool KeyListener::DispatchEvent(const Event& event) {
                    [key](const KeyCodeState& key_code_state) {
                      return key_code_state.code == key;
                    });
-  if (it == std::end(key_code_states_))
+  if (it == std::end(key_code_states_)) {
     return true;
-  else
+  } else {
     it->key_pressed = press;
+  }
 
   const bool any_key_pressed =
       std::any_of(std::begin(key_code_states_), std::end(key_code_states_),
@@ -102,8 +107,9 @@ bool KeyListener::DispatchEvent(const Event& event) {
                   });
   if (any_key_pressed != any_key_pressed_) {
     any_key_pressed_ = any_key_pressed;
-    for (auto* observer : observers())
+    for (auto* observer : observers()) {
       observer->KeyStateChanged();
+    }
   }
   return true;
 }
