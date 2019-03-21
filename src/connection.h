@@ -15,8 +15,7 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#ifndef CONNECTION_H
-#define CONNECTION_H
+#pragma once
 
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -86,4 +85,3 @@ auto XcbSyncAux(Connection* connection, ReplyFunc reply_func, Cookie cookie)
   return XcbReply(t);
 }
 
-#endif

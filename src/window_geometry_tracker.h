@@ -15,8 +15,7 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#ifndef WINDOW_GEOMETRY_TRACKER_H
-#define WINDOW_GEOMETRY_TRACKER_H
+#pragma once
 
 #include <cstdint>
 
@@ -82,4 +81,3 @@ class WindowGeometryTracker : public EventDispatcher,
   DELETE_SPECIAL_MEMBERS(WindowGeometryTracker);
 };
 
-#endif

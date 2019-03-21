@@ -15,20 +15,18 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#ifndef X_ERROR_H
-#define X_ERROR_H
+#pragma once
 
-// TODO(tomKPZ): is there a way to forward-declare xcb_generic_error_t?
-#include <xcb/xcb.h>
+#include "util.h"
 
-#include <stdexcept>
-#include <string>
+class Event;
 
-class XError : public std::runtime_error {
+class EventDispatcher {
  public:
-  explicit XError(const std::string& what);
-  explicit XError(const char* what);
-  explicit XError(const xcb_generic_error_t& error);
+  // Returns true iff the event was handled.
+  virtual bool DispatchEvent(const Event& event) = 0;
+
+ protected:
+  DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(EventDispatcher);
 };
 
-#endif

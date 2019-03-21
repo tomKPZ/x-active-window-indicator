@@ -15,20 +15,15 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#ifndef EVENT_DISPATCHER_H
-#define EVENT_DISPATCHER_H
+#pragma once
 
 #include "util.h"
 
-class Event;
-
-class EventDispatcher {
+class ActiveWindowObserver {
  public:
-  // Returns true iff the event was handled.
-  virtual bool DispatchEvent(const Event& event) = 0;
+  virtual void ActiveWindowChanged() = 0;
 
  protected:
-  DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(EventDispatcher);
+  DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(ActiveWindowObserver);
 };
 
-#endif

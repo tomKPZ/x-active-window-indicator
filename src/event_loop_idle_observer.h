@@ -15,28 +15,15 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#ifndef OBSERVABLE_H
-#define OBSERVABLE_H
-
-#include <forward_list>
+#pragma once
 
 #include "util.h"
 
-template <typename Observer>
-class Observable {
+class EventLoopIdleObserver {
  public:
-  void AddObserver(Observer* observer) { observers_.push_front(observer); }
-
-  void RemoveObserver(Observer* observer) { observers_.remove(observer); }
+  virtual void OnIdle() = 0;
 
  protected:
-  virtual ~Observable() { DCHECK(observers_.empty()); }
-  DEFAULT_SPECIAL_MEMBERS(Observable);
-
-  const std::forward_list<Observer*>& observers() const { return observers_; }
-
- private:
-  std::forward_list<Observer*> observers_;
+  DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(EventLoopIdleObserver);
 };
 
-#endif

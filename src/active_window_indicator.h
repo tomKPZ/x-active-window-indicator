@@ -15,8 +15,7 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#ifndef ACTIVE_WINDOW_INDICATOR_H
-#define ACTIVE_WINDOW_INDICATOR_H
+#pragma once
 
 #include <memory>
 
@@ -82,4 +81,3 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
   DELETE_SPECIAL_MEMBERS(ActiveWindowIndicator);
 };
 
-#endif

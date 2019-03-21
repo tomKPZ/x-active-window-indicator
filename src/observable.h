@@ -15,33 +15,26 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#ifndef EVENT_H
-#define EVENT_H
+#pragma once
 
-// TODO(tomKPZ): any way to forward declare xcb_generic_event_t?
-#include <xcb/xcb.h>
-
-#include <cstdint>
+#include <forward_list>
 
 #include "util.h"
 
-class Event {
+template <typename Observer>
+class Observable {
  public:
-  // Takes ownership of |event|.
-  explicit Event(xcb_generic_event_t* event);
-  ~Event();
+  void AddObserver(Observer* observer) { observers_.push_front(observer); }
 
-  bool SendEvent() const;
-  uint8_t ResponseType() const;
-  uint16_t Sequence() const;
+  void RemoveObserver(Observer* observer) { observers_.remove(observer); }
 
-  explicit operator bool() const { return event_ != nullptr; }
-  const xcb_generic_event_t* event() const { return event_; }
+ protected:
+  virtual ~Observable() { DCHECK(observers_.empty()); }
+  DEFAULT_SPECIAL_MEMBERS(Observable);
+
+  const std::forward_list<Observer*>& observers() const { return observers_; }
 
  private:
-  xcb_generic_event_t* event_;
-
-  DELETE_SPECIAL_MEMBERS(Event);
+  std::forward_list<Observer*> observers_;
 };
 
-#endif

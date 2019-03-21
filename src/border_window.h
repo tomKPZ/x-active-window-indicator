@@ -15,46 +15,32 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#ifndef ACTIVE_WINDOW_TRACKER_H
-#define ACTIVE_WINDOW_TRACKER_H
+#pragma once
 
 #include <cstdint>
 
-#include "event_dispatcher.h"
-#include "observable.h"
-#include "scoped_observer.h"
 #include "util.h"
 
-using xcb_atom_t = std::uint32_t;
-using xcb_window_t = std::uint32_t;
+using xcb_window_t = uint32_t;
 
-class ActiveWindowObserver;
 class Connection;
-class Event;
-class EventLoop;
 
-class ActiveWindowTracker : public EventDispatcher,
-                            public Observable<ActiveWindowObserver> {
+class BorderWindow {
  public:
-  ActiveWindowTracker(Connection* connection, EventLoop* event_loop);
-  ~ActiveWindowTracker() override;
+  explicit BorderWindow(Connection* connection);
+  ~BorderWindow();
 
-  xcb_window_t active_window() const { return active_window_; }
+  void SetPosition(int16_t x, int16_t y);
+  void SetSize(uint16_t width, uint16_t height);
 
- protected:
-  // EventDispatcher:
-  bool DispatchEvent(const Event& event) override;
+  void Show();
+  void Hide();
 
  private:
-  void SetActiveWindow();
-
   Connection* connection_;
-  ScopedObserver<EventDispatcher> event_dispatcher_;
 
-  xcb_atom_t net_active_window_;
-  xcb_window_t active_window_;
+  xcb_window_t window_;
 
-  DELETE_SPECIAL_MEMBERS(ActiveWindowTracker);
+  DELETE_SPECIAL_MEMBERS(BorderWindow);
 };
 
-#endif
