@@ -15,34 +15,17 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#ifndef BORDER_WINDOW_H
-#define BORDER_WINDOW_H
-
-#include <cstdint>
+#pragma once
 
 #include "util.h"
 
-using xcb_window_t = uint32_t;
-
-class Connection;
-
-class BorderWindow {
+class WindowGeometryObserver {
  public:
-  explicit BorderWindow(Connection* connection);
-  ~BorderWindow();
+  virtual void WindowPositionChanged() {}
+  virtual void WindowSizeChanged() {}
+  virtual void WindowBorderWidthChanged() {}
 
-  void SetPosition(int16_t x, int16_t y);
-  void SetSize(uint16_t width, uint16_t height);
-
-  void Show();
-  void Hide();
-
- private:
-  Connection* connection_;
-
-  xcb_window_t window_;
-
-  DELETE_SPECIAL_MEMBERS(BorderWindow);
+ protected:
+  DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(WindowGeometryObserver);
 };
 
-#endif

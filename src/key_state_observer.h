@@ -15,8 +15,7 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#ifndef KEY_STATE_OBSERVER_H
-#define KEY_STATE_OBSERVER_H
+#pragma once
 
 #include "util.h"
 
@@ -28,4 +27,3 @@ class KeyStateObserver {
   DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(KeyStateObserver);
 };
 
-#endif

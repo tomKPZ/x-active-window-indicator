@@ -15,25 +15,30 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#ifndef SCOPED_OBSERVER_H
-#define SCOPED_OBSERVER_H
+#pragma once
 
 #include "observable.h"
+#include "util.h"
 
-template <typename Observer>
-class ScopedObserver {
+class Connection;
+class Event;
+class EventDispatcher;
+class EventLoopIdleObserver;
+
+class EventLoop : public Observable<EventDispatcher>,
+                  public Observable<EventLoopIdleObserver> {
  public:
-  ScopedObserver(Observer* observer, Observable<Observer>* observable)
-      : observer_(observer), observable_(observable) {
-    observable_->AddObserver(observer_);
-  }
+  EventLoop(Connection* connection, int should_quit_fd);
+  ~EventLoop() override;
 
-  ~ScopedObserver() { observable_->RemoveObserver(observer_); }
-  DEFAULT_SPECIAL_MEMBERS(ScopedObserver);
+  void Run();
 
  private:
-  Observer* observer_;
-  Observable<Observer>* observable_;
+  Event WaitForEvent();
+
+  Connection* connection_;
+  int should_quit_fd_;
+
+  DELETE_SPECIAL_MEMBERS(EventLoop);
 };
 
-#endif

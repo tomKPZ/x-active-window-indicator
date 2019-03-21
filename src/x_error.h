@@ -15,17 +15,18 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#ifndef ACTIVE_WINDOW_OBSERVER_H
-#define ACTIVE_WINDOW_OBSERVER_H
+#pragma once
 
-#include "util.h"
+// TODO(tomKPZ): is there a way to forward-declare xcb_generic_error_t?
+#include <xcb/xcb.h>
 
-class ActiveWindowObserver {
+#include <stdexcept>
+#include <string>
+
+class XError : public std::runtime_error {
  public:
-  virtual void ActiveWindowChanged() = 0;
-
- protected:
-  DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(ActiveWindowObserver);
+  explicit XError(const std::string& what);
+  explicit XError(const char* what);
+  explicit XError(const xcb_generic_error_t& error);
 };
 
-#endif
