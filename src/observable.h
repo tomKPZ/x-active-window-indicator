@@ -37,4 +37,3 @@ class Observable {
  private:
   std::forward_list<Observer*> observers_;
 };
-

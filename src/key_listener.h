@@ -63,4 +63,3 @@ class KeyListener : public EventDispatcher,
 
   DELETE_SPECIAL_MEMBERS(KeyListener);
 };
-

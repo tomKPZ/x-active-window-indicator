@@ -29,4 +29,3 @@ class XError : public std::runtime_error {
   explicit XError(const char* what);
   explicit XError(const xcb_generic_error_t& error);
 };
-

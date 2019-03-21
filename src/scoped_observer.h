@@ -34,4 +34,3 @@ class ScopedObserver {
   Observer* observer_;
   Observable<Observer>* observable_;
 };
-

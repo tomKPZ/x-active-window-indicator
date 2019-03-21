@@ -26,4 +26,3 @@ class EventLoopIdleObserver {
  protected:
   DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(EventLoopIdleObserver);
 };
-

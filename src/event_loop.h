@@ -41,4 +41,3 @@ class EventLoop : public Observable<EventDispatcher>,
 
   DELETE_SPECIAL_MEMBERS(EventLoop);
 };
-

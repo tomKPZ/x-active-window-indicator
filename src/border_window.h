@@ -43,4 +43,3 @@ class BorderWindow {
 
   DELETE_SPECIAL_MEMBERS(BorderWindow);
 };
-

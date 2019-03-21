@@ -55,4 +55,3 @@ class ActiveWindowTracker : public EventDispatcher,
 
   DELETE_SPECIAL_MEMBERS(ActiveWindowTracker);
 };
-
