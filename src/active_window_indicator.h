@@ -80,4 +80,3 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
 
   DELETE_SPECIAL_MEMBERS(ActiveWindowIndicator);
 };
-

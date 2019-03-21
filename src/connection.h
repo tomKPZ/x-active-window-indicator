@@ -84,4 +84,3 @@ auto XcbSyncAux(Connection* connection, ReplyFunc reply_func, Cookie cookie)
   DCHECK(t);
   return XcbReply(t);
 }
-

@@ -42,4 +42,3 @@ class Event {
 
   DELETE_SPECIAL_MEMBERS(Event);
 };
-

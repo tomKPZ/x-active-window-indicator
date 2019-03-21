@@ -80,4 +80,3 @@ class WindowGeometryTracker : public EventDispatcher,
 
   DELETE_SPECIAL_MEMBERS(WindowGeometryTracker);
 };
-
