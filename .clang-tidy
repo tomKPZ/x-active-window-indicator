@@ -3,6 +3,7 @@
 # cppcoreguidelines-pro-bounds-pointer-arithmetic
 # cppcoreguidelines-pro-type-reinterpret-cast
 # cppcoreguidelines-pro-type-union-access
+# llvm-header-guard
 Checks: 'abseil-*,
          android-*,
          boost-*,
@@ -26,7 +27,9 @@ Checks: 'abseil-*,
          cppcoreguidelines-special-member-functions,
          google-*,
          hicpp-*,
-         llvm-*,
+         llvm-include-order,
+         llvm-namespace-comment,
+         llvm-twine-local,
          misc-*,
          modernize-*,
          mpi-*,
