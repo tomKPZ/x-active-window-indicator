@@ -42,13 +42,13 @@ class WindowGeometryTracker : public EventDispatcher,
                         const xcb_window_t& window);
   ~WindowGeometryTracker() override;
 
-  int16_t X() const;
-  int16_t Y() const;
+  [[nodiscard]] int16_t X() const;
+  [[nodiscard]] int16_t Y() const;
 
-  uint16_t width() const { return width_; }
-  uint16_t height() const { return height_; }
+  [[nodiscard]] uint16_t width() const { return width_; }
+  [[nodiscard]] uint16_t height() const { return height_; }
 
-  uint16_t border_width() const { return border_width_; }
+  [[nodiscard]] uint16_t border_width() const { return border_width_; }
 
  protected:
   // EventDispatcher:

@@ -26,11 +26,11 @@ Event::~Event() {
 }
 
 bool Event::SendEvent() const {
-  return (event_->response_type & 0x80u) != 0;
+  return (event_->response_type & 0x80U) != 0;
 }
 
 uint8_t Event::ResponseType() const {
-  return event_->response_type & 0x7fu;
+  return event_->response_type & 0x7fU;
 }
 
 uint16_t Event::Sequence() const {

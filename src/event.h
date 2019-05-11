@@ -30,12 +30,12 @@ class Event {
   explicit Event(xcb_generic_event_t* event);
   ~Event();
 
-  bool SendEvent() const;
-  uint8_t ResponseType() const;
-  uint16_t Sequence() const;
+  [[nodiscard]] bool SendEvent() const;
+  [[nodiscard]] uint8_t ResponseType() const;
+  [[nodiscard]] uint16_t Sequence() const;
 
   explicit operator bool() const { return event_ != nullptr; }
-  const xcb_generic_event_t* event() const { return event_; }
+  [[nodiscard]] const xcb_generic_event_t* event() const { return event_; }
 
  private:
   xcb_generic_event_t* event_;

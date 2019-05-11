@@ -54,7 +54,7 @@ KeyListener::KeyListener(Connection* connection, EventLoop* event_loop)
            XCB_INPUT_MINOR_VERSION);
   auto* input_extension =
       xcb_get_extension_data(connection_->connection(), &xcb_input_id);
-  if (input_extension->present == 0u) {
+  if (input_extension->present == 0U) {
     throw XError("XINPUT not available");
   }
   xcb_input_major_opcode_ = input_extension->major_opcode;
