@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <array>
 #include <csignal>
 #include <cstdlib>
 #include <initializer_list>
