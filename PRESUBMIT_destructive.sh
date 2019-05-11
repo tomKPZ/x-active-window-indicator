@@ -1,6 +1,9 @@
 #! /usr/bin/env bash
 
-cmake . -DCMAKE_EXPORT_COMPILE_COMMANDS=On
+cmake . \
+      -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
+      -DCMAKE_C_COMPILER=clang \
+      -DCMAKE_CXX_COMPILER=clang++
 
 iwyu-tool -p . -j8 -- --mapping_file=iwyu.imp
 
