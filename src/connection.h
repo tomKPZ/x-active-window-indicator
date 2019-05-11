@@ -40,7 +40,7 @@ class XcbReply {
     free(t_);  // NOLINT
   }
   const T* operator->() const { return t_; }
-  const T* get() const { return t_; }
+  [[nodiscard]] const T* get() const { return t_; }
 
  private:
   T* t_;

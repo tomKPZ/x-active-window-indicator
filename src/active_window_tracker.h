@@ -38,7 +38,7 @@ class ActiveWindowTracker : public EventDispatcher,
   ActiveWindowTracker(Connection* connection, EventLoop* event_loop);
   ~ActiveWindowTracker() override;
 
-  xcb_window_t active_window() const { return active_window_; }
+  [[nodiscard]] xcb_window_t active_window() const { return active_window_; }
 
  protected:
   // EventDispatcher:

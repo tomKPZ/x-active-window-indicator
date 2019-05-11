@@ -63,7 +63,7 @@ class Connection::MultiMask {
       if ((mask & mask_bit) != XCB_EVENT_MASK_NO_EVENT) {
         mask_count++;
       }
-      mask_bit <<= 1u;
+      mask_bit <<= 1U;
     }
   }
 
@@ -74,18 +74,18 @@ class Connection::MultiMask {
         DCHECK(mask_count > 0);
         mask_count--;
       }
-      mask_bit <<= 1u;
+      mask_bit <<= 1U;
     }
   }
 
-  uint32_t ToMask() const {
+  [[nodiscard]] uint32_t ToMask() const {
     uint32_t mask = XCB_EVENT_MASK_NO_EVENT;
     uint32_t mask_bit = 1;
     for (auto mask_count : mask_counts_) {
       if (mask_count > 0) {
         mask |= mask_bit;
       }
-      mask_bit <<= 1u;
+      mask_bit <<= 1U;
     }
     return mask;
   }
@@ -110,7 +110,7 @@ Connection::Connection() {
     throw XError("Could not get screen");
   }
   root_window_ = screen->root;
-  if (root_window_ == 0u) {
+  if (root_window_ == 0U) {
     throw XError("Could not find root window");
   }
 }

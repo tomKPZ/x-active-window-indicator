@@ -36,7 +36,7 @@ class KeyListener : public EventDispatcher,
   KeyListener(Connection* connection, EventLoop* event_loop);
   ~KeyListener() override;
 
-  bool any_key_pressed() const { return any_key_pressed_; }
+  [[nodiscard]] bool any_key_pressed() const { return any_key_pressed_; }
 
  protected:
   // EventDispatcher:
