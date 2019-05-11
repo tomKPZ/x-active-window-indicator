@@ -108,6 +108,9 @@ void BorderWindow::SetSize(uint16_t width, uint16_t height) {
   xcb_xfixes_set_window_shape_region(connection_->connection(), window_,
                                      XCB_SHAPE_SK_BOUNDING, 0, 0,
                                      XcbRegion(connection_, rects).id());
+  xcb_xfixes_set_window_shape_region(connection_->connection(), window_,
+                                     XCB_SHAPE_SK_INPUT, 0, 0,
+                                     XcbRegion(connection_, {}).id());
 }
 
 void BorderWindow::Show() {
