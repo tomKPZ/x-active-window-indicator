@@ -54,12 +54,12 @@ class XcbRegion {
 
 BorderWindow::BorderWindow(Connection* connection) : connection_(connection) {
   window_ = connection_->GenerateId();
-  uint32_t attributes[] = {BORDER_COLOR, 1U};
+  std::array<uint32_t, 2> attributes{BORDER_COLOR, 1U};
   xcb_create_window(connection_->connection(), XCB_COPY_FROM_PARENT, window_,
                     connection_->root_window(), 0, 0, 1, 1, BORDER_WIDTH,
                     XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
                     XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT,
-                    static_cast<uint32_t*>(attributes));
+                    attributes.data());
 
   XCB_SYNC(xcb_xfixes_query_version, connection_, XCB_XFIXES_MAJOR_VERSION,
            XCB_XFIXES_MINOR_VERSION);

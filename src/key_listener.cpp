@@ -38,12 +38,11 @@ void SelectEvents(Connection* connection,
   const struct {
     xcb_input_event_mask_t event_mask;
     xcb_input_xi_event_mask_t xi_event_mask;
-  } mask[] = {{{XCB_INPUT_DEVICE_ALL,
-                sizeof(xcb_input_xi_event_mask_t) / sizeof(uint32_t)},
-               event_mask}};
+  } mask = {{XCB_INPUT_DEVICE_ALL,
+             sizeof(xcb_input_xi_event_mask_t) / sizeof(uint32_t)},
+            event_mask};
   xcb_input_xi_select_events(connection->connection(),
-                             connection->root_window(), std::size(mask),
-                             &mask[0].event_mask);
+                             connection->root_window(), 1, &mask.event_mask);
 }
 
 }  // namespace
@@ -94,17 +93,17 @@ bool KeyListener::DispatchEvent(const Event& event) {
   auto it =
       std::find_if(std::begin(key_code_states_), std::end(key_code_states_),
                    [key](const KeyCodeState& key_code_state) {
-                     return key_code_state.code == key;
+                     return key_code_state.code() == key;
                    });
   if (it == std::end(key_code_states_)) {
     return true;
   }
-  it->key_pressed = press;
+  it->set_key_pressed(press);
 
   const bool any_key_pressed =
       std::any_of(std::begin(key_code_states_), std::end(key_code_states_),
                   [](const KeyCodeState& key_code_state) {
-                    return key_code_state.key_pressed;
+                    return key_code_state.key_pressed();
                   });
   if (any_key_pressed != any_key_pressed_) {
     any_key_pressed_ = any_key_pressed;

@@ -19,6 +19,14 @@
 
 #include <cstdlib>
 
+namespace {
+
+constexpr const uint8_t kSendEventMask = 0x80U;
+constexpr const uint8_t kResponseTypeMask =
+    static_cast<uint8_t>(~kSendEventMask);
+
+}  // namespace
+
 Event::Event(xcb_generic_event_t* event) : event_(event) {}
 
 Event::~Event() {
@@ -26,11 +34,11 @@ Event::~Event() {
 }
 
 bool Event::SendEvent() const {
-  return (event_->response_type & 0x80U) != 0;
+  return (event_->response_type & kSendEventMask) != 0;
 }
 
 uint8_t Event::ResponseType() const {
-  return event_->response_type & 0x7fU;
+  return event_->response_type & kResponseTypeMask;
 }
 
 uint16_t Event::Sequence() const {

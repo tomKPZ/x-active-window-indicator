@@ -20,6 +20,7 @@
 #include <xcb/xproto.h>
 
 #include <algorithm>
+#include <climits>
 #include <forward_list>
 #include <limits>
 #include <string>
@@ -46,8 +47,8 @@ std::vector<xcb_atom_t> GetAtomArray(Connection* connection,
   auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
                         XCB_ATOM_ATOM, 0, std::numeric_limits<uint32_t>::max());
 
-  if (reply->format != 8 * sizeof(xcb_atom_t) || reply->type != XCB_ATOM_ATOM ||
-      reply->bytes_after > 0) {
+  if (reply->format != CHAR_BIT * sizeof(xcb_atom_t) ||
+      reply->type != XCB_ATOM_ATOM || reply->bytes_after > 0) {
     throw XError("Bad property reply");
   }
 
@@ -62,7 +63,7 @@ xcb_window_t GetWindow(Connection* connection,
   auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
                         XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));
 
-  if (reply->format != 8 * sizeof(xcb_window_t) ||
+  if (reply->format != CHAR_BIT * sizeof(xcb_window_t) ||
       reply->type != XCB_ATOM_WINDOW || reply->bytes_after > 0 ||
       xcb_get_property_value_length(reply.get()) != sizeof(xcb_window_t)) {
     throw XError("Bad property reply");

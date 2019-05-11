@@ -93,7 +93,7 @@ class Connection::MultiMask {
  private:
   static constexpr auto kMaskSize = 25;
 
-  unsigned int mask_counts_[kMaskSize]{};
+  std::array<unsigned int, kMaskSize> mask_counts_;
 
   DELETE_SPECIAL_MEMBERS(MultiMask);
 };
