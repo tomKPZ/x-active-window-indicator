@@ -22,6 +22,7 @@
 #include <xcb/xfixes.h>
 #include <xcb/xproto.h>
 
+#include <array>
 #include <vector>
 
 #include "connection.h"

@@ -5,7 +5,7 @@ cmake . \
       -DCMAKE_C_COMPILER=clang \
       -DCMAKE_CXX_COMPILER=clang++
 
-iwyu-tool -p . -j8 -- --mapping_file=iwyu.imp
+iwyu-tool -p . -j8 -- -Xiwyu --mapping_file=iwyu.imp
 
 /usr/share/clang/run-clang-tidy.py . -fix -quiet
 
