@@ -92,12 +92,10 @@ Event EventLoop::WaitForEvent() {
   xcb_flush(connection);
 
   while (true) {
-    struct pollfd poll_fds[] = {
-        {should_quit_fd_, POLLIN, 0},
-        {xcb_get_file_descriptor(connection), POLLIN, 0},
-    };
-    int ready =
-        poll(static_cast<struct pollfd*>(poll_fds), std::size(poll_fds), -1);
+    std::array<struct pollfd, 2> poll_fds{
+        {{should_quit_fd_, POLLIN, 0},
+         {xcb_get_file_descriptor(connection), POLLIN, 0}}};
+    int ready = poll(poll_fds.data(), poll_fds.size(), -1);
     if (ready == -1) {
       if (errno == EINTR) {
         continue;

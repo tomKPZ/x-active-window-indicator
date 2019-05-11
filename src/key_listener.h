@@ -43,17 +43,27 @@ class KeyListener : public EventDispatcher,
   bool DispatchEvent(const Event& event) override;
 
  private:
-  struct KeyCodeState {
-    explicit KeyCodeState(uint32_t key_code) : code(key_code) {}
-    const uint32_t code;
+  // TODO(tomKPZ): Don't hardcode these keycodes.
+  constexpr static uint32_t kWinKeyLeft = 133;
+  constexpr static uint32_t kWinKeyRight = 134;
+
+  class KeyCodeState {
+   public:
+    explicit KeyCodeState(uint32_t key_code) : code_(key_code) {}
+
+    [[nodiscard]] uint32_t code() const { return code_; }
+    [[nodiscard]] bool key_pressed() const { return key_pressed_; }
+    void set_key_pressed(bool key_pressed) { key_pressed_ = key_pressed; }
+
+   private:
+    const uint32_t code_;
 
     // TODO(tomKPZ): Any way to get initial key states?
-    bool key_pressed = false;
+    bool key_pressed_ = false;
   };
 
-  // TODO(tomKPZ): Don't hardcode these keycodes.
-  std::vector<KeyCodeState> key_code_states_{KeyCodeState{133},
-                                             KeyCodeState{134}};
+  std::vector<KeyCodeState> key_code_states_{KeyCodeState{kWinKeyLeft},
+                                             KeyCodeState{kWinKeyRight}};
   bool any_key_pressed_ = false;
 
   Connection* connection_;

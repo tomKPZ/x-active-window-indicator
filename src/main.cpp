@@ -28,7 +28,7 @@
 #include "event_loop.h"
 
 // Self-pipe trick.
-static int pipe_fds[2];
+static std::array<int, 2> pipe_fds;
 
 void signal_handler(int /*unused*/, siginfo_t* /*unused*/, void* /*unused*/);
 void signal_handler(int /*unused*/, siginfo_t* /*unused*/, void* /*unused*/) {
@@ -38,7 +38,7 @@ void signal_handler(int /*unused*/, siginfo_t* /*unused*/, void* /*unused*/) {
 }
 
 int main() {
-  if (pipe(static_cast<int*>(pipe_fds)) == -1) {
+  if (pipe(pipe_fds.data()) == -1) {
     throw std::runtime_error("pipe() failed");
   }
   for (int fd : pipe_fds) {
