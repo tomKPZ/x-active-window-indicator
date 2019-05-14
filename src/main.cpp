@@ -27,47 +27,50 @@
 #include "active_window_indicator.h"
 #include "connection.h"
 #include "event_loop.h"
+#include "lippincott.h"
 
 // Self-pipe trick.
 static std::array<int, 2> pipe_fds;
 
-void signal_handler(int /*unused*/, siginfo_t* /*unused*/, void* /*unused*/);
-void signal_handler(int /*unused*/, siginfo_t* /*unused*/, void* /*unused*/) {
-  if (write(pipe_fds[1], "", 1) == -1) {
-    std::abort();
-  }
-}
-
-int main() {
-  if (pipe(pipe_fds.data()) == -1) {
-    throw std::runtime_error("pipe() failed");
-  }
-  for (int fd : pipe_fds) {
-    // NOLINTNEXTLINE
-    int flags = fcntl(pipe_fds[0], F_GETFL);
-    // NOLINTNEXTLINE
-    if (flags == -1 || fcntl(fd, F_SETFL, flags) == -1) {
-      throw std::runtime_error("fcntl() failed");
+int main() noexcept {
+  try {
+    if (pipe(pipe_fds.data()) == -1) {
+      throw std::runtime_error("pipe() failed");
     }
-  }
-
-  struct sigaction sa {};
-  sa.sa_flags = SA_RESTART;
-  sa.sa_sigaction = signal_handler;
-  for (auto sig : {
-           SIGHUP,
-           SIGINT,
-           SIGQUIT,
-           SIGTERM,
-       }) {
-    if (sigaction(sig, &sa, nullptr) == -1) {
-      throw std::runtime_error("sigaction() failed");
+    for (int fd : pipe_fds) {
+      // NOLINTNEXTLINE
+      int flags = fcntl(pipe_fds[0], F_GETFL);
+      // NOLINTNEXTLINE
+      if (flags == -1 || fcntl(fd, F_SETFL, flags) == -1) {
+        throw std::runtime_error("fcntl() failed");
+      }
     }
-  }
 
-  Connection connection;
-  EventLoop loop{&connection, pipe_fds[0]};
-  ActiveWindowIndicator indicator{&connection, &loop};
-  loop.Run();
+    struct sigaction sa {};
+    sa.sa_flags = SA_RESTART;
+    sa.sa_sigaction = [](int /*unused*/, siginfo_t* /*unused*/,
+                         void* /*unused*/) {
+      if (write(pipe_fds[1], "", 1) == -1) {
+        std::abort();
+      }
+    };
+    for (auto sig : {
+             SIGHUP,
+             SIGINT,
+             SIGQUIT,
+             SIGTERM,
+         }) {
+      if (sigaction(sig, &sa, nullptr) == -1) {
+        throw std::runtime_error("sigaction() failed");
+      }
+    }
+
+    Connection connection;
+    EventLoop loop{&connection, pipe_fds[0]};
+    ActiveWindowIndicator indicator{&connection, &loop};
+    loop.Run();
+  } catch (...) {
+    Lippincott();
+  }
   return 0;
 }
