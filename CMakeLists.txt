@@ -69,6 +69,7 @@ add_executable(x-active-window-indicator
                src/event.cpp
                src/event_loop.cpp
                src/key_listener.cpp
+               src/lippincott.cpp
                src/main.cpp
                src/window_geometry_tracker.cpp
                src/x_error.cpp)

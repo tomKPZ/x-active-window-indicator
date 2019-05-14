@@ -24,7 +24,6 @@
 #include <array>
 #include <cerrno>
 #include <cstdint>
-#include <exception>
 #include <forward_list>
 #include <iostream>
 #include <sstream>  // IWYU pragma: keep (https://github.com/include-what-you-use/include-what-you-use/issues/277)
@@ -35,7 +34,7 @@
 #include "event.h"
 #include "event_dispatcher.h"
 #include "event_loop_idle_observer.h"
-#include "x_error.h"
+#include "lippincott.h"
 
 namespace {
 
@@ -60,12 +59,8 @@ void EventLoop::Run() {
     for (auto* dispatcher : Observable<EventDispatcher>::observers()) {
       try {
         dispatched = dispatcher->DispatchEvent(event);
-      } catch (const XError& x_error) {
-        std::cerr << "X Error: " << x_error.what() << std::endl;
-      } catch (const std::exception& exception) {
-        std::cerr << "Exception: " << exception.what() << std::endl;
       } catch (...) {
-        std::cerr << "Unknown exception" << std::endl;
+        Lippincott();
       }
       if (dispatched) {
         break;
