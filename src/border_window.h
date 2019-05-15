@@ -37,6 +37,8 @@ class BorderWindow {
   void Hide();
 
  private:
+  void Raise();
+
   Connection* connection_;
 
   xcb_window_t window_;

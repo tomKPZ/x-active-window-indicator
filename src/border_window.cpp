@@ -116,8 +116,16 @@ void BorderWindow::SetSize(uint16_t width, uint16_t height) {
 
 void BorderWindow::Show() {
   xcb_map_window(connection_->connection(), window_);
+  Raise();
 }
 
 void BorderWindow::Hide() {
   xcb_unmap_window(connection_->connection(), window_);
+}
+
+void BorderWindow::Raise() {
+  xcb_configure_window_value_list_t configure{};
+  configure.stack_mode = XCB_STACK_MODE_ABOVE;
+  xcb_configure_window_aux(connection_->connection(), window_,
+                           XCB_CONFIG_WINDOW_STACK_MODE, &configure);
 }
