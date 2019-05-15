@@ -21,8 +21,8 @@
 #include <xcb/xproto.h>
 
 #include <cstdint>
-#include <cstdlib>
 #include <memory>
+#include <type_traits>
 #include <unordered_map>
 
 #include "util.h"
@@ -33,20 +33,7 @@
              func((c)->connection() __VA_OPT__(, ) __VA_ARGS__))
 
 template <typename T>
-class XcbReply {
- public:
-  explicit XcbReply(T* t) : t_(t) {}
-  ~XcbReply() {
-    free(t_);  // NOLINT
-  }
-  const T* operator->() const { return t_; }
-  [[nodiscard]] const T* get() const { return t_; }
-
- private:
-  T* t_;
-
-  DELETE_SPECIAL_MEMBERS(XcbReply);
-};
+using XcbReply = std::unique_ptr<T, FreeDeleter>;
 
 class Connection {
  public:
@@ -82,5 +69,5 @@ auto XcbSyncAux(Connection* connection, ReplyFunc reply_func, Cookie cookie)
     throw XError(*error);
   }
   DCHECK(t);
-  return XcbReply(t);
+  return XcbReply<std::decay_t<decltype(*t)>>(t);
 }

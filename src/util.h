@@ -66,3 +66,9 @@ constexpr Dst CheckedCast(Src value) {
   }
   return static_cast<Dst>(value);
 }
+
+struct FreeDeleter {
+  void operator()(void* ptr) const {
+    free(ptr);  // NOLINT
+  }
+};
