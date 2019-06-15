@@ -54,3 +54,5 @@ rules.ninja
 
 # GDB
 .gdb_history
+
+.clangd
