@@ -1,4 +1,7 @@
 noexcept
 constexpr
 tests
-auto format variable/class names
+Auto format variable/class names.
+Add option to wait for WM initialization.
+Prevent multiple instances from running.
+Command line options to set border color and size.
