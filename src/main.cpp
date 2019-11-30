@@ -39,9 +39,9 @@ int main() noexcept {
     }
     for (int fd : pipe_fds) {
       // NOLINTNEXTLINE
-      int flags = fcntl(pipe_fds[0], F_GETFL);
+      int flags = fcntl(fd, F_GETFL);
       // NOLINTNEXTLINE
-      if (flags == -1 || fcntl(fd, F_SETFL, flags) == -1) {
+      if (flags == -1 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
         throw std::runtime_error("fcntl() failed");
       }
     }
