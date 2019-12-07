@@ -15,39 +15,11 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include "quit_signaller.h"
+#pragma once
 
-#include <sys/signalfd.h>
-#include <unistd.h>
+#include <stdexcept>
 
-#include <csignal>
-#include <cstdio>
-#include <cstdlib>
-#include <initializer_list>
-
-#include "p_error.h"
-
-QuitSignaller::QuitSignaller() {
-  sigset_t mask;
-  sigemptyset(&mask);
-  for (auto sig : {
-           SIGHUP,
-           SIGINT,
-           SIGQUIT,
-           SIGTERM,
-       }) {
-    sigaddset(&mask, sig);
-  }
-
-  fd_ = signalfd(-1, &mask, SFD_CLOEXEC);
-  if (fd_ == -1) {
-    throw PError("signalfd");
-  }
-}
-
-QuitSignaller::~QuitSignaller() {
-  if (close(fd_) == -1) {
-    perror("close");
-    std::abort();
-  }
-}
+class PError : public std::runtime_error {
+ public:
+  explicit PError(const char* msg);
+};
