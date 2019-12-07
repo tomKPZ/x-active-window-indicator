@@ -57,6 +57,15 @@
   virtual ~Type() = default;                                 \
   DEFAULT_SPECIAL_MEMBERS(Type)
 
+#define REDO_ON_EINTR(x)                      \
+  [&]() {                                     \
+    int result;                               \
+    do {                                      \
+      result = (x);                           \
+    } while (result == -1 && errno == EINTR); \
+    return result;                            \
+  }()
+
 template <typename Dst, typename Src>
 constexpr auto CheckedCast(Src value) -> Dst {
   if (value < std::numeric_limits<Dst>::min() ||

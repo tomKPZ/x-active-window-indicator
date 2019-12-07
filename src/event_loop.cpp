@@ -35,6 +35,7 @@
 #include "event_loop_idle_observer.h"
 #include "lippincott.h"
 #include "p_error.h"
+#include "util.h"
 
 namespace {
 
@@ -90,11 +91,8 @@ auto EventLoop::WaitForEvent() const -> Event {
     std::array<struct pollfd, 2> poll_fds{
         {{should_quit_fd_, POLLIN, 0},
          {xcb_get_file_descriptor(connection), POLLIN, 0}}};
-    int ready = poll(poll_fds.data(), poll_fds.size(), -1);
+    int ready = REDO_ON_EINTR(poll(poll_fds.data(), poll_fds.size(), -1));
     if (ready == -1) {
-      if (errno == EINTR) {
-        continue;
-      }
       throw PError("poll");
     }
     if (poll_fds[0].revents != 0) {
