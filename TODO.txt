@@ -5,3 +5,5 @@ Auto format variable/class names.
 Add option to wait for WM initialization.
 Prevent multiple instances from running.
 Command line options to set border color and size.
+C++20
+Fix indicator not showing on GNOME.
