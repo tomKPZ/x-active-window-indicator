@@ -34,7 +34,7 @@ class EventLoop : public Observable<EventDispatcher>,
   void Run();
 
  private:
-  Event WaitForEvent();
+  auto WaitForEvent() -> Event;
 
   Connection* connection_;
   int should_quit_fd_;

@@ -32,7 +32,7 @@ class Observable {
   virtual ~Observable() { DCHECK(observers_.empty()); }
   DEFAULT_SPECIAL_MEMBERS(Observable);
 
-  [[nodiscard]] const std::forward_list<Observer*>& observers() const {
+  [[nodiscard]] auto observers() const -> const std::forward_list<Observer*>& {
     return observers_;
   }
 

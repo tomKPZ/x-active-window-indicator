@@ -36,11 +36,13 @@ class KeyListener : public EventDispatcher,
   KeyListener(Connection* connection, EventLoop* event_loop);
   ~KeyListener() override;
 
-  [[nodiscard]] bool any_key_pressed() const { return any_key_pressed_; }
+  [[nodiscard]] auto any_key_pressed() const -> bool {
+    return any_key_pressed_;
+  }
 
  protected:
   // EventDispatcher:
-  bool DispatchEvent(const Event& event) override;
+  auto DispatchEvent(const Event& event) -> bool override;
 
  private:
   // TODO(tomKPZ): Don't hardcode these keycodes.
@@ -51,8 +53,8 @@ class KeyListener : public EventDispatcher,
    public:
     explicit KeyCodeState(uint32_t key_code) : code_(key_code) {}
 
-    [[nodiscard]] uint32_t code() const { return code_; }
-    [[nodiscard]] bool key_pressed() const { return key_pressed_; }
+    [[nodiscard]] auto code() const -> uint32_t { return code_; }
+    [[nodiscard]] auto key_pressed() const -> bool { return key_pressed_; }
     void set_key_pressed(bool key_pressed) { key_pressed_ = key_pressed; }
 
    private:
