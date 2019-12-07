@@ -28,10 +28,10 @@
 #include "scoped_observer.h"
 #include "util.h"
 #include "window_geometry_observer.h"
+#include "window_geometry_tracker.h"
 
 class Connection;
 class EventLoop;
-class WindowGeometryTracker;
 
 class ActiveWindowIndicator : public ActiveWindowObserver,
                               public EventLoopIdleObserver,
@@ -74,9 +74,9 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
   bool needs_set_size_ = false;
   bool needs_show_ = false;
 
-  std::unique_ptr<WindowGeometryTracker> window_geometry_tracker_;
+  std::unique_ptr<WindowGeometryTracker> window_geometry_tracker_{};
   std::unique_ptr<ScopedObserver<WindowGeometryObserver>>
-      window_geometry_observer_;
+      window_geometry_observer_{};
 
   DELETE_SPECIAL_MEMBERS(ActiveWindowIndicator);
 };

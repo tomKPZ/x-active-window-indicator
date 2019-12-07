@@ -40,18 +40,18 @@
   } while (0)
 #endif
 
-#define DELETE_SPECIAL_MEMBERS(Type)                \
-  Type(const Type&) = delete;                       \
-  Type& operator=(const Type&) = delete; /*NOLINT*/ \
-  Type(Type&&) = delete;                 /*NOLINT*/ \
-  Type& operator=(Type&&) = delete       /*NOLINT*/
+#define DELETE_SPECIAL_MEMBERS(Type)           \
+  Type(const Type&) = delete;                  \
+  auto operator=(const Type&)->Type& = delete; \
+  Type(Type&&) = delete;                       \
+  auto operator=(Type &&)->Type& = delete
 
-#define DEFAULT_SPECIAL_MEMBERS(Type)                \
-  Type() = default;                                  \
-  Type(const Type&) = default;                       \
-  Type& operator=(const Type&) = default; /*NOLINT*/ \
-  Type(Type&&) noexcept = default;        /*NOLINT*/ \
-  Type& operator=(Type&&) = default       /*NOLINT*/
+#define DEFAULT_SPECIAL_MEMBERS(Type)           \
+  Type() = default;                             \
+  Type(const Type&) = default;                  \
+  auto operator=(const Type&)->Type& = default; \
+  Type(Type&&) noexcept = default;              \
+  auto operator=(Type &&)->Type& = default
 
 #define DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(Type) \
   virtual ~Type() = default;                                 \
