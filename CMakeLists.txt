@@ -67,6 +67,7 @@ add_executable(
   src/key_listener.cpp
   src/lippincott.cpp
   src/main.cpp
+  src/quit_signaller.cpp
   src/window_geometry_tracker.cpp
   src/x_error.cpp)
 

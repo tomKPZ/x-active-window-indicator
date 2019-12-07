@@ -15,33 +15,17 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include <sys/signalfd.h>
-
-#include <csignal>
-#include <initializer_list>
-
 #include "active_window_indicator.h"
 #include "connection.h"
 #include "event_loop.h"
 #include "lippincott.h"
+#include "quit_signaller.h"
 
 auto main() noexcept -> int {
   try {
-    sigset_t mask;
-    sigemptyset(&mask);
-    for (auto sig : {
-             SIGHUP,
-             SIGINT,
-             SIGQUIT,
-             SIGTERM,
-         }) {
-      sigaddset(&mask, sig);
-    }
-
-    int sfd = signalfd(-1, &mask, SFD_CLOEXEC);
-
+    QuitSignaller quit_signaller;
     Connection connection;
-    EventLoop loop{&connection, sfd};
+    EventLoop loop{&connection, quit_signaller.fd()};
     ActiveWindowIndicator indicator{&connection, &loop};
     loop.Run();
   } catch (...) {

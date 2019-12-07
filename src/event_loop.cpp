@@ -53,7 +53,7 @@ EventLoop::EventLoop(Connection* connection, int should_quit_fd)
 
 EventLoop::~EventLoop() = default;
 
-void EventLoop::Run() {
+void EventLoop::Run() const {
   while (auto event = WaitForEvent()) {
     bool dispatched = false;
     for (auto* dispatcher : Observable<EventDispatcher>::observers()) {
@@ -72,7 +72,7 @@ void EventLoop::Run() {
   }
 }
 
-auto EventLoop::WaitForEvent() -> Event {
+auto EventLoop::WaitForEvent() const -> Event {
   auto* connection = connection_->connection();
 
   xcb_generic_event_t* event = xcb_poll_for_event(connection);
@@ -95,7 +95,7 @@ auto EventLoop::WaitForEvent() -> Event {
       if (errno == EINTR) {
         continue;
       }
-      throw std::logic_error("poll() failed");
+      throw std::runtime_error("poll() failed");
     }
     if (poll_fds[0].revents != 0) {
       return Event(nullptr);

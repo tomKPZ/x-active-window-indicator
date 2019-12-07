@@ -31,10 +31,10 @@ class EventLoop : public Observable<EventDispatcher>,
   EventLoop(Connection* connection, int should_quit_fd);
   ~EventLoop() override;
 
-  void Run();
+  void Run() const;
 
  private:
-  auto WaitForEvent() -> Event;
+  [[nodiscard]] auto WaitForEvent() const -> Event;
 
   Connection* connection_;
   int should_quit_fd_;
