@@ -38,11 +38,13 @@ class ActiveWindowTracker : public EventDispatcher,
   ActiveWindowTracker(Connection* connection, EventLoop* event_loop);
   ~ActiveWindowTracker() override;
 
-  [[nodiscard]] xcb_window_t active_window() const { return active_window_; }
+  [[nodiscard]] auto active_window() const -> xcb_window_t {
+    return active_window_;
+  }
 
  protected:
   // EventDispatcher:
-  bool DispatchEvent(const Event& event) override;
+  auto DispatchEvent(const Event& event) -> bool override;
 
  private:
   void SetActiveWindow();

@@ -50,7 +50,7 @@
   Type() = default;                                  \
   Type(const Type&) = default;                       \
   Type& operator=(const Type&) = default; /*NOLINT*/ \
-  Type(Type&&) = default;                 /*NOLINT*/ \
+  Type(Type&&) noexcept = default;        /*NOLINT*/ \
   Type& operator=(Type&&) = default       /*NOLINT*/
 
 #define DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(Type) \
@@ -58,7 +58,7 @@
   DEFAULT_SPECIAL_MEMBERS(Type)
 
 template <typename Dst, typename Src>
-constexpr Dst CheckedCast(Src value) {
+constexpr auto CheckedCast(Src value) -> Dst {
   if (value < std::numeric_limits<Dst>::min() ||
       value > std::numeric_limits<Dst>::max()) {
     throw std::runtime_error("Cast value not in range: " +

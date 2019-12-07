@@ -24,7 +24,7 @@ class Event;
 class EventDispatcher {
  public:
   // Returns true iff the event was handled.
-  virtual bool DispatchEvent(const Event& event) = 0;
+  virtual auto DispatchEvent(const Event& event) -> bool = 0;
 
  protected:
   DEFAULT_VIRTUAL_DESTRUCTOR_AND_SPECIAL_MEMBERS(EventDispatcher);
