@@ -27,7 +27,6 @@
 #include <forward_list>
 #include <iostream>
 #include <sstream>  // IWYU pragma: keep (https://github.com/include-what-you-use/include-what-you-use/issues/277)
-#include <stdexcept>
 #include <string>
 
 #include "connection.h"
@@ -35,6 +34,7 @@
 #include "event_dispatcher.h"
 #include "event_loop_idle_observer.h"
 #include "lippincott.h"
+#include "p_error.h"
 
 namespace {
 
@@ -95,7 +95,7 @@ auto EventLoop::WaitForEvent() const -> Event {
       if (errno == EINTR) {
         continue;
       }
-      throw std::runtime_error("poll() failed");
+      throw PError("poll");
     }
     if (poll_fds[0].revents != 0) {
       return Event(nullptr);

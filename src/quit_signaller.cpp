@@ -24,7 +24,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <initializer_list>
-#include <stdexcept>
+
+#include "p_error.h"
 
 QuitSignaller::QuitSignaller() {
   sigset_t mask;
@@ -40,7 +41,7 @@ QuitSignaller::QuitSignaller() {
 
   fd_ = signalfd(-1, &mask, SFD_CLOEXEC);
   if (fd_ == -1) {
-    throw std::runtime_error("signalfd() failed");
+    throw PError("signalfd");
   }
 }
 
