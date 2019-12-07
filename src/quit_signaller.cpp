@@ -15,21 +15,38 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include "active_window_indicator.h"
-#include "connection.h"
-#include "event_loop.h"
-#include "lippincott.h"
 #include "quit_signaller.h"
 
-auto main() noexcept -> int {
-  try {
-    QuitSignaller quit_signaller;
-    Connection connection;
-    EventLoop loop{&connection, quit_signaller.fd()};
-    ActiveWindowIndicator indicator{&connection, &loop};
-    loop.Run();
-  } catch (...) {
-    Lippincott();
+#include <sys/signalfd.h>
+#include <unistd.h>
+
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <initializer_list>
+#include <stdexcept>
+
+QuitSignaller::QuitSignaller() {
+  sigset_t mask;
+  sigemptyset(&mask);
+  for (auto sig : {
+           SIGHUP,
+           SIGINT,
+           SIGQUIT,
+           SIGTERM,
+       }) {
+    sigaddset(&mask, sig);
   }
-  return 0;
+
+  fd_ = signalfd(-1, &mask, SFD_CLOEXEC);
+  if (fd_ == -1) {
+    throw std::runtime_error("signalfd() failed");
+  }
+}
+
+QuitSignaller::~QuitSignaller() {
+  if (close(fd_) == -1) {
+    perror("close");
+    std::abort();
+  }
 }

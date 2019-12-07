@@ -15,21 +15,19 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include "active_window_indicator.h"
-#include "connection.h"
-#include "event_loop.h"
-#include "lippincott.h"
-#include "quit_signaller.h"
+#pragma once
 
-auto main() noexcept -> int {
-  try {
-    QuitSignaller quit_signaller;
-    Connection connection;
-    EventLoop loop{&connection, quit_signaller.fd()};
-    ActiveWindowIndicator indicator{&connection, &loop};
-    loop.Run();
-  } catch (...) {
-    Lippincott();
-  }
-  return 0;
-}
+#include "util.h"
+
+class QuitSignaller {
+ public:
+  QuitSignaller();
+  ~QuitSignaller();
+
+  [[nodiscard]] auto fd() const -> int { return fd_; }
+
+ private:
+  int fd_;
+
+  DELETE_SPECIAL_MEMBERS(QuitSignaller);
+};
