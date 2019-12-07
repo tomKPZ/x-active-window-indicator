@@ -15,12 +15,9 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include <fcntl.h>
-#include <unistd.h>
+#include <sys/signalfd.h>
 
-#include <array>
 #include <csignal>
-#include <cstdlib>
 #include <initializer_list>
 #include <stdexcept>
 
@@ -29,44 +26,23 @@
 #include "event_loop.h"
 #include "lippincott.h"
 
-// Self-pipe trick.
-static std::array<int, 2> pipe_fds;
-
-int main() noexcept {
+auto main() noexcept -> int {
   try {
-    if (pipe(pipe_fds.data()) == -1) {
-      throw std::runtime_error("pipe() failed");
-    }
-    for (int fd : pipe_fds) {
-      // NOLINTNEXTLINE
-      int flags = fcntl(fd, F_GETFL);
-      // NOLINTNEXTLINE
-      if (flags == -1 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
-        throw std::runtime_error("fcntl() failed");
-      }
-    }
-
-    struct sigaction sa {};
-    sa.sa_flags = SA_RESTART;
-    sa.sa_sigaction = [](int /*unused*/, siginfo_t* /*unused*/,
-                         void* /*unused*/) {
-      if (write(pipe_fds[1], "", 1) == -1) {
-        std::abort();
-      }
-    };
+    sigset_t mask;
+    sigemptyset(&mask);
     for (auto sig : {
              SIGHUP,
              SIGINT,
              SIGQUIT,
              SIGTERM,
          }) {
-      if (sigaction(sig, &sa, nullptr) == -1) {
-        throw std::runtime_error("sigaction() failed");
-      }
+      sigaddset(&mask, sig);
     }
 
+    int sfd = signalfd(-1, &mask, SFD_CLOEXEC);
+
     Connection connection;
-    EventLoop loop{&connection, pipe_fds[0]};
+    EventLoop loop{&connection, sfd};
     ActiveWindowIndicator indicator{&connection, &loop};
     loop.Run();
   } catch (...) {
