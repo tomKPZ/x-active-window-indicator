@@ -22,7 +22,6 @@
 #include <xcb/xproto.h>
 
 #include <array>
-#include <cerrno>
 #include <cstdint>
 #include <forward_list>
 #include <iostream>
