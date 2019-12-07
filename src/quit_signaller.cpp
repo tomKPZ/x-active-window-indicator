@@ -26,6 +26,7 @@
 #include <initializer_list>
 
 #include "p_error.h"
+#include "util.h"
 
 QuitSignaller::QuitSignaller() {
   sigset_t mask;
@@ -46,7 +47,7 @@ QuitSignaller::QuitSignaller() {
 }
 
 QuitSignaller::~QuitSignaller() {
-  if (close(fd_) == -1) {
+  if (REDO_ON_EINTR(close(fd_) == -1)) {
     perror("close");
     std::abort();
   }
