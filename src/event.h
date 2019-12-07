@@ -21,6 +21,7 @@
 #include <xcb/xcb.h>
 
 #include <cstdint>
+#include <memory>
 
 #include "util.h"
 
@@ -36,11 +37,11 @@ class Event {
 
   explicit operator bool() const { return event_ != nullptr; }
   [[nodiscard]] auto event() const -> const xcb_generic_event_t* {
-    return event_;
+    return event_.get();
   }
 
  private:
-  xcb_generic_event_t* event_;
+  std::unique_ptr<xcb_generic_event_t, FreeDeleter> event_;
 
   DELETE_SPECIAL_MEMBERS(Event);
 };

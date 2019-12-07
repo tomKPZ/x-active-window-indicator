@@ -17,8 +17,6 @@
 
 #include "event.h"
 
-#include <cstdlib>
-
 namespace {
 
 constexpr const uint8_t kSendEventMask = 0x80U;
@@ -29,9 +27,7 @@ constexpr const uint8_t kResponseTypeMask =
 
 Event::Event(xcb_generic_event_t* event) : event_(event) {}
 
-Event::~Event() {
-  free(event_);  // NOLINT
-}
+Event::~Event() = default;
 
 auto Event::SendEvent() const -> bool {
   return (event_->response_type & kSendEventMask) != 0;
