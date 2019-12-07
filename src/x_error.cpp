@@ -22,7 +22,7 @@
 
 namespace {
 
-std::string MakeErrorMessage(const xcb_generic_error_t& error) {
+auto MakeErrorMessage(const xcb_generic_error_t& error) -> std::string {
   std::ostringstream stream;
   stream << "XCB Error: response_type("
          << static_cast<uint16_t>(error.response_type) << "), error_code("

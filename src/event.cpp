@@ -33,14 +33,14 @@ Event::~Event() {
   free(event_);  // NOLINT
 }
 
-bool Event::SendEvent() const {
+auto Event::SendEvent() const -> bool {
   return (event_->response_type & kSendEventMask) != 0;
 }
 
-uint8_t Event::ResponseType() const {
+auto Event::ResponseType() const -> uint8_t {
   return event_->response_type & kResponseTypeMask;
 }
 
-uint16_t Event::Sequence() const {
+auto Event::Sequence() const -> uint16_t {
   return event_->sequence;
 }

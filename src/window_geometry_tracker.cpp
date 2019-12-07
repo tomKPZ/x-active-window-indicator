@@ -51,15 +51,15 @@ WindowGeometryTracker::~WindowGeometryTracker() {
   connection_->DeselectEvents(window_, XCB_EVENT_MASK_STRUCTURE_NOTIFY);
 }
 
-int16_t WindowGeometryTracker::X() const {
+auto WindowGeometryTracker::X() const -> int16_t {
   return parent_ ? CheckedCast<int16_t>(parent_->X() + x_) : 0;
 }
 
-int16_t WindowGeometryTracker::Y() const {
+auto WindowGeometryTracker::Y() const -> int16_t {
   return parent_ ? CheckedCast<int16_t>(parent_->Y() + y_) : 0;
 }
 
-bool WindowGeometryTracker::DispatchEvent(const Event& event) {
+auto WindowGeometryTracker::DispatchEvent(const Event& event) -> bool {
   union {
     const xcb_generic_event_t* generic;
 

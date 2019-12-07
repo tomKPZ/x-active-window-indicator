@@ -42,7 +42,7 @@ class XcbRegion {
                              CheckedCast<uint32_t>(rects.size()), rects.data());
   }
   ~XcbRegion() { xcb_xfixes_destroy_region(connection_->connection(), id_); }
-  [[nodiscard]] uint32_t id() const { return id_; }
+  [[nodiscard]] auto id() const -> uint32_t { return id_; }
 
  private:
   Connection* connection_;

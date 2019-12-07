@@ -67,7 +67,7 @@ KeyListener::~KeyListener() {
   SelectEvents(connection_, static_cast<xcb_input_xi_event_mask_t>(0));
 }
 
-bool KeyListener::DispatchEvent(const Event& event) {
+auto KeyListener::DispatchEvent(const Event& event) -> bool {
   if (event.ResponseType() != XCB_GE_GENERIC) {
     return false;
   }

@@ -36,15 +36,15 @@
 
 namespace {
 
-xcb_atom_t GetAtom(Connection* connection, const std::string& str) {
+auto GetAtom(Connection* connection, const std::string& str) -> xcb_atom_t {
   return XCB_SYNC(xcb_intern_atom, connection, false,
                   CheckedCast<uint16_t>(str.length()), str.c_str())
       ->atom;
 }
 
-std::vector<xcb_atom_t> GetAtomArray(Connection* connection,
-                                     const xcb_window_t& window,
-                                     xcb_atom_t atom) {
+auto GetAtomArray(Connection* connection,
+                  const xcb_window_t& window,
+                  xcb_atom_t atom) -> std::vector<xcb_atom_t> {
   auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
                         XCB_ATOM_ATOM, 0, std::numeric_limits<uint32_t>::max());
 
@@ -58,9 +58,9 @@ std::vector<xcb_atom_t> GetAtomArray(Connection* connection,
   return std::vector<xcb_atom_t>(value, value + reply->value_len);
 }
 
-xcb_window_t GetWindow(Connection* connection,
-                       const xcb_window_t& window,
-                       xcb_atom_t atom) {
+auto GetWindow(Connection* connection,
+               const xcb_window_t& window,
+               xcb_atom_t atom) -> xcb_window_t {
   auto reply = XCB_SYNC(xcb_get_property, connection, false, window, atom,
                         XCB_ATOM_WINDOW, 0, sizeof(xcb_window_t));
 
@@ -102,7 +102,7 @@ ActiveWindowTracker::~ActiveWindowTracker() {
                               XCB_EVENT_MASK_PROPERTY_CHANGE);
 }
 
-bool ActiveWindowTracker::DispatchEvent(const Event& event) {
+auto ActiveWindowTracker::DispatchEvent(const Event& event) -> bool {
   if (event.ResponseType() != XCB_PROPERTY_NOTIFY) {
     return false;
   }
