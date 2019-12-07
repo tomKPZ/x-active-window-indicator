@@ -38,7 +38,7 @@
 
 namespace {
 
-std::string MakeUnhandledErrorMessage(const Event& event) {
+auto MakeUnhandledErrorMessage(const Event& event) -> std::string {
   std::ostringstream stream;
   stream << "Unhandled event: send_event(" << event.SendEvent()
          << "), response_type(" << static_cast<uint16_t>(event.ResponseType())
@@ -72,7 +72,7 @@ void EventLoop::Run() {
   }
 }
 
-Event EventLoop::WaitForEvent() {
+auto EventLoop::WaitForEvent() -> Event {
   auto* connection = connection_->connection();
 
   xcb_generic_event_t* event = xcb_poll_for_event(connection);

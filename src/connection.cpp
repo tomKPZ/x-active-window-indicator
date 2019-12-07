@@ -26,7 +26,7 @@
 
 namespace {
 
-xcb_screen_t* ScreenOfConnection(xcb_connection_t* c, int screen) {
+auto ScreenOfConnection(xcb_connection_t* c, int screen) -> xcb_screen_t* {
   xcb_screen_iterator_t iter;
 
   iter = xcb_setup_roots_iterator(xcb_get_setup(c));
@@ -79,7 +79,7 @@ class Connection::MultiMask {
     }
   }
 
-  [[nodiscard]] uint32_t ToMask() const {
+  [[nodiscard]] auto ToMask() const -> uint32_t {
     uint32_t mask = XCB_EVENT_MASK_NO_EVENT;
     uint32_t mask_bit = 1;
     for (auto mask_count : mask_counts_) {
@@ -124,7 +124,7 @@ Connection::~Connection() {
   xcb_disconnect(connection_);
 }
 
-uint32_t Connection::GenerateId() {
+auto Connection::GenerateId() -> uint32_t {
   return xcb_generate_id(connection_);
 }
 
