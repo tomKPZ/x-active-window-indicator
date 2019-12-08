@@ -44,6 +44,10 @@ QuitSignaller::QuitSignaller() {
   if (fd_ == -1) {
     throw PError("signalfd");
   }
+
+  if (sigprocmask(SIG_BLOCK, &mask, nullptr) == -1) {
+    throw PError("sigprocmask");
+  }
 }
 
 QuitSignaller::~QuitSignaller() {
