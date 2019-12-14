@@ -6,4 +6,6 @@ Add option to wait for WM initialization.
 Prevent multiple instances from running.
 Command line options to set border color and size.
 C++20
-Fix indicator not showing on GNOME.
+Fix indicator too wide on GNOME shell.
+Add command line option to show translucent solid window via
+    _NET_WM_WINDOW_OPACITY or argb visuals.
