@@ -57,9 +57,9 @@ BorderWindow::BorderWindow(Connection* connection) : connection_(connection) {
   window_ = connection_->GenerateId();
   std::array<uint32_t, 2> attributes{BORDER_COLOR, 1U};
   xcb_create_window(connection_->connection(), XCB_COPY_FROM_PARENT, window_,
-                    connection_->root_window(), 0, 0, 1, 1, BORDER_WIDTH,
+                    connection_->root_window(), 0, 0, 1, 1, 0,
                     XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
-                    XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT,
+                    XCB_CW_BACK_PIXEL | XCB_CW_OVERRIDE_REDIRECT,
                     attributes.data());
 
   XCB_SYNC(xcb_xfixes_query_version, connection_, XCB_XFIXES_MAJOR_VERSION,
@@ -88,24 +88,23 @@ void BorderWindow::SetSize(uint16_t width, uint16_t height) {
   // TODO(tomKPZ): Use an outer border instead of an inner border if the window
   // is tiny.
   xcb_configure_window_value_list_t configure{};
-  configure.width = CheckedCast<uint16_t>(width - 2 * BORDER_WIDTH);
-  configure.height = CheckedCast<uint16_t>(height - 2 * BORDER_WIDTH);
+  configure.width = CheckedCast<uint16_t>(width);
+  configure.height = CheckedCast<uint16_t>(height);
   xcb_configure_window_aux(connection_->connection(), window_,
                            XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                            &configure);
 
   const std::vector<xcb_rectangle_t> rects{
       // Top edge.
-      {-BORDER_WIDTH, -BORDER_WIDTH, width, BORDER_WIDTH},
+      {0, 0, width, BORDER_WIDTH},
       // Bottom edge.
-      {-BORDER_WIDTH, CheckedCast<int16_t>(height - 2 * BORDER_WIDTH), width,
-       BORDER_WIDTH},
+      {0, CheckedCast<int16_t>(height - BORDER_WIDTH), width, BORDER_WIDTH},
       // Left edge.
-      {-BORDER_WIDTH, -BORDER_WIDTH, BORDER_WIDTH, height},
+      {0, 0, BORDER_WIDTH, height},
       // Right edge.
-      {CheckedCast<int16_t>(width - 2 * BORDER_WIDTH), -BORDER_WIDTH,
-       BORDER_WIDTH, height},
+      {CheckedCast<int16_t>(width - BORDER_WIDTH), 0, BORDER_WIDTH, height},
   };
+
   xcb_xfixes_set_window_shape_region(connection_->connection(), window_,
                                      XCB_SHAPE_SK_BOUNDING, 0, 0,
                                      XcbRegion(connection_, rects).id());
