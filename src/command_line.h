@@ -15,23 +15,20 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include "active_window_indicator.h"
-#include "command_line.h"
-#include "connection.h"
-#include "event_loop.h"
-#include "lippincott.h"
-#include "quit_signaller.h"
+#pragma once
 
-auto main(int argc, char** argv) noexcept -> int {
-  try {
-    CommandLine command_line{argc, argv};
-    QuitSignaller quit_signaller;
-    Connection connection;
-    EventLoop loop{&connection, quit_signaller.fd()};
-    ActiveWindowIndicator indicator{&connection, &loop, &command_line};
-    loop.Run();
-  } catch (...) {
-    Lippincott();
-  }
-  return 0;
-}
+#include <stdexcept>
+
+class CommandLine {
+ public:
+  CommandLine(int argc, char** argv);
+
+  [[nodiscard]] auto border_color() const -> uint32_t { return border_color_; }
+  [[nodiscard]] auto border_width() const -> uint16_t { return border_width_; }
+
+ private:
+  void Init(int argc, char** argv);
+
+  uint32_t border_color_;
+  uint16_t border_width_;
+};

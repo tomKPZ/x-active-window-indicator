@@ -20,6 +20,7 @@
 #include <exception>
 #include <iostream>
 
+#include "usage_error.h"
 #include "x_error.h"
 
 void Lippincott() noexcept {
@@ -27,6 +28,8 @@ void Lippincott() noexcept {
     throw;
   } catch (const XError& x_error) {
     std::cerr << "X Error: " << x_error.what() << std::endl;
+  } catch (const UsageError& /*usage_error*/) {
+    UsageError::Usage();
   } catch (const std::exception& exception) {
     std::cerr << "Exception: " << exception.what() << std::endl;
   } catch (...) {

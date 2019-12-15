@@ -68,11 +68,31 @@
 
 template <typename Dst, typename Src>
 constexpr auto CheckedCast(Src value) -> Dst {
-  if (value < std::numeric_limits<Dst>::min() ||
-      value > std::numeric_limits<Dst>::max()) {
-    throw std::runtime_error("Cast value not in range: " +
-                             std::to_string(value));
+  if constexpr (std::is_signed_v<Dst>) {
+    if constexpr (std::is_signed_v<Src>) {
+      if (value < std::numeric_limits<Dst>::min() ||
+          value > std::numeric_limits<Dst>::max()) {
+        throw std::out_of_range("Cast value not in range");
+      }
+    } else {
+      if (value > static_cast<std::make_unsigned_t<Dst>>(
+                      std::numeric_limits<Dst>::max())) {
+        throw std::out_of_range("Cast value not in range");
+      }
+    }
+  } else {
+    if constexpr (std::is_signed_v<Src>) {
+      if (value < 0 || static_cast<std::make_unsigned_t<Src>>(value) >
+                           std::numeric_limits<Dst>::max()) {
+        throw std::out_of_range("Cast value not in range");
+      }
+    } else {
+      if (value > std::numeric_limits<Dst>::max()) {
+        throw std::out_of_range("Cast value not in range");
+      }
+    }
   }
+
   return static_cast<Dst>(value);
 }
 

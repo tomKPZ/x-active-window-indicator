@@ -30,6 +30,7 @@
 #include "window_geometry_observer.h"
 #include "window_geometry_tracker.h"
 
+class CommandLine;
 class Connection;
 class EventLoop;
 
@@ -38,7 +39,9 @@ class ActiveWindowIndicator : public ActiveWindowObserver,
                               public KeyStateObserver,
                               public WindowGeometryObserver {
  public:
-  ActiveWindowIndicator(Connection* connection, EventLoop* event_loop);
+  ActiveWindowIndicator(Connection* connection,
+                        EventLoop* event_loop,
+                        CommandLine* command_line);
   ~ActiveWindowIndicator() override;
 
  protected:

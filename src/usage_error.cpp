@@ -15,23 +15,28 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-#include "active_window_indicator.h"
-#include "command_line.h"
-#include "connection.h"
-#include "event_loop.h"
-#include "lippincott.h"
-#include "quit_signaller.h"
+#include "usage_error.h"
 
-auto main(int argc, char** argv) noexcept -> int {
-  try {
-    CommandLine command_line{argc, argv};
-    QuitSignaller quit_signaller;
-    Connection connection;
-    EventLoop loop{&connection, quit_signaller.fd()};
-    ActiveWindowIndicator indicator{&connection, &loop, &command_line};
-    loop.Run();
-  } catch (...) {
-    Lippincott();
-  }
-  return 0;
+#include <iostream>
+#include <ostream>
+
+namespace {
+
+const char* kUsageMessage = R"(
+usage: x-active-window-indicator [-h] [-c COLOR] [-w WIDTH]
+
+An X11 utility that signals the active window
+
+optional arguments:
+  -h, --help                show this help message and exit
+  -c, --border-color COLOR  indicator color in aarrggbb format
+  -w --border-width WIDTH   indicator border width
+)";
+
+}  // namespace
+
+// static
+void UsageError::Usage() {
+  std::cerr << kUsageMessage + 1;
+  std::flush(std::cerr);
 }
