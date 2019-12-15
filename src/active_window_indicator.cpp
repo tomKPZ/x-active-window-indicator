@@ -24,10 +24,11 @@
 #include "window_geometry_tracker.h"
 
 ActiveWindowIndicator::ActiveWindowIndicator(Connection* connection,
-                                             EventLoop* event_loop)
+                                             EventLoop* event_loop,
+                                             CommandLine* command_line)
     : connection_(connection),
       event_loop_(event_loop),
-      border_window_(connection_),
+      border_window_(connection_, command_line),
       active_window_tracker_(connection_, event_loop_),
       key_listener_(connection_, event_loop_),
       active_window_observer_(this, &active_window_tracker_),

@@ -61,6 +61,7 @@ add_executable(
   src/active_window_indicator.cpp
   src/active_window_tracker.cpp
   src/border_window.cpp
+  src/command_line.cpp
   src/connection.cpp
   src/event.cpp
   src/event_loop.cpp
@@ -69,6 +70,7 @@ add_executable(
   src/main.cpp
   src/p_error.cpp
   src/quit_signaller.cpp
+  src/usage_error.cpp
   src/window_geometry_tracker.cpp
   src/x_error.cpp)
 

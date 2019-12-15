@@ -16,17 +16,19 @@
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 #include "active_window_indicator.h"
+#include "command_line.h"
 #include "connection.h"
 #include "event_loop.h"
 #include "lippincott.h"
 #include "quit_signaller.h"
 
-auto main() noexcept -> int {
+auto main(int argc, char** argv) noexcept -> int {
   try {
+    CommandLine command_line{argc, argv};
     QuitSignaller quit_signaller;
     Connection connection;
     EventLoop loop{&connection, quit_signaller.fd()};
-    ActiveWindowIndicator indicator{&connection, &loop};
+    ActiveWindowIndicator indicator{&connection, &loop, &command_line};
     loop.Run();
   } catch (...) {
     Lippincott();

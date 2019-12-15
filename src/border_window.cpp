@@ -25,14 +25,12 @@
 #include <array>
 #include <vector>
 
+#include "command_line.h"
 #include "connection.h"
 #include "util.h"
 #include "x_error.h"
 
 namespace {
-
-constexpr const uint32_t BORDER_COLOR = 0xff0000;
-constexpr const uint16_t BORDER_WIDTH = 5;
 
 class XcbRegion {
  public:
@@ -53,9 +51,10 @@ class XcbRegion {
 
 }  // namespace
 
-BorderWindow::BorderWindow(Connection* connection) : connection_(connection) {
+BorderWindow::BorderWindow(Connection* connection, CommandLine* command_line)
+    : connection_(connection), command_line_(command_line) {
   window_ = connection_->GenerateId();
-  std::array<uint32_t, 2> attributes{BORDER_COLOR, 1U};
+  std::array<uint32_t, 2> attributes{command_line_->border_color(), 1U};
   xcb_create_window(connection_->connection(), XCB_COPY_FROM_PARENT, window_,
                     connection_->root_window(), 0, 0, 1, 1, 0,
                     XCB_WINDOW_CLASS_INPUT_OUTPUT, XCB_COPY_FROM_PARENT,
@@ -94,15 +93,16 @@ void BorderWindow::SetSize(uint16_t width, uint16_t height) {
                            XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                            &configure);
 
+  const uint16_t border_width = command_line_->border_width();
   const std::vector<xcb_rectangle_t> rects{
       // Top edge.
-      {0, 0, width, BORDER_WIDTH},
+      {0, 0, width, border_width},
       // Bottom edge.
-      {0, CheckedCast<int16_t>(height - BORDER_WIDTH), width, BORDER_WIDTH},
+      {0, CheckedCast<int16_t>(height - border_width), width, border_width},
       // Left edge.
-      {0, 0, BORDER_WIDTH, height},
+      {0, 0, border_width, height},
       // Right edge.
-      {CheckedCast<int16_t>(width - BORDER_WIDTH), 0, BORDER_WIDTH, height},
+      {CheckedCast<int16_t>(width - border_width), 0, border_width, height},
   };
 
   xcb_xfixes_set_window_shape_region(connection_->connection(), window_,

@@ -23,11 +23,12 @@
 
 using xcb_window_t = uint32_t;
 
+class CommandLine;
 class Connection;
 
 class BorderWindow {
  public:
-  explicit BorderWindow(Connection* connection);
+  explicit BorderWindow(Connection* connection, CommandLine* command_line);
   ~BorderWindow();
 
   void SetPosition(int16_t x, int16_t y);
@@ -40,6 +41,8 @@ class BorderWindow {
   void Raise();
 
   Connection* connection_;
+
+  CommandLine* command_line_;
 
   xcb_window_t window_;
 
