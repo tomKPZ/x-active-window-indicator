@@ -32,6 +32,7 @@ auto main(int argc, char** argv) noexcept -> int {
     loop.Run();
   } catch (...) {
     Lippincott();
+    return 1;
   }
   return 0;
 }
