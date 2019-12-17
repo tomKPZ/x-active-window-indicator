@@ -30,7 +30,7 @@ An X11 utility that signals the active window
 optional arguments:
   -h, --help                show this help message and exit
   -c, --border-color COLOR  indicator color in aarrggbb format
-  -w --border-width WIDTH   indicator border width
+  -w, --border-width WIDTH  indicator border width
 )";
 
 }  // namespace
