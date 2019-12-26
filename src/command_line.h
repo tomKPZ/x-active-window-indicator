@@ -18,7 +18,6 @@
 #pragma once
 
 #include <cstdint>
-#include <stdexcept>
 
 class CommandLine {
  public:
