@@ -18,11 +18,10 @@
 #include "usage_error.h"
 
 #include <iostream>
-#include <ostream>
 
 namespace {
 
-const char* kUsageMessage = R"(
+const char* k_usage_message = R"(
 usage: x-active-window-indicator [-h] [-c COLOR] [-w WIDTH]
 
 An X11 utility that signals the active window
@@ -37,6 +36,6 @@ optional arguments:
 
 // static
 void UsageError::Usage() {
-  std::cerr << kUsageMessage + 1;
+  std::cerr << k_usage_message + 1;
   std::flush(std::cerr);
 }

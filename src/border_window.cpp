@@ -40,7 +40,7 @@ class XcbRegion {
                              CheckedCast<uint32_t>(rects.size()), rects.data());
   }
   ~XcbRegion() { xcb_xfixes_destroy_region(connection_->connection(), id_); }
-  [[nodiscard]] auto id() const -> uint32_t { return id_; }
+  [[nodiscard]] auto Id() const -> uint32_t { return id_; }
 
  private:
   Connection* connection_;
@@ -107,10 +107,10 @@ void BorderWindow::SetSize(uint16_t width, uint16_t height) {
 
   xcb_xfixes_set_window_shape_region(connection_->connection(), window_,
                                      XCB_SHAPE_SK_BOUNDING, 0, 0,
-                                     XcbRegion(connection_, rects).id());
+                                     XcbRegion(connection_, rects).Id());
   xcb_xfixes_set_window_shape_region(connection_->connection(), window_,
                                      XCB_SHAPE_SK_INPUT, 0, 0,
-                                     XcbRegion(connection_, {}).id());
+                                     XcbRegion(connection_, {}).Id());
 }
 
 void BorderWindow::Show() {

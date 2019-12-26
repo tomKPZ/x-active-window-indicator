@@ -20,12 +20,12 @@
 #include <getopt.h>
 
 #include <array>
-#include <sstream>
+#include <iostream>
+#include <sstream>  // IWYU pragma: keep (https://github.com/include-what-you-use/include-what-you-use/issues/277)
 #include <stdexcept>
 #include <string>
 
 #include "usage_error.h"
-#include "util.h"
 
 namespace {
 

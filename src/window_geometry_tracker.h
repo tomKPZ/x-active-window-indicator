@@ -18,7 +18,6 @@
 #pragma once
 
 #include <cstdint>
-
 #include <memory>
 
 #include "event_dispatcher.h"
