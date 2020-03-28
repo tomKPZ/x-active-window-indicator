@@ -111,6 +111,7 @@ function filter_impl() {
     FD=$1
     shift
     if [[ $VERBOSE -ge 1 ]]; then
+	shift
         "$@"
         return $?
     else
